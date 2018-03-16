@@ -1,0 +1,144 @@
+# Some English templates, adapted from the Finnish ones, using somewhat informal, high-spirited language.
+# Not for production, just for fun!
+# Mark
+
+No way! {who} managed to get {what} votes
+what_type = total_votes
+
+
+{who} got a whole {what} votes in {where}
+what_type = total_votes, where_type = municipality
+
+{who} rocked in with an awesome {what} votes in {where}
+what_type = total_votes, where_type = municipality
+
+
+# ---Total_votes_rank templates---
+
+{who} blew the competition out of the water
+what_type = total_votes_rank, what = 1
+
+
+# ---Total_votes_change and total_votes_previous_election templates---
+
+{who} had a crappy day and dropped {what, abs} votes since last time
+what_type = total_votes_change, what < 0
+
+Cool as ice, {who} didn't drop a single vote since last time
+what_type = total_votes_change, what = 0
+
+{who} got an awesome {what} votes more than they did before
+what_type = total_votes_change, what > 0
+
+Last time round {who} got {what} votes, if I remember correctly
+what_type = total_votes_previous_election
+
+
+# ---Percentage_votes templates---
+
+{who} bagged a {what}% slice of the votes
+what_type = percentage_votes
+
+{who} reaped {what} percentage points more than their last performance (awesome)
+what_type = percentage_votes_change, what > 0
+
+Bad hair day for {who}: down {what, abs} percentage points on the last election
+what_type = percentage_votes_change, what < 0
+
+
+# ---Total_votes_rank templates---
+
+{who} secured {what, ordinal} place in term of votes
+what_type = total_votes_rank, what != 1
+
+So close! {who} came in at second place in the vote count
+what_type = total_votes_rank, what = 2
+
+
+# ---Seats_change templates---
+
+Whoops! {who} dropped {what, abs} seats
+what_type = seats_change, what < 0
+
+Boom! {what} more seats for {who}
+what_type = seats_change, what > 1
+
+Just a measy one seat for {who}
+what_type = seats_change, what = 1
+
+Playing it safe, no more seats for {who}
+what_type = seats_change, what = 0
+
+
+# ---Seats_change_rank templates---
+
+{who} rose up the ranking in {where} by {what, abs} places - score!
+what_type = seats_change_rank, what > 0
+
+{who} climbed in the ranks in {where} by a whopping {what, abs} places
+what_type = seats_change_rank, what > 4
+
+{who} dropped the ball in {where}, tumbling down the rankings by {what, abs} places
+what_type = seats_change_rank, what < 0
+
+{who} held on tight to their place in the rankings in {where}
+what_type = seats_change_rank, what = 0
+
+
+# --- Seats templates ---
+
+Oops! No seats for {who}
+what_type = seats, what = 0
+
+Damnit, just the one seat for {who}
+what_type = seats, what = 1
+
+{who} shotgunned {what} seats
+what_type = seats, what > 1
+
+# --- Seats_rank templates ---
+
+A good day for {who}, top dog in the seats game
+what_type = seats_rank, what = 1
+
+{who} crawled into {what, ordinal} place in terms of seats
+what_type = seats_rank, what > 1
+
+# ---Total_votes_previous_election_rank templates---
+
+{who} scooped up more new votes than all the other suckers
+what_type = total_votes_change_rank, what = 1
+
+{who} came in at {what, ordinal} place (in terms of votes) back at the last election
+what_type = total_votes_previous_election_rank, what > 1
+
+{who} was king of the castle, as far as votes as concerned, in the last election
+what_type = total_votes_previous_election_rank, what = 1
+
+# ---Is candidate member of council templates ---
+
+Poor {who} is not a member of the council
+what_type = is_councillor, what = False
+
+{who} is only a bloomin' member of the council
+what_type = is_councillor, what = True
+
+# ---Is candidate member of parliament templates ---
+
+{who} is not an MP, poor sod
+what_type = is_mp, what = False
+
+{who} is an MP - legend
+what_type = is_mp, what = True
+
+# ---Is candidate member of European Parliament templates ---
+
+Believe or not, {who} is not even an MEP
+what_type = is_mep, what = False
+
+{who} rules the roost in the European Parliament
+what_type = is_mep, what = True
+
+# Named entity?
+{who} is better known as {what, as-party} in the ghetto
+what_type = party

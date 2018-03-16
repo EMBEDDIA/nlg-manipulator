@@ -1,0 +1,11 @@
+__pycache__
+*.log
+.idea
+virtualenv/
+/data/*
+*.iml
+*.cprof
+.vscode
+*.ipynb
+*.pyc
+/venv/*

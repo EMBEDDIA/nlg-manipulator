@@ -1,0 +1,119 @@
+## I’ve started taking templates from the workshop document and formalising them here.
+## I’ve kept the section headings used in the workshop, so you can see how far I’ve got.
+## Mark
+
+# Total votes
+
+{name} fick {value} röster i {place}
+value_type = total_votes, value > 0
+
+I {place} fick {name} {total votes} röster
+value_type = total_votes, value > 0
+
+{name} fick inga röster i {place}
+value_type = total_votes, value = 0
+
+{name} blev utan röster i {place}
+value_type = total_votes, value = 0
+
+
+# Total votes in previous election
+
+I det förra kommunalvalet fick {name} {value} röster
+value_type = total_votes_previous_election, value > 0
+
+I det förra kommunalvalet samlade {name} {value} röster
+value_type = total_votes_previous_election, value > 0
+
+I det förra kommunalvalet fick {name} inga röster
+value_type = total_votes_previous_election, value = 0
+
+I det förra kommunalvalet samlade {name} inga röster
+value_type = total_votes_previous_election, value = 0
+
+{name} fick {value} i det förra kommunalvalet
+value_type = total_votes_previous_election, value > 0
+
+{value} röstade på {name} i det förra kommunalvalet
+value_type = total_votes_previous_election, value > 0
+
+
+# Percentage of votes received
+
+{name} fick {value} procent av rösterna i {place}
+value_type = percentage_votes, value > 0.
+
+I {place} fick {name} {value} procent av rösterna
+value_type = percentage_votes, value > 0.
+
+{value} procent av rösterna gick i {place} till {name}
+value_type = percentage_votes, value > 0.
+
+I {place} gick majoriteten av rösterna till {name}
+value_type = percentage_votes, value > 50.
+
+I {place} gick största delen av rösterna till {name}
+value_type = percentage_votes, value > 50.
+
+# This was listed in this section, but should appear in one of the rank types below. MTGW
+#I {place} röstade flest på {name}
+#value=1
+
+
+# Is candidate member of council
+
+# NB: The original templates have a load of variants depending on whether the candidate was on council before vs now.
+# I've followed the Finnish templates in avoiding this distinction for now. MTGW
+
+{name} sitter med i nuvarande fullmäktige i {place}
+value_type = is_councillor, value = True
+
+{name} är ledamot i fullmäktige i {place}
+value_type = is_councillor, value = True
+
+{name} sitter inte med i nuvarande fullmäktige i {place}
+value_type = is_councillor, value = False
+
+{name} är inte ledamot i fullmäktige i {place}
+value_type = is_councillor, value = False
+
+
+# Is candidate member of European parliament
+
+## I've removed the "also" versions, as I don't think we have a way to decide when to use them.
+## I've added the negative versions
+
+{name} är EU-parlamentariker
+value_type = is_mep, value = True, name_type = candidate
+
+{name} är medlem i Europaparlamentet
+value_type = is_mep, value = True, name_type = candidate
+
+{name} sitter i Europaparlamentet
+value_type = is_mep, value = True, name_type = candidate
+
+{name} är inte EU-parlamentariker
+value_type = is_mep, value = False, name_type = candidate
+
+{name} är inte medlem i Europaparlamentet
+value_type = is_mep, value = False, name_type = candidate
+
+{name} sitter inte i Europaparlamentet
+value_type = is_mep, value = False, name_type = candidate
+
+
+# Is candidate member of parliament
+
+## Again, removed the "also" versions and added negatives
+
+{name} är riksdagsledamot
+value_type = is_mp, value = True, name_type = candidate
+
+{name} sitter med i riksdagen
+value_type = is_mp, value = True, name_type = candidate
+
+{name} är inte riksdagsledamot
+value_type = is_mp, value = False, name_type = candidate
+
+{name} sitter inte med i riksdagen
+value_type = is_mp, value = False, name_type = candidate

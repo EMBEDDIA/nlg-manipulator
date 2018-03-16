@@ -1,0 +1,138 @@
+# Some English templates, adapted from the Finnish ones, sounding like an incompetent newsreader
+# Not for production, just for fun!
+# Mark
+
+It seems that {who} got, um, I think, {what} votes
+what_type = total_votes
+
+
+Oh and in {where}, {who} got about {what} votes
+what_type = total_votes, where_type = municipality
+
+I think I heard that {who} got around 500, no wait, {what} votes in {where}
+what_type = total_votes, where_type = municipality
+
+
+# ---Total_votes_rank templates---
+
+I'm pretty sure someone got more votes than anyone else...{who}, maybe?
+what_type = total_votes_rank, what = 1
+
+
+# ---Total_votes_change and total_votes_previous_election templates---
+
+{who} lost some votes that they had before...something like {what, abs}
+what_type = total_votes_change, what < 0
+
+{who} got more votes, no, less votes, ah no wait, the same number as last time
+what_type = total_votes_change, what = 0
+
+{who} seemed to get a higher number in this votes box than they had before. Wait, my maths isn't very good...3...78...got it: {what} more than last time
+what_type = total_votes_change, what > 0
+
+I can't really remember for sure, but I think {who} got about {what} votes last time
+what_type = total_votes_previous_election
+
+
+# ---Percentage_votes templates---
+
+I'm being told that {who} got {what}% of the votes
+what_type = percentage_votes
+
+{who} got, um, {what} percent more than before
+what_type = percentage_votes_change, what > 0
+
+{who} got less votes than last time. Hmm, can that be right? Yeah, {what, abs} percent less
+what_type = percentage_votes_change, what < 0
+
+
+# ---Total_votes_rank templates---
+
+{who} were the best - they got more votes than the others
+what_type = total_votes_rank, what = 1
+
+{who} were the {what, ordinal} best
+what_type = total_votes_rank, what > 2
+
+{who} got the second most votes
+what_type = total_votes_rank, what = 2
+
+
+# ---Seats_change templates---
+
+Are we done yet? No, here, {who} lost {what, abs} seats
+what_type = seats_change, what < 0
+
+{who} lost {what} seats. No, um, gained {what} seats
+what_type = seats_change, what > 0
+
+{who} got the same number of seats as before, as far as I can remember
+what_type = seats_change, what = 0
+
+
+# ---Seats_change_rank templates---
+
+{who} got more extra seats in {where} than others, does that make any sense?
+what_type = seats_change_rank, what > 0
+
+{who} went down in the ranking of number of seats in {where}...look I really can't work these figures out
+what_type = seats_change_rank, what < 0
+
+{who} were in the same place in the rankings in {where} as last time
+what_type = seats_change_rank, what = 0
+
+
+# --- Seats templates ---
+
+Right, I think {who} didn't get any seats...they don't seem to be in the list, anyway
+what_type = seats, what = 0
+
+{who} got...um, just one seat
+what_type = seats, what = 1
+
+{who} seem to have got, hmm, {what} seats
+what_type = seats, what > 1
+
+# --- Seats_rank templates ---
+
+Looks like {who} got the most seats
+what_type = seats_rank, what = 1
+
+{who} are in {what, ordinal} place!
+what_type = seats_rank, what > 1
+
+# ---Total_votes_previous_election_rank templates---
+
+{who} got lots more votes than before
+what_type = total_votes_change_rank, what = 1
+
+{who} got tonnes of seats last time. Seriously, loads
+what_type = total_votes_previous_election_rank, what = 1
+
+# ---Is candidate member of council templates ---
+
+{who} is not a member of the council
+what_type = is_councillor, what = False
+
+{who} is a member of the council
+what_type = is_councillor, what = True
+
+# ---Is candidate member of parliament templates ---
+
+{who} is not an MP
+what_type = is_mp, what = False
+
+{who} is an MP
+what_type = is_mp, what = True
+
+# ---Is candidate member of European Parliament templates ---
+
+{who} is not even an MEP, I don't think
+what_type = is_mep, what = False
+
+{who} is an MEP
+what_type = is_mep, what = True
+
+# Named entity?
+{who}...is that the same as {what, as-party}?
+what_type = party

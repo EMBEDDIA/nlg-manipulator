@@ -1,0 +1,1016 @@
+# Templates for Valtteri the election bot
+#
+# This version of the template file specifies templates for the following languages in the multilingual format:
+# - Finnish
+# - Swedish
+# - English
+#
+# Comments are allowed: any line starting with '#' is ignored.
+#
+# Headlines are specified with fi-head, sv-head or en-head
+
+# Note that many of the templates below (though not all) use the terms “value”,
+# “name” and “place”, which are equivalent to “what_2”, “who_2” and “where_2”
+
+# The templates support also specifying a generic template for pre-determined groups of what_types
+# The what_type groups are defined below before the actual templates. The dollar sign is used to differentiate
+# lines with group definitions from the actual templates. The brackets in the group names are not strictly necessary,
+# but should help differentiate them from ordinary values within templates.
+#
+# The usage is similar to ordinary what_types, but using a new operator 'in':
+#
+# fi: {name} sai {value} {unit} [{place, case=ssa}]
+# fi: {name} sai {place, case=ssa} {value} {unit}
+# en: {name} got {value} {unit} [in {place}]
+# | what_type_2 in {base}, what_2 > 0, when_2 = 2017
+
+
+
+# ---Group definitions---
+
+${base}: total_votes, percentage_votes
+${change}: percentage_votes_change, seats_change, total_votes_change
+${vote_change}: percentage_votes_change, total_votes_change
+
+
+# ---Generic templates---
+
+# ---Votes and percentages---
+
+fi: {name} sai {value} {unit} [{place, case=ssa}]
+fi: {name} sai {place, case=ssa} {value} {unit}
+en: {name} got {value} {unit} [in {place}]
+en: [In {place}] {name} took {value} {unit}
+en: [In {place},] {value} {unit} went to {name, case=acc}
+en: [In {place},] {name} secured {value} {unit}
+| what_type_2 = .*_votes, what_2 > 0, when_2 = 2017
+
+fi: {name} saa {value} {unit} [{place, case=gen}] uuteen valtuustoon
+en: {name} receives {value} {unit} in the new council [in {place}]
+en: {name} has {what_2} {unit} in the new council [in {place}]
+| seats > 0, place_type = municipality, when_2 = 2017
+
+# ---Votes and percentages in the previous election---
+
+fi: {name} sai edellisissä kuntavaaleissa [{place, case=ssa}] {value} {unit}
+fi: {name} sai [{place, case=ssa}] {value} {unit} edellisissä kuntavaaleissa
+| total_votes > 0, when_2 = 2012
+
+
+# ---Changes---
+
+fi: {name} sai [{place, case=ssa}] {value, abs} {unit} kuin edellisissä kuntavaaleissa
+en: {name} got {what_2, abs} {unit} [in {place}] than in the last municipal election
+en: {name} got {what_2, abs} {unit} than in the previous municipal election [in {place}]
+| what_type_2 = .*_change, what_2 != 0, when_1 = 2012, when_2 = 2017
+
+
+# ---Total votes templates---
+
+#fi: {name} sai {value} ääntä
+#sv: {name} fick {value} röster
+#fi: {name, case=n} äänimäärä oli {value}
+#| value_type = total_votes, value > 0
+
+fi-head: {name, case=lle} {place, case=ssa} {value} {unit}
+fi-head: {place, case=sta} {value} {unit} {name, case=lle}
+sv: {name} fick {value} {unit} i {place}
+sv: I {place} fick {name} {value} {unit}
+Sv-head: {value} {unit} till {name} i {place}
+en-head: {name} gets {value} votes in {place}
+| total_votes > 0, when_2 = 2017
+
+fi: {name} ei saanut [{place, case=ssa}] lainkaan ääniä
+fi: {name} ei saanut yhtään ääntä [{place, case=ssa}]
+fi: {name} jäi [{place, case=ssa}] ilman ääniä
+fi-head: {name} äänittä {place, case=ssa}
+fi-head: {name, case=lle} pyöreä nolla {place, case=ssa}
+sv: {name} fick inga {unit} i {place}
+sv: {name} blev utan {unit} i {place}
+sv: {name} blev utan väljarstöd i {place}
+Sv-head: {name} utan {unit} i {place}
+Sv-head: Inga {unit} åt {name} i {place}
+en: {name} received no votes [in {place}]
+en: [In {place}] {name} received no votes
+en-head: No votes for {name, case=acc} in {place}
+| total_votes = 0, when_2 = 2017
+
+
+# Total votes in previous election
+
+fi: viime kuntavaaleissa {name, case=a} kannatti [{place, case=ssa}] {value} äänestäjää
+fi-head: {name, case=lle} viime vaaleissa {place, case=ssa} {value} {unit}
+sv: I det förra kommunalvalet fick {name} {value} {unit}
+sv: I det förra kommunalvalet samlade {name} {value} {unit}
+sv: {name} fick {value} {unit} i det förra kommunalvalet
+sv: {value} personer röstade på {name} i det förra kommunalvalet
+Sv-head: {name} fick i det förra kommunalvalet {value} {unit} i {place}
+Sv-head: I {place} gick {value} {unit} i det förra kommunalvalet till {name}
+en: {value} voted for {name, case=acc} [in {place}] in the previous municipal election
+En: In the last municipal election {value} voted for {name, case=acc} [in {place}]
+# Most boring headline ever!
+en-head: {name} got {value} votes in {place} in the last election
+| total_votes > 0, when_2 = 2012
+
+fi: {name} jäi edellisissä kuntavaaleissa [{place, case=ssa}] ilman ääniä
+fi: {name} ei saanut [{place, case=ssa}] edellisissä kuntavaaleissa lainkaan ääniä
+fi-head: {name} äänittä {place, case=ssa} viime vaaleissa
+fi-head: {name} viimeksi nollille {place, case=ssa}
+sv: I det förra kommunalvalet fick {name} inga {unit} [i {place}]
+sv: I det förra kommunalvalet samlade {name} inga {unit} [i {place}]
+Sv-head: {name} lyckades inte samla några {unit} i det förra kommunalvalet
+en: In the previous municipal election, {name} received no votes [in {place}]
+En: {name} failed to collect any votes [in {place}] in the previous municipal election
+en-head: {name} got no votes in {place} in previous election
+| total_votes = 0, name_type = candidate, place_type = municipality, when_2 = 2012
+
+# note: place not needed in the text since by the condition the candidate didn’t get any votes anywhere
+
+
+# ---Percentage_votes templates---
+
+fi: {name} sai [{place, case=n}] äänistä {value} {unit, form=short}
+fi: {name, case=n} kannatus [{place, case=ssa}] oli {value} {unit, form=short}
+fi-head: {name, case=lle} {value} {unit, form=short} {place, case=n} äänistä
+fi-head: {place, case=n} äänistä {value} {unit, form=short} {name, case=lle}
+sv: {name} fick {value} {unit, form=short} av rösterna i {place}
+sv: I {place} fick {name} {value} {unit, form=short} av rösterna
+sv: {value} {unit, form=short} av rösterna gick i {place} till {name}
+Sv-head: {value} {unit, form=short} åt {name} i {place}
+Sv-head: {name} fick {value} {unit, form=short} i {place}
+en-head: {value} {unit} to {name, case=acc} in {place}
+| value_type = percentage_votes, when_2 = 2017
+
+fi: {name} sai enemmistön [{place, case=n}] äänistä
+fi: {name} sai [{place, case=ssa}] äänienemmistön
+fi-head: {place, case=n} äänienemmistö {name, case=lle}
+fi-head: {name, case=lle} {place, case=ssa} äänienemmistö
+sv: I {place} gick majoriteten av rösterna till {name}
+sv: I {place} gick största delen av rösterna till {name}
+sv: I {place} fick {name} flest röster
+Sv: Majoriteten av rösterna i {place} gick till {name}
+Sv-head: Majoriteten av rösterna i {place} till {name}
+Sv-head: {name} störst i {place}
+en: [In {place},] {name} received most votes
+en: [In {place},] the majority of the votes went to {name, case=acc}
+En: The majority of the votes [in {place}] went to {name, case=acc}
+en-head: Majority for {name, case=acc} in {place}
+| percentage_votes > 50, when_2 = 2017
+
+fi-head: {name} kasvoi {place, case=ssa} {value} {unit, form=short}
+fi-head: {value} {unit, form=short, case=gen} kasvu {name, case=lle} {place, case=ssa}
+sv: {name} fick {value} {unit} än i det senaste kommunalvalet
+Sv: {name} samlade {value} {unit} än i det förra kommunalvalet
+Sv-head: {name} utökade sitt väljarstöd i {place} med {value} {unit, form=short}
+Sv-head: {name} ökade väljarstödet i {place} med {value} {unit, form=short}
+en-head: {name} gets {value} {unit, form=short} more in {place}
+| percentage_votes_change > 0, when_2 = 2017
+#very strange headline
+
+fi-head: {value, abs} {unit, form=short, case=gen} lasku {name, case=lle} {place, case=ssa}
+fi-head: {name, case=n} kannatus laski {place, case=ssa} {value, abs} {unit, form=short}
+sv: {name} fick {value, abs} {unit} än i det senaste kommunalvalet
+Sv: {name} tappade {value, abs} {unit, form=short} röster i jämförelse med det förra kommunalvalet
+Sv-head: {name} väljarstöd dalade i {place} [med {value, abs} {unit, form=short}]
+Sv-head: {name} tappade i {place} med {value, abs} {unit, form=short}
+en-head: {name} {value, abs} {unit, form=short} down on last election in {place}
+| percentage_votes_change < 0, when_2 = 2017
+
+fi: {name} sai [{place, case=ssa}] yhtä monta prosenttia äänistä kuin edellisissä kuntavaaleissa
+fi-head: {name, case=n} kannatus ennallaan {place, case=ssa}
+sv: {name} fick lika många procent av rösterna som i det senaste kommunalvalet
+Sv-head: {name} säkrade samma väljarstöd som i det senaste kommunalvalet i {place}
+Sv-head: {name} behåller understödet i {place}
+En: {name} received the same percentage of votes [in {place}] as in the last municipal elections
+en-head: {name} gets same vote share as last in election in {place}
+| percentage_votes_change = 0, when_2 = 2017
+
+
+fi: {name} sai [{place, case=ssa}] jokseenkin yhtä suuren osuuden äänistä kuin edellisissä kuntavaaleissa
+fi-head: {name, case=n} kannatus ennallaan {place, case=ssa}
+sv: {name} fick ett motsvarande väljarstöd som i det senaste kommunalvalet
+Sv-head: {name} behåller understödet i {place}
+Sv-head: Stadigt väljarstöd för {name} i {place}
+En: {name} received roughly the same percentage of votes [in {place}] as in the last municipal elections
+en-head: {name} maintains vote share in {place}
+| percentage_votes_change < 1, percentage_votes_change > -1, when_2 = 2017
+
+
+# --Is candidate elected or in reserve (in this election)--
+# fact election_result (exists for candidates and municipalities only?) has three possible values:
+# election_result = 1: elected
+# election_result = 2: in reserve
+# election_result = 3: not elected
+
+fi: {name, case=acc} valittiin [{place, case=n}] valtuustoon
+fi-head: {name} {place, case=n} valtuustoon
+Sv: {name} blev invald i fullmäktige [i {place}]
+Sv-head: {name} invald i fullmäktige i {place}
+en: {name} was elected to the council [in {place}]
+en: {name} was elected as a councillor [in {place}]
+en-head: {name} elected to council in {place}
+| election_result = 1, when_2 = 2017
+
+fi: {name, case=acc} valittiin varapaikalle [{place, case=n} valtuustoon]
+fi-head: {name} varasijalle {place, case=ssa}
+Sv: {name} blev invald som suppleant i fullmäktige [i {place}]
+Sv-head: {name} invald som suppleant [i {place}]
+en: {name} was elected as a deputy councillor [in {place}]
+en: {name} elected deputy councillor in {place}
+| election_result = 2, when_2 = 2017
+
+fi: {name, case=a} ei valittu [{place, case=n}] valtuustoon
+fi-head: {name, case=a} ei valittu {place, case=ssa}
+Sv: {name} blev inte invald i fullmäktige [i {place}]
+Sv-head: {name} inte invald [i {place}]
+en: {name} was not elected as a councillor [in {place}]
+en: {name} was not elected to the council [in {place}]
+en-head: {name} not councillor in {place}
+| election_result = 3, when_2 = 2017
+
+
+# In combination with previous results
+
+# Is this a correct formulation of a two-fact template?
+fi: {name} nousi [{place, case=n}] valtuustoon
+fi-head: {name} nousi {place, case=n} valtuustoon
+Sv: {name} valdes in i fullmäktige [i {place}]
+Sv-head: {name} invald in i fullmäktige i {place}
+en: {name} was not elected as a councillor [in {place}]
+en: {name} will not become a councillor [in {place}]
+en-head: {name} fails to become councillor in {place}
+| election_result = 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, is_councillor = False, when_2 = 1.when_2
+
+fi: {name} jatkaa [{place, case=n}] valtuustossa
+fi-head: {name} jatkaa {place, case=n} valtuustoon
+Sv: {name} fortsätter som fullmäktigeledamot i {place}
+Sv: {name} sitter kvar som ledamot i fullmäktige i {place}
+Sv-head: {name} fortsätter i fullmäktige i {place}
+en: {name} continues as a member of the council [in {place}]
+en: {name} continues as a councillor [in {place}]
+en-head: {name} maintains council seat [in {place}]
+| election_result = 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, is_councillor = True, when_2 = 1.when_2
+
+fi: {name} putosi [{place, case=n}] valtuustosta
+fi-head: {name} putosi {place, case=n} valtuustosta
+Sv: {name} fortsätter inte som fullmäktigeledamot i {place}
+Sv: {name} sitter inte kvar som ledamot i fullmäktige i {place}
+sv-head: {name} föll ur fullmäktige i {place}
+en: {name} ceases to be a member of the council [in {place}]
+en-head: {name} loses council seat [in {place}]
+| election_result = 3, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, is_councillor = True, when_2 = 1.when_2
+
+
+# ---Is candidate member of council templates ---
+# Do NOT refer to place except with a condition that enforces it’s a municipality
+# otherwise you will get smth like “N.N ei ole vaalipiirin Töölö I istuvan valtuuston jäsen”
+
+fi: {name} ei ole istuvan valtuuston jäsen
+sv: {name} sitter inte i nuvarande fullmäktige
+sv: {name} är inte ledamot i fullmäktige från förut
+Sv: {name} är inte fullmäktigeledamot sedan tidigare
+en: {name} is not currently a member of the council
+en: {name} is not currently a councillor
+| is_councillor = False, name_type = candidate, when_2 = 2017
+
+fi: {name} on istuvan valtuuston jäsen
+sv: {name} sitter i nuvarande fullmäktige
+sv: {name} är ledamot i fullmäktige
+sv: {name} är fullmäktigeledamot sedan tidigare
+en: {name} is currently a member of the council
+en: {name} is currently a councillor
+| is_councillor = True, when_2 = 2017
+
+
+# ---Is candidate member of European Parliament templates —
+
+# Doesn’t make sense with location, so don’t specify
+fi: {name} ei ole europarlamentaarikko
+fi: {name} ei ole Euroopan parlamentin jäsen
+sv: {name} är inte EU-parlamentariker
+sv: {name} är inte medlem i Europaparlamentet
+sv: {name} sitter inte i Europaparlamentet
+en: {name} is not a member of the European Parliament
+en: {name} is not an MEP
+| is_mep = False, name_type = candidate, when_2 = 2017
+
+fi: {name} on europarlamentaarikko
+fi: {name} on Euroopan parlamentin jäsen
+sv: {name} är EU-parlamentariker
+sv: {name} är medlem i Europaparlamentet
+sv: {name} sitter i Europaparlamentet
+en: {name} is a member of the European Parliament
+en: {name} is an MEP
+| is_mep = True, when_2 = 2017
+
+
+# ---Is candidate member of parliament templates —
+
+fi: {name} ei ole kansanedustaja
+sv: {name} är inte riksdagsledamot
+sv: {name} sitter inte med i riksdagen
+en: {name} is not a member of parliament
+| is_mp = False, name_type = candidate, when_2 = 2017
+
+fi: {name} on kansanedustaja
+sv: {name} är riksdagsledamot
+sv: {name} är invald i riksdagen
+Sv: {name} sitter i riksdagen
+en: {name} is a member of parliament
+| is_mp = True, when_2 = 2017
+
+
+
+# --- Seats templates ---
+
+fi: {who_2} ei saa yhtään paikkaa [{place, case=n}] uuteen valtuustoon
+fi-head: {who_2} ei pääse {place, case=n} valtuustoon
+fi-head: {who_2} ulkona {place, case=n} valtuustosta
+sv: {who_2} får inga {unit} i nya fullmäktige
+Sv: {name} blir utan {unit} i det nyvalda fullmäktige
+Sv-head: {name} föll ur fullmäktige i {place}
+en: {name} does not have any {unit} in the new council [in {place}]
+en-head: No {unit} for {name, case=acc} [in {place}]
+| seats = 0, place_type = municipality, when_2 = 2017
+
+fi-head: {place, case=n} valtuustosta yksi paikka {who_2, case=lle}
+fi-head: {who_2, case=lle} yksi paikka {place, case=n} valtuustoon
+sv: {who_2} får en plats i den nya fullmäktige i {place}
+sv-head: En plats åt {who_2} i {place}
+en-head: One seat for {name, case=acc} [in {place}]
+| seats = 1, place_type = municipality, when_2 = 2017
+
+fi-head: {who_2, case=lle} {what_2} {unit} {place, case=ssa}
+fi-head: {place, case=sta} {what_2} {unit} {who_2, case=lle}
+sv: {who_2} får {what_2} {unit} i det nya fullmäktige i {place}
+sv-head: {who_2} får {what_2} {unit} i {place}
+en-head: {name} gets {what_2} {unit} in {place}
+| seats > 1, place_type = municipality, when_2 = 2017
+
+
+# cases where place = Uusimaa or place = Suomi
+fi: {who_2} ei saa yhtään paikkaa [koko {place, case=n} valtuustoissa]
+fi-head: {who_2} nollille koko {place, case=ssa}
+fi-head: {place, case=sta} ei paikan paikkaa {who_2, case=lle}
+sv: {who_2} får inga {unit} i fullmäktige i {place}
+Sv-head: {who_2} får inga {unit} i {place}
+en: {name} does not have any {unit} in the new council [in {place}]
+en-head: No {unit} for {name, case=acc} in {place}
+en-head: {name} gets no {unit} in {place}
+| seats = 0, place_type != municipality, name_type = party, when_2 = 2017
+
+fi: {who_2} saa kaikkiaan yhden {unit} [{place, case=n}] valtuustoissa
+fi-head: {who_2, case=lle} yksi {unit, case=nom} koko {place, case=ssa}
+fi-head: Koko {place, case=ssa} yksi {unit, case=nom} {who_2, case=lle}
+sv: {who_2} får en plats i fullmäktige i {place}
+sv: {who_2} får en plats i {place}
+Sv-head:
+en: {name} has one seat in the new council [in {place}]
+en-head: {name} gets one seat in {place}
+| seats = 1, place_type != municipality, when_2 = 2017
+
+fi: {who_2} saa yhteensä {what_2} {unit} [{place, case=n}] valtuustoissa
+fi-head: {who_2, case=lle} yhteensä {what_2} {unit} {place, case=ssa}
+fi-head: {place, case=n} valtuustoista {what_2} {unit} {who_2, case=lle}
+sv: {who_2} får {what_2} {unit} i fullmäktige i {place}
+Sv: I {place} tar {name} {value} {unit} i fullmäktige
+Sv-head: {who_2} får {what_2} {unit} i {place}
+en: {name} has {what_2} {unit} in the new council [in {place}]
+en: {name} gets {what_2} {unit} in {place}
+en: {what_2} {unit} go to {name, case=acc} in {place}
+| seats > 1, place_type != municipality, when_2 = 2017
+
+
+# --- Seats_rank templates ---
+
+## NB: This seems to be a very common headline fact,
+## so it would be good to have many alternative texts
+fi: {who_2} on [{place, case=n}] valtuuston suurin puolue
+fi-head: {who_2} {place, case=n} suurin
+fi-head: {who_2} {place, case=n} johdossa
+fi-head: {place, case=a} hallitsee {who_2}
+fi-head: {place} {who_2, case=n} hallussa
+fi-head: {who_2} hallitsee {place, case=a}
+fi-head: {who_2} ykkösenä {place, case=ssa}
+sv: {who_2} är det största partiet i fullmäktige i {place}
+sv: Flest platser i det nya fullmäktige gick till {name} i {place}
+sv-head: Flest platser till {name} i {place}
+Sv-head: {who_2} störst i {place}
+en: {name} is the largest party in the council [in {place}]
+en-head: {name} largest party in {place}
+en-head: Most seats go to {name, case=acc} in {place}
+| seats_rank = 1, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, total_votes_rank > -1, when_2 = 1.when_2
+# NB: the second condition is a trick to avoid telling separately the redundant
+# fact that the party who has most seats also received most votes.
+
+fi: {who_2} saa {what_2} {unit} [{place, case=n}] uuteen valtuustoon
+fi-head: {who_2} {place, case=n} {what_2, case=ksi} suurin
+fi-head: {place, case=ssa} {who_2, case=sta} {what_2, case=ksi} suurin
+sv: {who_2} fick {what_2} flest platser i det nya fullmäktige i {place}
+en: {name} secured {what_2} most seats in the new council [in {place}]
+en-head: {name} get {what_2} most seats in {place}
+| seats_rank > 1, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, seats > 0, when_2 = 1.when_2
+
+# cases where place = Uusimaa or place = Suomi
+sv: {who_2} är det största partiet i fullmäktige i {place}
+Sv: I {place} är {name} störst
+Sv: I {place} är {name} det största partiet
+sv: {who_2} har flest platser i fullmäktige i {place}
+| seats_rank = 1, place_type != municipality, when_2 = 2017
+
+# This version excludes the country-wide case, as we have a better template below
+fi: {name} on yhteenlaskettuna [{place, case=n}] valtuustojen suurin puolue
+fi-head: {name} {place, case=n} suurin kuntapuolue
+fi-head: {name, case=lle} {unit} {place, case=n} valtuustoissa
+en: {name} has the most council seats altogether [across {place}]
+en-head: {name} gets most seats in {place}
+| seats_rank = 1, place_type = D, when_2 = 2017
+
+fi: {name} on maan suurin kuntapuolue
+fi: {name} saa yhteensä {unit} [{place, case=n}] valtuustoihin
+fi-head: {name} on maan suurin kuntapuolue
+fi-head: {name, case=lle} eniten valtuustopaikkoja [{place, case=n}] valtuustoihin
+en: {name} has the most council seats nationwide
+en-head: {name} gets most seats nationwide
+| seats_rank = 1, place_type = country, when_2 = 2017
+
+#Kokoomus saa yhteensä 3. eniten paikkoja Keravan valtuustossa
+fi: {who_2} saa [yhteensä] {what_2} {unit} [{place, case=n}] valtuustoissa
+fi: {who_2, case=lla} on {what_2} {unit} [{place, case=n}] valtuustoissa
+fi-head: {who_2, case=lle} {what_2} {unit} {place, case=ssa}
+fi-head: {who_2} {what_2, case=ksi} suurin {place, case=ssa}
+fi-head: {who_2} {place, case=n} {what_2, case=ksi} suurin
+en: {name} secured {value} most council seats [in {place}]
+en: {who_2} got {value} most council seats altogether [across {place}]
+en: {who_2} received {value} most council seats overall [in {place}]
+en-head: {name} gets {value} most seats in {place}
+en-head: {who_2} gets {value} most seats [across {place}]
+| seats_rank > 1, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_rank_reverse > 1
+
+# Swedish needs to have this start at seats_rank > 2, because of the "näst mest" special case
+# This one becomes tricky in swedish at the word for council can’t be defined to be
+# in plural, in order to avoid that mostly you would just say “in a specific area”.
+sv: {who_2} får sammanlagt {what_2} mest platser i fullmäktige [i {place}]
+sv: {who_2} fick sammanlagt {what_2} flest platser i fullmäktige [i {place}]
+sv: {name} fick {value} mest platser [i {place}]
+sv-head: {name} fick {value} mest platser i {place}
+| seats_rank > 2, when_2 = 2017, place_type != municipality
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_rank_reverse > 1
+
+# "näst mest" special case for Swedish
+sv: {who_2} fick sammanlagt näst mest platser i fullmäktige [i {place}]
+sv-head: {name} fick näst mest platser i {place}
+| seats_rank = 2, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+
+# ---Seats_change_rank templates---
+
+fi: {name} kasvattaa eniten paikkamääräänsä [{place, case=n} valtuustossa]
+fi-head: {name, case=lle} eniten lisäpaikkoja {place, case=ssa}
+fi-head: {name} {place, case=n} valtuuston suurin nousija
+sv: {name} ökar antalet platser i fullmäktige [i {place}] mest
+en: {name} increased their number of seats the most [in {place}]
+en-head: Biggest gains for {name} [in {place}]
+| seats_change_rank = 1, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+sv: {name} ökar antalet platser i fullmäktige näst mest [i {place}]
+en: {name} secured the second largest increase in council seats [in {place}]
+en-head: Second largest gains for {name, case=acc} in {place}
+| seats_change_rank = 2, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+# Should we add english versions in here as well??
+fi: {name} kasvattaa paikkamääräänsä {value, case=ksi} eniten [{place, case=n} valtuustossa]
+fi-head: {name, case=lle} {value, case=ksi} eniten lisäpaikkoja {place, case=ssa}
+fi-head: {name} {place, case=n} {value, case=ksi} suurin nousija
+| seats_change_rank > 1, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+# Bigger areas than a single municipality
+
+fi: {name} kasvattaa eniten paikkamääräänsä [{place, case=n} valtuustoissa]
+fi-head: {name, case=lle} eniten lisäpaikkoja {place, case=ssa}
+fi-head: {name} suurin nousija {place, case=ssa}
+Sv: I {place} ökade {name} sitt antal fullmäktigeplatser mest
+sv: {name} ökade sitt antal fullmäktigeplatser mest
+#not pretty in swedish
+en: [Throughout {place},] {name} secured the largest gain in council seats
+en-head: Biggest gains for {name, case=acc} across {place}
+| seats_change_rank = 1, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+sv: I {place} ökade {name} antalet fullmäktigeplatser näst mest
+sv: {name} ökade antalet fullmäktigeplatser näst mest
+| seats_change_rank = 2, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+sv: {name} ökar antalet fullmäktigeplatser {value} mest [i {place}]
+| seats_change_rank > 2, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+fi: {name} kasvattaa paikkamääräänsä {value, case=ksi} eniten [{place, case=n} valtuustoissa]
+fi: {name} kasvattaa {what_2, case=ksi} eniten paikkamääräänsä [{place, case=n} valtuustoissa]
+fi-head: {name, case=lle} {value, case=ksi} eniten lisäpaikkoja {place, case=ssa}
+fi-head: {name} {place, case=n} {value, case=ksi} suurin nousija
+en: [Throughout {place},] {name} secured the {value} largest gain in council seats
+en-head: {value} biggest gains for {name, case=acc} across {place}
+| seats_change_rank > 1, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change > 0
+
+
+# Reverse rank: who lost most seats
+
+fi: {name} menettää {unit} [{place, case=n} valtuustossa]
+fi-head: {place, case=n} suurin menetys {name, case=lle}
+fi-head: {name, case=lle} suurin paikkatappio {place, case=ssa}
+Sv: {name} förlorar flest platser i fullmäktige [i {place}]
+en: {name} lost the most council seats [in {place}]
+en: {name} dropped the most council seats [in {place}]
+en-head: {name} drop most seats in {place}
+| seats_change_rank_reverse = 1, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+sv: {name} förlorar näst mest platser i {place}
+| seats_change_rank_reverse = 2, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+sv: {name} förlorar {value} flest platser i fullmäktige i {place}
+| seats_change_rank_reverse > 2, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+fi: {name} menettää {value} {unit} [{place, case=n} valtuustossa]
+fi-head: {place, case=n} {value, case=ksi} suurin tappio {name, case=lle}
+fi-head: {name, case=lle} {value, case=ksi} suurin paikkatappio {place, case=ssa}
+sv: {name} förlorar {value} flest platser i fullmäktige i {place}
+en: {name} lost the {value} most council seats [in {place}]
+en: {name} dropped the {value} most council seats [in {place}]
+en-head: {name} drop {value} most seats in {place}
+| seats_change_rank_reverse > 1, place_type = municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+# Bigger areas than a single municipality
+
+fi: {name} menettää {unit} [{place, case=n} valtuustoissa]
+fi-head: {name, case=lle} suurin menetys {place, case=ssa}
+fi-head: {place, case=n} suurin menetys {name, case=lle}
+Sv: I {place} förlorar {name} flest fullmäktigeplatser
+en: {name} lost the most council seats [across {place}]
+en: {name} dropped the most council seats [throughout {place}]
+en-head: {name} drop most seats across {place}
+| seats_change_rank_reverse = 1, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+sv: {name} förlorar näst flest platser i fullmäktige i {place}
+| seats_change_rank_reverse = 2, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+sv: {name} förlorar {value} flest fullmäktigeplatser [i {place}]
+| seats_change_rank_reverse > 2, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+fi: {name} menettää {value} {unit} [{place, case=n} valtuustoissa]
+fi: {name} häviää {value} {unit} [{place, case=n} valtuustoissa]
+fi-head: {place, case=n} {value, case=ksi} suurin menetys {name, case=lle}
+fi-head: {name, case=lle} {value, case=ksi} suurin paikkamenetys {place, case=ssa}
+fi-head: {name, case=lle} {value, case=ksi} suurin paikkatappio {place, case=ssa}
+en: {name} lost the {value} most council seats [across {place}]
+en: {name} dropped the {value} most council seats [throughout {place}]
+en-head: {name} drop {value} most seats across {place}
+| seats_change_rank_reverse > 1, place_type != municipality, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats_change < 0
+
+# Should we actually add these fact types? Or were they removed for a reason?
+# Old templates (for the non-existent seats_rank_change fact type):
+#fi: {who_2} nousee [{where_2, case=gen}] valtuustossa {what_2, abs} sijaa
+#fi: {who_2, case=gen} sijoitus [{where_2, case=gen}] valtuustossa nousee {what_2, abs} sijaa
+#sv: {who_2} steg {what_2, abs} placeringar i fullmäktige i {where_2}
+#sv: {who_2, case=gen} placering i {where_2} steg med {what_2, abs} platser
+#en: {name} climbed {value} places in the seat ranking [in {place}]
+#en: {name, case=gen} seat ranking [in {place}] rose by {value} places
+#| seats_rank_change > 0, place_type = municipality
+
+#fi: {who_2, case=gen} sijoitus [{where_2, case=gen}] valtuustossa laskee {what_2, abs} sijaa
+#sv: {who_2} sjönk {what_2, abs} placeringar i fullmäktige i {where_2, case=gen}
+#sv: {who_2, case=gen} placering i {what_2, case=gen} sjönk med {what_2, abs} platser
+#en: {name} fell {value} places in the seat ranking [in {place}]
+#| seats_rank_change < 0, place_type = municipality
+
+#fi: {who_2, case=gen} sijoitus [{where_2, case=gen}] valtuustossa ei muutu
+#sv: {who_2} placering i fullmäktige i {where_2, case=gen} förändrades inte
+#sv: {who_2} placering i fullmäktige i {where_2, case=gen} blev oförändrad
+#en: {name} maintained their position in the seat ranking [in {place}]
+#| seats_rank_change = 0, place_type = municipality
+
+
+
+# ---Total_votes_rank templates---
+
+fi: {who_2} sai [{place, case=ssa}] eniten ääniä
+fi-head: {who_2} voitti {place, case=lla}
+fi-head: {place, case=ssa} suurin äänimäärä {who_2, case=lle}
+fi-head: {who_2, case=lle} {place, case=ssa} suurin äänimäärä
+sv: {who_2} fick flest röster
+en: {name} received most votes [in {place}]
+en-head: {name} get most votes in {place}
+| total_votes_rank = 1, when_2 = 2017
+
+fi-head: {who_2} {place, case=n} kakkonen
+sv: {who_2} fick näst mest röster
+| total_votes_rank = 2, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+sv: {who_2} fick {what_2} flest röster
+| total_votes_rank > 2, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+fi: {who_2} sai [{place, case=ssa}] {what_2, case=ksi} eniten ääniä
+fi-head: {who_2} {place, case=n} {what_2}
+fi-head: {place, case=n} {what_2, case=ksi} suurin äänimäärä {who_2, case=lle}
+fi-head: {who_2, case=lle} {place, case=ssa} {what_2, case=ksi} eniten ääniä
+en: {name} received the {what_2} most votes [in {place}]
+en-head: {name} get {what_2} most votes in {place}
+| total_votes_rank > 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+
+
+# ---Total_votes_previous_election_rank templates---
+
+fi: {who_2} sai [{place, case=ssa}] {what_2, case=ksi} eniten ääniä edellisissä kuntavaaleissa
+fi: {who_2} sai [{place, case=n}] {what_2, case=ksi} suurimman äänimäärän edellisissä kuntavaaleissa
+fi-head: {who_2, case=lle} {place, case=n} {what_2, case=ksi} suurin äänimäärä viime vaaleissa
+sv: {who_2} fick {what_2} flest röster i det senaste kommunalvalet
+en: {who_2} got {what_2} most votes in the previous municipal election [in {place}]
+en-head: {who_2} got {what_2} most votes last time [in {place}]
+| total_votes_rank > 1, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+fi: {who_2} sai [{place, case=ssa}] eniten ääniä edellisissä kuntavaaleissa
+fi-head: {who_2, case=lle} {place, case=n} suurin äänimäärä viime vaaleissa
+sv: {who_2} fick flest röster i det senaste kommunalvalet
+en: {name} got most votes in the previous municipal election [in {place}]
+en-head: {name} got most votes last time in {place}
+| total_votes_rank = 1, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+# ---Total_votes_change_rank templates---
+
+fi: {who_2} kasvatti [{place, case=ssa}] edellisiin kuntavaaleihin verrattuna eniten kannatustaan
+fi: {who_2, case=gen} kannatus kasvoi [{place, case=ssa}] eniten
+fi: {place, case=ssa} {who_2, case=gen} kannatus kasvoi eniten
+fi-head: {name} {place, case=n} suurin nousija
+fi-head: {name, case=lle} {place, case=n} suurin kasvu
+sv: {who_2} ökade sitt väljarstöd mest
+Sv: {name, case=gen} väljarstöd ökade mest i jämförelse med det förra kommunalvalet
+en: {name} increased their voter support by the greatest margin [in {place}]
+en-head: Biggest vote gains for {name, case=acc} [in {place}]
+| total_votes_change_rank = 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes_change > 0
+
+# Should we have the "näst mest" form also for these?
+fi: {who_2} kasvatti [{place, case=ssa}] edellisiin kuntavaaleihin verrattuna {what_2, case=ksi} eniten kannatustaan
+fi: {who_2, case=gen} kannatus kasvoi [{place, case=ssa}] {what_2, case=ksi} eniten
+fi: {place, case=ssa} {who_2, case=gen} kannatus kasvoi {what_2, case=ksi} eniten
+fi-head: {name} {place, case=n} {what_2, case=ksi} suurin nousija
+fi-head: {name, case=lle} {place, case=n} {what_2, case=ksi} suurin kasvu
+Sv: {name} ökade sitt väljarstöd i {place} {value} mest i jämförelse med det förra kommunalvalet.
+en: {name} secured the {what_2} greatest gain in votes compared with the previous election [in {place}]
+en-head: {name} get {what_2} biggest vote gains in {place}
+| total_votes_change_rank > 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes_change > 0
+
+# --total_votes_change_rank_reverse templates--
+
+fi: {who_2} menetti [{place, case=ssa}] eniten kannatustaan edellisiin kuntavaaleihin verrattuna
+fi: {who_2, case=gen} kannatus laski [{place, case=ssa}] eniten
+fi: {place, case=ssa} {who_2, case=gen} kannatus laski eniten
+fi-head: {name} {place, case=n} suurin häviäjä
+fi-head: {name, case=lle} {place, case=n} suurin pudotus
+sv: I {place} tappade {name} flest röster i jämförelse med det förra kommunalvalet
+Sv: {name, case=gen} väljarstöd minskade mest i jämförelse med det förra kommunalvalet
+en: {name} decreased their voter support by the greatest margin [in {place}]
+en-head: {name} drop most votes in {place}
+| total_votes_change_rank_reverse = 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes_change < 0
+
+fi: {who_2} menetti [{place, case=ssa}] edellisiin kuntavaaleihin verrattuna {what_2, case=ksi} eniten kannatustaan
+fi: {who_2, case=gen} kannatus laski [{place, case=ssa}] {what_2, case=ksi} eniten
+fi: {place, case=ssa} {who_2, case=gen} kannatus laski {what_2, case=ksi} eniten
+fi-head: {name} {place, case=n} {what_2, case=ksi} suurin häviäjä
+fi-head: {name, case=lle} {place, case=n} {what_2, case=ksi} suurin pudotus
+Sv: I {place} tappade {name} väljarstöd {value} mest
+Sv-head: {name} tappade {value} mest platser i {place}
+en: {name} lost {value} most voter support [in {place}]
+en-head: {name} lose {value} most support in {place}
+| total_votes_change_rank_reverse > 1, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes_change < 0
+
+
+# ---percentage_votes_change_rank---
+# These are redundant (equal to votes_change_rank), should not exist in the first place
+
+# ---num_old_councillors_running—
+
+# ---num_meps_running---
+
+
+# ---percentage seats—
+fi: {who_2} saa [{place, case=ssa}] enemmistön valtuuston paikoista
+fi-head: {who_2, case=lle} enemmistö {place, case=n} valtuustoon
+fi-head: {place, case=n} valtuuston enemmistö {who_2, case=lle}
+sv: {who_2} tar majoriteten av platserna i fullmäktige
+en: {name} secured a majority of the seats [in {place}]
+en-head: Majority for {name, case=acc} in {place}
+| percentage_seats > 50.0, place_type = municipality, when_2 = 2017
+
+
+# ---Total_votes_change and total_votes_previous_election templates---
+
+fi: {who_2} menetti [{place, case=ssa}] {what_2, abs} {unit, form=short} edellisistä kuntavaaleista
+fi-head: {who_2, case=lle} {what_2, abs, case=gen} {unit, case=gen, form=short} tappio {place, case=ssa}
+fi-head: {who_2} menetti {place, case=ssa} {what_2, abs} {unit, form=short}
+sv: {who_2} fick {what_2, abs} färre röster än i det senaste kommunalvalet
+sv: {who_2} förlorade {what_2, abs} röster jämfört med det senaste kommunalvalet
+en: {name} dropped {what_2, abs} votes since the last municipal election [in {place}]
+en-head: {name} drop {what_2, abs} votes since last election in {place}
+| total_votes_change < 0, when_2 = 2017
+
+fi: {who_2} sai [{place, case=ssa}] yhtä monta ääntä kuin edellisissä kuntavaaleissa
+fi: {who_2} sai [{place, case=ssa}] saman määrän ääniä kuin edellisissä kuntavaaleissa
+fi-head: {who_2, case=n} äänimäärä {place, case=ssa} ennallaan
+sv: {who_2} fick lika många röster som i föregående kommunalval
+Sv: {name} samlade lika många röster som i det senaste kommunalvalet
+sv: {who_2} fick lika många röster som i det senaste kommunalvalet
+en: {name} got exactly as many votes [in {place}] as in the last municipal election
+en: {name} got the same number of votes [in {place}] as in the last municipal election
+en-head: {name} hit exactly same number of votes in {place} as last time
+| total_votes_change = 0, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+fi-head: {who_2, case=lle} {place, case=ssa} {what_2} lisä-ääntä
+fi-head: {place, case=sta} {who_2, case=lle} {what_2} lisä-ääntä
+sv: {who_2} fick {what_2} fler röster än i det senaste kommunalvalet
+Sv: {name} tog {value} fler röster än i föregående kommunalval
+en-head: {name} increase votes by {what_2} in {place}
+| total_votes_change > 0, when_2 = 2017
+
+
+# ---Seats_change templates---
+
+fi: {who_2} menettää [{place, case=ssa}] {what_2, abs} {unit, form=short}
+fi-head: {place, case=ssa} {what_2, abs} {unit, case=gen, form=short} menetys {who_2, case=lle}
+fi-head: {who_2, case=lle} {what_2, abs} {unit, case=gen, form=short} menetys {place, case=ssa}
+sv: {who_2} förlorar {what_2, abs} {unit, form=short}
+Sv: {name} tappar {what_2, abs} {unit, form=short} i fullmäktige
+en: {name} lost {what_2, abs} {unit, form=short} [in {place}]
+en-head: {name} lose {what_2, abs} {unit, form=short} in {place}
+| seats_change < 0, name_type = party, when_2 = 2017
+
+fi: {who_2} saa [{place, case=ssa}] {what_2} {unit, form=short} lisää
+fi-head: {who_2, case=lle} {place, case=ssa} {what_2} lisäpaikkaa
+fi-head: {place, case=ssa} {what_2} lisäpaikkaa {who_2, case=lle}
+sv: {who_2} fick {what_2} fler {unit, form=short}
+Sv: {name} utökade antalet {unit, form=short} med {value}
+en: {name} secured {what_2} more {unit, form=short} [in {place}]
+en-head: {name} get {what_2} more {unit, form=short} in {place}
+| seats_change > 1, name_type = party, when_2 = 2017
+
+fi: {who_2} saa [{place, case=ssa}] yhden lisäpaikan
+fi-head: {who_2, case=lle} yksi lisäpaikka {place, case=ssa}
+fi-head: {place, case=ssa} {who_2, case=lle} yksi lisäpaikka
+sv: {who_2} fick en plats till
+en: {name} secured one more seat [in {place}]
+en: {name} get one more seat in {place}
+| seats_change = 1, when_2 = 2017
+
+fi: {who_2} pitää [{place, case=ssa}] paikkojensa määrän samana
+fi-head: {who_2} pitää paikkansa {place, case=ssa}
+sv: {who_2} fick lika många {unit, form=short} i fullmäktige som tidigare
+Sv: {name} behåller antalet {unit, form=short} i fullmäktige
+en: {name} got the same number of {unit, form=short} [in {place}]
+en: {name} maintained the same number of {unit, form=short} in the council [in {place}]
+en: {name} maintain number of {unit, form=short} in {place}
+| seats_change = 0, when_2 = 2017
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes > 0
+
+# Named entity?
+#fi: {who_2} on ehdokkaana {what_2,  case=gen, as-party} listalla
+#sv: {who_2} ställer upp för {what_2, as-party}
+en: {who_2} represents {what_2, as-party}
+| what_type_2 = party, when_2 = 2017
+
+
+#### Missing templates added on night of Thu 6 April:
+# - seats_previous_election
+# - seats_previous_election_rank
+# ADDED BELOW (copy-paste from similar templates above)
+# SV and EN texts need to be adapted to the past elections/sitting council
+
+# --- Seats_previous_election templates ---
+
+fi: {who_2} ei saanut viimeksi yhtään paikkaa [{place, case=n}] valtuustoon
+fi-head: {who_2, case=lla} ei viimeksi yhtään paikkaa {place, case=n} valtuustossa
+#sv: {who_2} fick inga fullmäktigeplatser i det förra kommunalvalet
+#Sv: {name} har sedan tidigare inga platser i fullmäktige i {place}
+#Sv-head: {name} fick inga platser i fullmäktige i {place} i det förra kommunalvalet
+en: {name} did not have any council {unit} prior to the election [in {place}]
+en-head: No {unit} previously for {name, case=acc} [in {place}]
+| seats = 0, place_type = municipality, when_2 = 2012
+
+fi: {who_2, case=lla} on yksi paikka [{place, case=n}] nykyisessä valtuustossa
+fi-head: {who_2, case=lla} ennestään yksi paikka {place, case=n} valtuustossa
+#sv: {who_2} får en plats i den nya fullmäktige
+en: {name} received a council seat [in {place}] in the previous election
+en-head: One seat for {name, case=acc} in previous election in {place}
+| seats = 1, place_type = municipality, when_2 = 2012
+
+fi: {who_2, case=lla} on {what_2} {unit} [{place, case=n}] nykyisessä valtuustossa
+fi-head: {who_2, case=lla} ennestään {what_2} {unit} {place, case=ssa}
+#sv: {who_2} får {what_2} platser i det nya fullmäktige
+en: {name} had {what_2} {unit} in the previous council [in {place}]
+en-head: {name} had {what_2} {unit} previously in {place}
+| seats > 1, place_type = municipality, when_2 = 2012
+
+
+# cases where place = Uusimaa or place = Suomi
+fi: {who_2, case=lla} ei ole [{place, case=n}] nykyisissä valtuustoissa yhtään paikkaa
+fi-head: {who_2, case=lla} ei {place, case=ssa} ennestään yhtään paikkaa
+#sv: {who_2} får inga platser i fullmäktige i {place}
+en: {name} did not have any {unit} in the previous council [in {place}]
+en-head: No {unit} previously for {name, case=acc} in {place}
+en-head: {name} had no {unit} before election in {place}
+| seats = 0, place_type != municipality, when_2 = 2012
+| name_type = party
+
+fi: {who_2, case=lla} on yksi paikka [{place, case=n}] nykyisissä valtuustoissa
+fi-head: {who_2, case=lla} ennestään yksi paikka koko {place, case=ssa}
+#sv: {who_2} får en plats i fullmäktige i {place}
+en: {name} had one seat in the previous council [in {place}]
+en: {name} had one seat on the council prior to the election [in {place}]
+en-head: {name} had one seat in {place}
+| seats = 1, place_type != municipality, when_2 = 2012
+
+fi: {who_2, case=lla} on {what_2} {unit} [{place, case=n}] nykyisissä valtuustoissa
+fi-head: {who_2, case=lla} ennestään yhteensä {what_2} {unit} {place, case=ssa}
+#sv: {who_2} får {what_2} platser i fullmäktige i {place}
+#Sv: I {place} tar {name} {value} platser i fullmäktige
+en: {name} had {what_2} {unit} in the previous council [in {place}]
+en-head: {name} had {what_2} {unit} in {place}
+en-head: {what_2} {unit} in previous election went to {name, case=acc} in {place}
+| seats > 1, place_type != municipality, when_2 = 2012
+
+
+# --- Seats_previous_election_rank templates ---
+
+fi: {who_2} on [{place, case=n}] nykyisen valtuuston suurin puolue
+fi-head: {who_2} on {place, case=n} nykyisen valtuuston suurin
+#sv: {who_2} är det största partiet i fullmäktige
+en: {name} was the largest party in the council [in {place}] prior to the election
+en-head: {name} was largest party in {place}
+en-head: Most seats went to {name, case=acc} in {place} in previous election
+| seats_rank = 1, place_type = municipality, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, total_votes_rank = 1
+# NB: the second condition is a trick to avoid telling separately the redundant
+# fact that the party who has most seats also received most votes.
+# 8.2.2018 Unfortunately the above trick doesn't work, since the facts to be presented in the article are chosen
+# _before_ selecting the templates.
+
+fi: {who_2, case=lla} on {what_2} {unit} [{place, case=n}] nykyisessä valtuustossa
+fi-head: {who_2} oli {place, case=n} {what_2, case=ksi} suurin
+#sv: {who_2} fick {what_2} flest platser i det nya fullmäktige
+#Sv: Flest platser i det nya fullmäktige gick till {name}
+en: {name} had secured {what_2} most seats in the previous election [in {place}]
+en-head: {name} had {what_2} most seats in {place} prior to election
+| seats_rank > 1, place_type = municipality, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+
+
+# cases where place = Uusimaa or place = Suomi
+fi: {name} on yhteenlaskettuna [{place, case=n}] nykyisten valtuustojen suurin puolue
+fi-head: {name} oli {place, case=n} suurin
+#sv: {who_2} är det största partiet i fullmäktige i {place}
+#Sv: I {place} är {name} störst
+#Sv: I {place} är {name} det största partiet
+#sv: {who_2} har flest platser i fullmäktige i {place}
+| seats_rank = 1, place_type != municipality, when_2 = 2012
+
+## This version excludes the country-wide case, as we have a better template below
+en: {name} had the most council seats altogether [across {place}] prior to the election
+en-head: {name} had most seats in {place} previously
+#Sv: {name} tar sammanlagt flest platser i {place}
+#Sv-head: {name} får flest platser i {place}
+| seats_rank = 1, place_type = D, when_2 = 2012
+
+en: {name} won the most council seats nationwide in the previous election
+en-head: {name} had most seats nationwide previously
+#Sv: {name} får flest fullmäktigeplatser i hela landet
+#Sv-head: {name} störst i kommunalvalet
+| seats_rank = 1, place_type = country, when_2 = 2012
+
+#Kokoomuksella oli yhteensä 3. eniten paikkoja Keravan valtuustossa
+fi: {who_2, case=lla} on yhteensä {what_2} {unit} [{place, case=n}] nykyisissä valtuustoissa
+fi-head: {who_2, case=lla} ennestään {what_2} {unit} {place, case=ssa}
+## This one becomes tricky in swedish at the word for council can’t be defined to be
+## in plural, in order to avoid that mostly you would just say “in a specific area”.
+#sv: {who_2} får sammanlagt {what_2} mest platser i fullmäktige i {place}
+#Sv: {name} fick {value} mest platser i {place}
+en: {name} had secured {value} most council seats [in {place}] in the previous election
+en-head: {name} had {value} most seats in {place} before
+| seats_rank > 1, place_type != municipality, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+
+
+#sv: {who_2} fick sammanlagt näst mest platser i fullmäktige [i {place}]
+| seats_rank = 2, place_type != municipality, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+
+fi: {who_2, case=lla} on {what_2} {unit} [{place, case=n}] nykyisissä valtuustoissa
+fi-head: {who_2, case=lla} ennestään {what_2} {unit} {place, case=ssa}
+#sv: {who_2} fick sammanlagt {what_2} flest platser i fullmäktige [i {place}]
+en: {who_2} had {what_2} most council seats altogether [across {place}] prior to the election
+en: {who_2} received {what_2} most council seats in the previous election overall [in {place}]
+# This feels a bit weird headline, as do the others that refer to the previous election.
+en-head: {who_2} had {what_2} most seats previously [across {place}]
+| seats_rank > 1, place_type != municipality, when_2 = 2012
+| who_2 = 1.who_2, where_2 = 1.where_2, when_2 = 1.when_2, seats > 0
+
+
+
+
+
+
+
+
+#
+# Notes from Leo, ignore for now everything below here
+#
+#seats_previous_election_rank
+#
+#seats_change_rank
+#
+#total_votes_rank_reverse
+#
+#percentage_votes_rank_reverse
+#
+#seats_previous_election
+#
+#total_votes_change_rank
+#
+#percentage_votes_change_rank_reverse
+#
+#percentage_votes_rank
+#
+#total_votes_previous_election_rank_reverse
+#
+#seats_rank_reverse
+#
+#total_votes_previous_election
+# No templates match
+#     who_type_2='candidate',
+#     where_2='765',
+#     where_type_2='M',
+#     what_2=0,
+#      what_type_2='total_votes_previous_election'
+
+
+#Kerava kasvatti/pienensi valtuustonsa kokoa 23:sta 25:een.
+
+
+#Tulevaan Keravan valtuustoon valitaan 23 edustajaa entisen 25 sijaan.
+
+
+#Tämän templaatin sääntörivi päin perzettä vielä.
+#Kansallinen Kokoomus on Keravan suurin puolue 24 prosentin äänimäärällään.
+#{1.who_2} on {1.where_2, case=n} suurin puolue {2.what_2} prosentin äänimäärällään
+#| what_type_2 = total_votes_rank, what_2 = 1, where_type_2 = Municipality
+#| who_2 =1.who_2, where_2 = 1.where_2, what_type_2 = votes_percentage
+
+#
+# Multi-message template example
+#
+# The first line after the template body relates to the first fact,
+# The second line after the template relates to the second fact etc.
+# Note how the second fact has a requirement for the facts to share a “who”
+
+#Kokoomus sai eniten ääniä 1632 äänellään
+#{1.who_2} sai eniten ääniä {2.what_2} äänellään
+#| what_type_2 = total_votes_rank, what_2 = 1
+#| what_type_2 = total_votes, who_2 = 1.who_2, where_2 = 1.where_2
+
+
+#***  SUGGESTED ADDITIONS ***
+
+#Kokoomus menetti paikkansa Keravan valtuustossa
+#fi: {name} menetti paikkansa {place, gen=n} valtuustossa
+#sv: {name} förlorade sina platser i fullmäktige i {place}
+#en: {name} lost their seats in the council in {place}
+#| what_type_2 = seat change from >1 to 0
