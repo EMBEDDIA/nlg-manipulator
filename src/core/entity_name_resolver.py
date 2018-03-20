@@ -31,6 +31,8 @@ class EntityNameResolver(NLGPipelineComponent):
     #
     # In this implementation, it is enough to define the multi-entity_type confusion groups, as we
     # can simply use the default parameter in dict.get() to return the key for other cases-
+
+    # ToDo: These can probably be removed, but left them here for now.
     confusion_groups = {
         'party': 'party-candidate',
         'candidate': 'party-candidate',

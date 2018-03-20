@@ -12,10 +12,6 @@ FACT_FIELD_ALIASES = {
     "what_type_2": ["value_type", "unit"],
     "what_1": [],
     "what_2": ["value"],
-    "who_type_1": [],
-    "who_type_2": ["name_type"],
-    "who_1": [],
-    "who_2": ["name"],
     "where_type_1": [],
     "where_type_2": ["place_type"],
     "where_1": [],
@@ -24,15 +20,6 @@ FACT_FIELD_ALIASES = {
     "when_2": ["time"],
 }
 FACT_FIELD_MAP = canonical_map(FACT_FIELD_ALIASES)
-
-# This defines alternative values for name types
-# Currently there aren't any, but we define the mapping for consistency, in case we want to add some later
-NAME_TYPES = {
-    "candidate": [],
-    "party": [],
-}
-NAME_TYPE_MAP = canonical_map(NAME_TYPES)
-
 
 # Similarly, we have multiple ways to refer to location types
 LOCATION_TYPES = {

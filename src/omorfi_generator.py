@@ -102,21 +102,13 @@ class OmorfiGenerator(object):
             if cached:
                 this.value = lambda x: cached
             else:
-                if this.attributes.get("entity_type", None) == "candidate" and this.attributes.get("name_type", None) == "full":
-                    parts = this.value.split(" ")
-                    modified_part = parts[-2]
-                else:
-                    modified_part = this.value        
+                modified_part = this.value
 
                 if case == "possessive" or case == "genitive":
                     maybe_s = "s" if modified_part[-1] != "s" else ""
                     modified_part = "{}'{}".format(modified_part, maybe_s)
 
-                if this.attributes.get("entity_type", None) == "candidate" and this.attributes.get("name_type", None) == "full":
-                    parts[-2] = modified_part
-                    result = " ".join(parts)
-                else:
-                    result = modified_part
+                result = modified_part
 
                 this.value = lambda x: result
 
@@ -146,21 +138,13 @@ class OmorfiGenerator(object):
             if cached:
                 this.value = lambda x: cached
             else:
-                if this.attributes.get("entity_type", None) == "candidate" and this.attributes.get("name_type", None) == "full":
-                    parts = this.value.split(" ")
-                    modified_part = parts[-2]
-                else:
-                    modified_part = this.value        
+                modified_part = this.value
 
                 if case == "possessive" or case == "genitive":
                     maybe_s = "" if modified_part[-1] in ["s", "x", "z"] else "s"
                     modified_part = "{}'{}".format(modified_part, maybe_s)
 
-                if this.attributes.get("entity_type", None) == "candidate" and this.attributes.get("name_type", None) == "full":
-                    parts[-2] = modified_part
-                    result = " ".join(parts)
-                else:
-                    result = modified_part
+                result = modified_part
 
                 this.value = lambda x: result
 
@@ -194,17 +178,6 @@ class OmorfiGenerator(object):
                 modified = "äänestysalue {}".format(this.value)
                 this.value = lambda x: modified
                 self._modify(this, multi_word_idx=0)
-
-            elif attributes.get("entity_type", None) == "candidate":
-                if attributes.get('name_type', None) == "full":
-                    # Taneli Tötterström (puolue) +GEN -> Taneli Tötterström_in_ (puolue)
-                    self._modify(this, multi_word_idx=this.value.count(" ") - 1)
-                elif attributes.get('name_type', None) == "short":
-                    # Tötterström +GEN -> Tötterström_in_
-                    self._modify(this, multi_word_idx=this.value.count(" "))
-                else:
-                    # Pronoun
-                    self._modify(this)
 
             else:
                 # The slot is probably a common noun

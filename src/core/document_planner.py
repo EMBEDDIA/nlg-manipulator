@@ -149,14 +149,14 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     def _penalize_similarity(self, candidates, nuclei):
         if not nuclei:
             return candidates
-        nuclei_who_2 = [nucleus.fact.who_2 for nucleus in nuclei]
-        modified = [msg for msg in candidates if msg.fact.who_2 not in nuclei_who_2]
+        # ToDo: Need to determine some similarity measure to replace the old one that compared the who-values
+        modified = [msg for msg in candidates]
         return modified
 
     def _encourage_similarity(self, candidates, nucleus):
         # Drop the messages that we won't consider at all instead of dropping the score to zero. This is much faster,
         # especially in cases where there are a lot of messages only a few of which would be left with a non-zero score.
-        modified = [msg for msg in candidates if (nucleus.fact.where_2 == msg.fact.where_2 and nucleus.fact.who_2 == msg.fact.who_2)]
+        modified = [msg for msg in candidates if (nucleus.fact.where_2 == msg.fact.where_2)]
 
         return modified
 
@@ -188,8 +188,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         fact_2 = msg_2.fact
 
         # Comparison of the same what_type between different place, time or entity
-        if (fact_1.where_2 != fact_2.where_2 or fact_1.who_2 != fact_2.who_2 or fact_1.when_2 != fact_2.when_2) and \
-                (fact_1.what_2 == fact_2.what_2):
+        if (fact_1.where_2 != fact_2.where_2 or fact_1.when_2 != fact_2.when_2) and (fact_1.what_2 == fact_2.what_2):
             return Relation.CONTRAST
 
         # msg_1 is an elaboration of msg_2

@@ -266,7 +266,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             ))
 
                         # Only some of the field names are allowed to be used in templates
-                        if field_name not in ["what_1", "what_2", "who_1", "who_2", "where_1", "where_2", "when_1", "when_2", "what_type_2"]:
+                        if field_name not in ["what_1", "what_2", "where_1", "where_2", "when_1", "when_2", "what_type_2"]:
                             raise TemplateReadingError("invalid field name '{}' for use in a template: {}".format(
                                 field_name, expanded_template_line
                             ))
@@ -326,8 +326,6 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             raise TemplateReadingError("cannot apply filters to 'who' or 'where' fields, only 'what'")
                         if field_name[:-2] in ['what_type', 'when']:
                             to_value = SlotFilterChain(FactFieldSource(field_name))
-                        elif field_name[:-2] == 'who':
-                            to_value = WhoValue(field_name)
                         else:
                             to_value = WhereValue(field_name)
 
@@ -379,14 +377,7 @@ def parse_matcher_expr(constraint_line):
 
         # For certain fields, we only allow string values and limit them to a given set
         # We also map them from a set of alternatives onto a canonical form
-        if lhs.field_name in ["who_type_1", "who_type_2"]:
-            try:
-                value = NAME_TYPE_MAP[value]
-            except KeyError:
-                raise TemplateReadingError("unknown who_type '{}'. Expected one of: {}".format(
-                    value, ", ".join("'{}'".format(v) for v in NAME_TYPE_MAP.keys())
-                ))
-        elif lhs.field_name in ["where_type_1", "where_type_2"]:
+        if lhs.field_name in ["where_type_1", "where_type_2"]:
             try:
                 value = LOCATION_TYPE_MAP[value]
             except KeyError:

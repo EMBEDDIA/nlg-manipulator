@@ -4,7 +4,7 @@ from .pipeline import NLGPipelineComponent
 import logging
 log = logging.getLogger('root')
 
-def filter_messages(messages, what_type=None, what=None, who_type=None, who=None, where_type=None, where=None):
+def filter_messages(messages, what_type=None, what=None, where_type=None, where=None):
     """
     Filters a list of message so that only message that match the parameters are returned.
     """
@@ -16,10 +16,6 @@ def filter_messages(messages, what_type=None, what=None, who_type=None, who=None
         messages = [m for m in messages if m.where == where]
     if where_type:
         messages = [m for m in messages if m.where_type == where_type]
-    if who:
-        messages = [m for m in messages if m.who == who]
-    if who_type:
-        messages = [m for m in messages if m.who_type == who_type]
     return messages
 
 def extend_or_append(collection, new_items):

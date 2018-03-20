@@ -24,18 +24,10 @@ class MunicipalElectionImportanceSelector(NLGPipelineComponent):
         fact = message.fact
         what = fact.what_2
         what_type = fact.what_type_2
-        who = fact.who_2
-        who_type = fact.who_type_2
         where = fact.where_2
         where_type = fact.where_type_2
         when = fact.when_2
         outlier_score = fact.outlierness or 1
-
-        # importance of names - who_score
-        if who_type == "party":
-            who_score = pfg.party_score
-        if who_type == "candidate":
-            who_score = pfg.candidate_score
 
         # importance of location types - where_type_score
         if where_type == "M":
@@ -115,7 +107,7 @@ class MunicipalElectionImportanceSelector(NLGPipelineComponent):
             what_score = what_score / 4
 
         # total importance score
-        message_score = who_score * where_type_score * what_score
+        message_score = where_type_score * what_score
         # message_score = "{:.5f}".format(message_score)
 
         if "_rank" in what_type:

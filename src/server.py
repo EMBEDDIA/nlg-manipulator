@@ -54,17 +54,17 @@ def allow_cors(func):
         return func(*args, **kwargs)
     return wrapper
 
-def get_article(language, who, who_type, where, where_type):
+def get_article(language, where, where_type):
     if not args.redis:
         log.info("Redis is not enabled, starting pipeline")
-        headline, body = service.run_pipeline(language, who, who_type, where, where_type)
+        headline, body = service.run_pipeline(language, where, where_type)
         return headline, body
     else:
-        key = "{}|{}|{}|{}|{}".format(language, who, who_type, where, where_type)
+        key = "{}|{}|{}|{}|{}".format(language, where, where_type)
         cached = cache.get(key)
         if not cached:
             log.info("Key was not in Redis, updating cache")
-            headline, body = service.run_pipeline(language, who, who_type, where, where_type)
+            headline, body = service.run_pipeline(language, where, where_type)
             value = "{}|SPLIT|{}".format(headline, body)
             cache.set(key, value)
             return headline, body
@@ -75,7 +75,7 @@ def get_article(language, who, who_type, where, where_type):
             if len(parts) != 2:
                 log.debug("Invalid value in Redis. Clearing cache and trying again.")
                 cache.flushdb()
-                return get_article(language, who, who_type, where, where_type)
+                return get_article(language, where, where_type)
             return parts[0], parts[1]
 
 @app.route('/')
@@ -102,17 +102,7 @@ def news_html_search():
         where_type = location[0]
         where = location[1:]
     
-    entity = request.forms.get('entity')
-    if not entity or 'no-entity' in entity:
-        redirect('/news?language={}&where={}&where_type={}'.format(language, where, where_type))
-    else:
-        who_type = entity[0]
-        if who_type == 'P':
-            who_type = 'party'
-        elif who_type == 'C':
-            who_type = 'candidate'
-        who = entity[1:]
-        redirect('/news?language={}&where={}&where_type={}&who={}&who_type={}'.format(language, where, where_type, who, who_type))
+    redirect('/news?language={}&where={}&where_type={}'.format(language, where, where_type))
 
 @app.get('/city')
 def geolocate():
@@ -133,22 +123,18 @@ def geolocate():
 @view('news-article')
 def news_html():
     language = request.query.language or "fi"
-    who = request.query.who or None
-    who_type = request.query.who_type or None
     where = request.query.where or None
     where_type = request.query.where_type or None
 
-    if not (where or who):
+    if not where:
         redirect('/')
 
     if not where:
         where_type = 'C'
         where = 'fi'
 
-    header, body = get_article(language, who, who_type, where, where_type)
+    header, body = get_article(language, where, where_type)
     return dict({
-        "who": who,
-        "who_type": who_type,
         "where": where,
         "where_type": where_type,
         "language": language,
@@ -161,23 +147,19 @@ def news_html():
 @allow_cors
 def news_api():
     language = request.query.language or "fi"
-    who = request.query.who or None
-    who_type = request.query.who_type or None
     where = request.query.where or None
     where_type = request.query.where_type or None
 
-    if not (where or who):
+    if not where:
         response.status = 400
-        return {"error": "Must have at least one of the following query parameters: 'who', 'where'"}
+        return {"error": "Must have at least one of the following query parameters: 'where'"}
 
     if not where:
         where_type = 'C'
         where = 'fi'
 
-    header, body = get_article(language, who, who_type, where, where_type)
+    header, body = get_article(language, where, where_type)
     return dict({
-        "who": who,
-        "who_type": who_type,
         "where": where,
         "where_type": where_type,
         "language": language,
@@ -193,8 +175,6 @@ def random_news():
 
     header, body = get_article(language, None, None, m, "M")
     return dict({
-        "who": None,
-        "who_type": None,
         "where": m,
         "where_type": "M",
         "language": language,
@@ -261,8 +241,6 @@ def get_random_headlines():
             parts = key.split("|")
             headline = {
                 "language": None if parts[0] == "None" else parts[0],
-                "who": None if parts[1] == "None" else parts[1],
-                "who_type": None if parts[2] == "None" else parts[2],
                 "where": None if parts[3] == "None" else parts[3],
                 "where_type": None if parts[4] == "None" else parts[4],
                 "headline": value.split("|SPLIT|")[0]

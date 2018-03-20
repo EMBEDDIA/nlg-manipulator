@@ -2,10 +2,6 @@ from collections import namedtuple
 
 
 Fact = namedtuple('fact', [
-    'who_1',
-    'who_2',
-    'who_type_1',
-    'who_type_2',
     'where_1',
     'where_2',
     'where_type_1',
