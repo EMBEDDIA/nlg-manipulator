@@ -40,9 +40,9 @@ import warnings
 import logging
 
 from core.template import Literal, Template, Slot
-from templates import FACT_FIELDS, FACT_FIELD_MAP, NAME_TYPE_MAP, LOCATION_TYPE_MAP
+from templates import FACT_FIELDS, FACT_FIELD_MAP, LOCATION_TYPE_MAP
 from templates.matchers import OPERATORS, Matcher, FactField, ReferentialExpr
-from templates.substitutions import SLOT_FILTERS, SlotFilterChain, WhoValue, WhereValue, FactFieldSource, LiteralSource
+from templates.substitutions import WhereValue, FactFieldSource, LiteralSource
 
 log = logging.getLogger('root')
 
@@ -275,59 +275,32 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             raise TemplateReadingError("Substitution '{}' refers to rule {}, but template only has {} "
                                                        "rules".format(subst, rule_ref+1, len(rules)))
 
-                    filters = []
                     attributes = {}
-                    # Read each of the filter specifications and build a value filter for each
+                    # Read each of the attribute specializations
                     for subst_part in subst_parts[1:]:
                         if "=" in subst_part:
                             # Attributes specify things like case, to be used in realisation
                             att, __, val = subst_part.partition("=")
                             attributes[att.strip()] = val.strip()
                         else:
-                            # Some filters may take arguments, which get passed into the filter constructor
-                            if "(" in subst_part:
-                                if subst_part[-1] != ")":
-                                    raise TemplateReadingError(
-                                        "unmatched open bracket in filter arguments in slot: {}".format(subst_part)
-                                    )
-                                filter_name, __, args = subst_part.partition("(")
-                                args = [a.strip() for a in args[:-1].split(";")]
-                                filter_name = filter_name.strip()
-                            else:
-                                args = []
-                                filter_name = subst_part.strip()
-                            # Look up the filter class
-                            if filter_name not in SLOT_FILTERS:
-                                raise TemplateReadingError("unknown slot filter '{}'. Available filters: {}".format(
-                                    filter_name, ", ".join(SLOT_FILTERS.keys())
-                                ))
-                            # Instantiate the filter using the given args
-                            try:
-                                filters.append(SLOT_FILTERS[filter_name](*args))
-                            except TypeError as e:
-                                raise TemplateReadingError("error instantiating slot filter {}({}): {}".format(
-                                    filter_name, ", ".join(args), e
-                                ))
+                            raise TemplateReadingError(
+                                "Found an attribute with no value specified. Possibly a leftover old style filter? {}".format(subst_part)
+                            )
 
                     # Generally (for the time being at least), we don't want to apply filters to who or where, since
                     #  these produce special strings representing the entities, not any old string
-                    if field_name in ["what_1", "what_2"]:
-                        to_value = SlotFilterChain(FactFieldSource(field_name), filters)
+                    if field_name[0] in ["'", '"']:
+                        to_value = LiteralSource(field_name[1:-1])
+                    elif field_name[:-2] == 'where':
+                        to_value = WhereValue(field_name)
+                    else:
+                        to_value = FactFieldSource(field_name)
+                    if field_name[:-2] == 'what':
                         # Set the correct format for numeral values based on the what_type
                         if "rank" in seen_what_types[rule_ref]:
                             attributes["num_type"] = "ordinal"
                         elif seen_what_types[rule_ref] not in ["party", "election_result", "is_councillor", "is_mep", "is_mp"]:
                             attributes["num_type"] = "cardinal"
-
-                    elif field_name[0] in ["'", '"']:
-                        to_value = SlotFilterChain(LiteralSource(field_name[1:-1]), filters)
-                    else:
-                        if len(filters):
-                            raise TemplateReadingError("cannot apply filters to 'who' or 'where' fields, only 'what'")
-                        if field_name[:-2] in ['what_type', 'when']:
-                            to_value = SlotFilterChain(FactFieldSource(field_name))
-                        else:
-                            to_value = WhereValue(field_name)
 
                     # Postprocess attributes
                     attributes = process_attributes(attributes)

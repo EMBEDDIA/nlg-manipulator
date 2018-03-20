@@ -1,6 +1,6 @@
 from .pipeline import NLGPipelineComponent
 from .template import Template, Literal, Slot
-from templates.substitutions import FactFieldSource, SlotFilterChain
+from templates.substitutions import FactFieldSource
 from .message import Message
 from .document_plan import Relation
 
@@ -116,7 +116,7 @@ class Aggregator(NLGPipelineComponent):
                 result[-1].attributes["form"] = "short"
                 result[-1].attributes["case"] = "accusative"
             except KeyError:
-                result.append(Slot(SlotFilterChain(FactFieldSource("what_type_2"))))
+                result.append(Slot(FactFieldSource("what_type_2")))
                 result[-1].fact = value.fact
                 attributes = {"form": "short", "case": "accusative"}
                 result[-1].attributes = attributes

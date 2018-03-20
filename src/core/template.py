@@ -1,6 +1,6 @@
 import logging
 
-from templates.substitutions import LiteralSource, FactFieldSource
+from templates.substitutions import LiteralSource
 from .document_plan import DocumentPlan
 log = logging.getLogger('root')
 
