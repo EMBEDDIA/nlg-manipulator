@@ -3,7 +3,6 @@ from functools import lru_cache
 
 from .pipeline import NLGPipelineComponent
 from .template import DefaultTemplate
-from .message import Message
 log = logging.getLogger('root')
 
 # If we're starting a new paragraph and haven't mentioned the location for more than this number of
