@@ -1,6 +1,6 @@
 
 
-class ComponentNameCollisionException(Exception):
+class ComponentNameCollisionError(Exception):
     pass
 
 
