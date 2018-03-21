@@ -17,7 +17,7 @@ def run():
     # Download the data
     download_px(wanted_px)
 
-    # Store population data
+    # Store and store population data
     df = Px('database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px', language='en').pd_dataframe()
     df = flatten(df)
     df = pythonify_column_names(df)
@@ -27,6 +27,7 @@ def run():
         'both_sexes_age_groups_total_premilinary_population': 'population'}
         , inplace=True)
     df = df[['when', 'where', 'population']]
+    df.replace(['"-"', '".."'], 0, inplace=True)
     df.to_csv('population.csv')
 
     # flatten and store crime statistics
@@ -34,10 +35,13 @@ def run():
     df = flatten(df, stacked_cols=[0])
     df = pythonify_column_names(df)
     df.rename(columns={'level_0': 'when', 'level_1': 'where'}, inplace=True)
-    
+    df.replace(['"-"', '".."'], 0, inplace=True)
     df.to_csv('crime.csv')
 
+    print('Converter')
     ConverterC()
+
+    print('Importer')
     ImporterC()
 
 class ImporterC:
