@@ -805,8 +805,8 @@ en: {name} maintain number of {unit, form=short} in {place}
 # Named entity?
 #fi: {who_2} on ehdokkaana {what_2,  case=gen, as-party} listalla
 #sv: {who_2} ställer upp för {what_2, as-party}
-en: {who_2} represents {what_2, as-party}
-| what_type_2 = party, when_2 = 2017
+#en: {who_2} represents {what_2, as-party}
+#| what_type_2 = party, when_2 = 2017
 
 
 #### Missing templates added on night of Thu 6 April:

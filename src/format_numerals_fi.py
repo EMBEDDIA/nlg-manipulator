@@ -68,11 +68,8 @@ class FinnishNumeralFormatter():
 
         self.units = {
             'base': self._unit_base,
-
             'percentage': self._unit_percentage,
-
             'change': self._unit_change,
-
             'rank': self._unit_rank,
         }
 

@@ -55,15 +55,14 @@ class EnglishNumeralFormatter():
 
         self.units = {
             'base': self._unit_base,
-
             'percentage': self._unit_percentage,
-
             'change': self._unit_change,
-
+            'rank': self._unit_rank,
         }
 
         self.time = {
-
+            'month': self._time_month,
+            'year': self._time_year,
         }
 
     def _unit_base(self, slot):
@@ -129,6 +128,10 @@ class EnglishNumeralFormatter():
             idx += 1
         return added_slots
 
+    def _unit_rank(self, slot):
+        # Not implemented yet
+        return 0
+
     def _ordinal(self, token):
         token = "{:n}".format(token)
         if token in self.SMALL_ORDINALS:
@@ -153,3 +156,20 @@ class EnglishNumeralFormatter():
     def _update_slot_value(self, slot, new_value):
         slot.value = lambda x: new_value
         return 0
+
+    def _time_month(self, slot):
+        # Not implemented yet
+        return 0
+
+    def _time_year(self, slot):
+        year = slot.value
+        added_slots = 0
+        template = slot.parent
+        idx = template.components.index(slot)
+        new_slot = LiteralSlot("in")
+        template.add_component(idx, new_slot)
+        added_slots += 1
+        idx += 1
+        if type(year) is not str:
+            slot.value = lambda x: self._cardinal(year)
+        return added_slots

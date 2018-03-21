@@ -108,19 +108,23 @@ class Aggregator(NLGPipelineComponent):
         log.debug("Elaborating {} with {}".format([c.value for c in first.components], [c.value for c in second.components]))
         result = [c for c in first.components]
         try:
-            value = second.template.get_slot("what_2")
-            result.append(Literal("("))
-            result.append(value)
-            try:
-                result.append(second.template.get_slot("what_type_2"))
-                result[-1].attributes["form"] = "short"
-                result[-1].attributes["case"] = "accusative"
-            except KeyError:
-                result.append(Slot(FactFieldSource("what_type_2")))
-                result[-1].fact = value.fact
+            first_type = first.facts[0].what_type_2
+            second_type = second.facts[0].what_type_2
+            if first_type + "_change" == second_type:
+                result.append(Literal(
+                    registry.get('vocabulary').get(language, {}).get('subord_clause_start', "MISSING-COMBINER")))
+                result.append(Slot(FactFieldSource('what_2'), fact=second.facts[0]))
+                result.append(Slot(FactFieldSource('what_type_2'), fact=second.facts[0]))
+                result[-1].attributes['form'] = 'full'
+                result.append(Literal(registry.get('vocabulary').get(language, {}).get('comparator', "MISSING-COMBINER")))
+                result.append(Slot(FactFieldSource('when_1'), fact=second.facts[0]))
+            else:
+                result.append(Literal("("))
+                result.append(Slot(FactFieldSource('what_2'), fact=second.facts[0]))
+                result.append(Slot(FactFieldSource("what_type_2"), fact=second.facts[0]))
                 attributes = {"form": "short", "case": "accusative"}
                 result[-1].attributes = attributes
-            result.append(Literal(")"))
+                result.append(Literal(")"))
         except KeyError:
             return self._combine(registry, language, first, second)
         new_message = Message(facts=first.facts + [fact for fact in second.facts if fact not in first.facts], importance_coefficient=first.importance_coefficient)

@@ -3,6 +3,7 @@ from .pipeline import NLGPipelineComponent
 from .document_plan import DocumentPlan, Relation
 from .message_generator import NoMessagesForSelectionException
 from .template_selector import TemplateMessageChecker
+import re
 
 log = logging.getLogger('root')
 
@@ -161,15 +162,17 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return modified
 
     def _add_satellite(self, satellite, messages):
+        # ToDo: Decide how to deal with the nuclei. Can they be elaborated by something else? Can they be used to
+        # elaborate less important message? At the moment they cannot be either part of an elaborate relation.
         for idx, msg in enumerate(messages):
-            if type(msg) is DocumentPlan:
+            if type(msg) is DocumentPlan or msg.prevent_aggregation:
                 continue
-            rel = self._check_relation(satellite, msg)
+            rel = self._check_relation(msg, satellite)
             if rel != Relation.SEQUENCE:
                 children = [msg, satellite]
                 messages[idx] = DocumentPlan(children, rel)
                 break
-            rel = self._check_relation(msg, satellite)
+            rel = self._check_relation(satellite, msg)
             if rel != Relation.SEQUENCE:
                 children = [satellite, msg]
                 messages[idx] = DocumentPlan(children, rel)
@@ -187,11 +190,12 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         fact_1 = msg_1.fact
         fact_2 = msg_2.fact
 
-        # Comparison of the same what_type between different place, time or entity
-        if (fact_1.where_2 != fact_2.where_2 or fact_1.when_2 != fact_2.when_2) and (fact_1.what_2 == fact_2.what_2):
+        # Comparison of the same what_type between different place or time
+        if (fact_1.where_2 != fact_2.where_2 or fact_1.when_2 != fact_2.when_2) and \
+                (fact_1.what_type_2 == fact_2.what_type_2):
             return Relation.CONTRAST
 
-        # msg_1 is an elaboration of msg_2
+        # msg_2 is an elaboration of msg_1
         elif self._is_elaboration(fact_1, fact_2):
             return Relation.ELABORATION
         elif self._is_exemplification(fact_1, fact_2):
@@ -203,27 +207,37 @@ class BodyDocumentPlanner(NLGPipelineComponent):
 
         :param fact1:
         :param fact2:
-        :return: True, if fact1 is an elaboration of fact2, False otherwise
+        :return: True, if fact2 is an elaboration of fact1, False otherwise
         """
-        elaboration = {"total_votes": ["percentage_votes", "total_votes_rank", "total_votes_rank_reverse"],
-                       "total_votes_change": ["total_votes_change_rank", "total_votes_change_rank_reverse"],
-                       "seats": ["seats_rank", "seats_rank_reverse"],
-                       }
-        same_context = [fact1.where_2, fact1.when_2, fact1.who_2] == [fact2.where_2, fact2.when_2, fact2.who_2]
-        # rank and rank_reverse are elaborated by the base values
+        same_context = (fact1.where_2, fact1.when_2) == (fact2.where_2, fact2.when_2)
         if not same_context:
             return False
-        if "rank" in fact2.what_type_2:
-            if "reverse" in fact2.what_type_2:
-                return fact1.what_type_2 == fact2.what_type_2[:-13]
-            return fact1.what_type_2 == fact2.what_type_2[:-5]
-        if fact1.what_type_2 == "total_votes" and fact2.what_type_2 == "percentage_votes":
+        # An elaboration can't have the same fact type in both facts.
+        if fact1.what_type_2 == fact2.what_type_2:
+            return False
+        value_type_re = re.compile(r'(percentage_|total_)?([a-z]+)(_change)?(_rank(_reverse)?)?')
+        match_1 = value_type_re.match(fact1.what_type_2)
+        match_2 = value_type_re.match(fact2.what_type_2)
+        # If the facts have different base unit, they can't have an elaboration relation
+        if match_1.group(2) != match_2.group(2):
+            return False
+        # rank and rank_reverse are elaborated by the base values
+        if match_1.group(4) is not None:
+            return match_1.group(1,3) == match_2.group(1,3)
+        # Rank and rank_reverse cannot be elaborations
+        if match_2.group(4) is not None:
+            return False
+        # Change is an elaboration of the result value
+        if match_2.group(3) is not None and match_1.group(1) == match_2.group(1):
+            return True
+        # total value is an elaboration of a percentage value
+        if match_1.group(3) == match_2.group(3) == None and match_1.group(1) == "percentage_":
             return True
         return False
 
     def _is_exemplification(self, fact1, fact2):
         """
-        Should check, whether fact1 is an exemplification of fact 2. This type doesn't exist at the moment, so
+        Should check, whether fact2 is an exemplification of fact1. This type doesn't exist at the moment, so
         will always return False
         :param fact1:
         :param fact2:

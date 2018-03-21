@@ -17,14 +17,20 @@ vocabulary = {
     "fi": {
         "default_combiner": "ja",
         "inverse_combiner": "mutta",
+        "subord_clause_start": ", mikä on",
+        "comparator": "kuin",
     },
     "en": {
         "default_combiner": "and",
         "inverse_combiner": "but",
+        "subord_clause_start": ", which is",
+        "comparator": "than",
     },
     "sv": {
         "default_combiner": "och",
         "inverse_combiner": "men",
+        "subord_clause_start": ", som är",
+        "comparator": "än",
     },
 }
 

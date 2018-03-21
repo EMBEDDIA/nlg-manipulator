@@ -176,7 +176,7 @@ class Slot(TemplateComponent):
     requirements.
     """
 
-    def __init__(self, to_value, attributes=None):
+    def __init__(self, to_value, attributes=None, fact=None):
         """
         :param to_value: A callable that defines how to transform the message
             that fills this slot into a textual representation.
@@ -184,7 +184,7 @@ class Slot(TemplateComponent):
 
         self.attributes = attributes or {}
         self._to_value = to_value
-        self._fact = None
+        self._fact = fact
         self._slot_type = self._to_value.field_name
 
     @property

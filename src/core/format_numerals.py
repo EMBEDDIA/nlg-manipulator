@@ -63,11 +63,18 @@ class NumeralFormatter(NLGPipelineComponent):
 
     def _realize_value(self, slot):
         try:
-            num_type = slot.attributes.get('num_type')
+            slot_suffix = slot.slot_type[-2:]
+            what_type = getattr(slot.fact, 'what_type' + slot_suffix)
+            if 'rank' in what_type:
+                slot.attributes['num_type'] = 'ordinal'
+                num_type = 'ordinal'
+            elif what_type not in ['party', 'election_result', 'is_councillor', 'is_mep', 'is_mp']:
+                slot.attributes['num_type'] = 'cardinal'
+                num_type = 'cardinal'
             value = slot.value
             if type(value) is str:
                 return None
-            modified_value = self._formatter.numerals.get(num_type, self._default_numeral)(value)
+            modified_value = self._formatter.numerals.get(num_type, self._default_numeral)(abs(value))
             slot.value = lambda x: modified_value
         except AttributeError:
             log.error("Error in value realization of slot {}".format(slot))

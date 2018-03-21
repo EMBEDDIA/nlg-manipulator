@@ -1,5 +1,5 @@
 class SlotSource(object):
-    """ Source of the value to be passed through filters """
+    """ Source of the slot value """
     def __call__(self, message):
         raise NotImplementedError("abstract slot source")
 
@@ -27,17 +27,17 @@ class LiteralSource(SlotSource):
         return '"{}"'.format(self.value)
 
 
-class WhereValue(SlotSource):
+class EntitySource(SlotSource):
     """
-    Special type of SlotSource for where values.
-
+    Special type of SlotSource for named entities.
     """
-    # ToDo: replace this with an ordinary FactFieldSource and do the Entity marking elsewhere
+    # ToDo: replace this with an ordinary FactFieldSource and do the Entity marking elsewhere?
     def __init__(self, field_name):
         self.field_name = field_name
 
     def __call__(self, message):
-        return "[ENTITY:{}:{}]".format(getattr(message, 'where_type' + self.field_name[-2:]), getattr(message, self.field_name))
+        return "[ENTITY:{}:{}]".format(getattr(message, self.field_name[:-2] + '_type' + self.field_name[-2:]),
+                                       getattr(message, self.field_name))
 
     def __str__(self):
         return "fact.{}".format(self.field_name)

@@ -42,7 +42,7 @@ import logging
 from core.template import Literal, Template, Slot
 from templates import FACT_FIELDS, FACT_FIELD_MAP, LOCATION_TYPE_MAP
 from templates.matchers import OPERATORS, Matcher, FactField, ReferentialExpr
-from templates.substitutions import WhereValue, FactFieldSource, LiteralSource
+from templates.substitutions import FactFieldSource, LiteralSource, EntitySource
 
 log = logging.getLogger('root')
 
@@ -276,7 +276,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                                                        "rules".format(subst, rule_ref+1, len(rules)))
 
                     attributes = {}
-                    # Read each of the attribute specializations
+                    # Read each of the attribute specifications
                     for subst_part in subst_parts[1:]:
                         if "=" in subst_part:
                             # Attributes specify things like case, to be used in realisation
@@ -287,20 +287,12 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                                 "Found an attribute with no value specified. Possibly a leftover old style filter? {}".format(subst_part)
                             )
 
-                    # Generally (for the time being at least), we don't want to apply filters to who or where, since
-                    #  these produce special strings representing the entities, not any old string
                     if field_name[0] in ["'", '"']:
                         to_value = LiteralSource(field_name[1:-1])
                     elif field_name[:-2] == 'where':
-                        to_value = WhereValue(field_name)
+                        to_value = EntitySource(field_name)
                     else:
                         to_value = FactFieldSource(field_name)
-                    if field_name[:-2] == 'what':
-                        # Set the correct format for numeral values based on the what_type
-                        if "rank" in seen_what_types[rule_ref]:
-                            attributes["num_type"] = "ordinal"
-                        elif seen_what_types[rule_ref] not in ["party", "election_result", "is_councillor", "is_mep", "is_mp"]:
-                            attributes["num_type"] = "cardinal"
 
                     # Postprocess attributes
                     attributes = process_attributes(attributes)
@@ -350,14 +342,14 @@ def parse_matcher_expr(constraint_line):
 
         # For certain fields, we only allow string values and limit them to a given set
         # We also map them from a set of alternatives onto a canonical form
-        if lhs.field_name in ["where_type_1", "where_type_2"]:
+        if lhs.field_name[:-2] == 'where_type':
             try:
                 value = LOCATION_TYPE_MAP[value]
             except KeyError:
                 raise TemplateReadingError("unknown where_type '{}'. Expected one of: {}".format(
                     value, ", ".join("'{}'".format(v) for v in LOCATION_TYPE_MAP.keys())
                 ))
-        elif lhs.field_name not in ["what_type_1", "what_type_2"]:
+        elif lhs.field_name[:-2] != 'what_type':
             # Don't do RHS parsing for what_type
             # Special case: value references another fact???
             matches = referential_value_re.match(value)
