@@ -185,7 +185,7 @@ class Slot(TemplateComponent):
         self.attributes = attributes or {}
         self._to_value = to_value
         self._fact = None
-        self._slot_type = self._to_value.source.field_name
+        self._slot_type = self._to_value.field_name
 
     @property
     def slot_type(self):
