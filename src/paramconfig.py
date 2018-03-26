@@ -32,6 +32,3 @@ stats_empty = 1
 #regarding outlyingness value
 value_out_score = 0.01 # if what_value = Q2
 out_zero_score = 1 # if q3 and q1 are equal
-
-#giving the percentage_votes_rank and the percentage_votes_change_rank facts a very low importance
-low_importance = 0.0001 # Is this still need for crime data?

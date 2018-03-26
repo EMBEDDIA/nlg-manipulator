@@ -22,33 +22,38 @@ class MessageGenerator(NLGPipelineComponent):
     column that row, and the 'what_type' is defined by the title of that column.
     """
 
-    def run(self, registry, random, language, datastore, where_query, where_type_query, when_query=None, when_type_query="year", ignored_cols=None):
-        log.info("Generating messages with where={}, where_type={}, when={}, when_type={}".format(
-            where_query, where_type_query, when_query, when_type_query))
+    def run(self, registry, random, language, datastore, where_query, where_type_query, when1_query=None, when2_query=None, when_type_query="year", ignored_cols=None):
+        log.info("Generating messages with where={}, where_type={}, when1={}, when2={}, when_type={}".format(
+            where_query, where_type_query, when1_query, when2_query, when_type_query))
 
         if ignored_cols is None:
             ignored_cols = []
 
         query = []
         if where_query:
-            query.append("where={!r}".format(where_query))
+            query.append("where=={!r}".format(where_query))
 
         if where_type_query:
             query.append("where_type=={!r}".format(where_type_query))
         
-        if when_query:
-            query.append("when=={!r}".format(when_query))
+        if when1_query:
+            query.append("when1=={!r}".format(when_query))
+
+        if when2_query:
+            query.append("when2=={!r}".format(when_query))
 
         if when_type_query:
             query.append("when_type=={!r}".format(when_type_query))
 
+        query = " and ".join(query)
+        log.debug('Query: "{}"'.format(query))
         df = datastore.query(query)
         
         messages = []
         col_names = [
             col_name for col_name in df 
             if not (
-                col_name in ["where", "when", "where_type", "when_type"]
+                col_name in ["where", "when1", "when2", "where_type", "when_type"]
                 or col_name in ignored_cols 
                 or "_outlierness" in col_name
             )
@@ -71,7 +76,8 @@ class MessageGenerator(NLGPipelineComponent):
             what_type_1 = what_type_2 = col_name
             what_1 = what_2 = row[col_name]
             # When value need to be reset for each loop because they may be changed within the loop
-            when_1 = when_2 = row['when']
+            when_1 = row['when1'] if 'when1' in row else None
+            when_2 = row['when2']
 
             outlierness_col_name = col_name + "_outlierness"
             outlierness = row.get(outlierness_col_name, None)
@@ -79,9 +85,6 @@ class MessageGenerator(NLGPipelineComponent):
             if what_2 is None or what_2 == "" or (isinstance(what_2, float) and isnan(what_2)):
                 # 'what' is effectively undefined, do not REALLY generate the message.
                 continue
-
-            if "change" in what_type_2 and when_2 == 2017:
-                when_1 = 2012
 
             if callable(importance_coefficient):
                 # Allow the importance coefficient to be a function that computes the weight from the field vals

@@ -4,25 +4,20 @@ import os
 import pickle
 import urllib
 from random import randint
-from zipfile import ZipFile
 import pandas as pd
-
-from locations import LocationHierarchy
 
 log = logging.getLogger('root')
 
 from core import Registry, NLGPipeline, DataFrameStore
-from moj_election_data_importer import Importer as MOJImporter
-from municipal_election_message_generator import MunicipalElectionMessageGenerator, NoMessagesForSelectionException
+from crime_message_generator import CrimeMessageGenerator, NoMessagesForSelectionException
 from core import BodyDocumentPlanner, HeadlineDocumentPlanner
 from templates.read_multiling import read_templates_file
 from core import NumeralFormatter
 from core import TemplateSelector
 from core import Aggregator
-from municipal_election_named_entity_resolver import MunicipalElectionEntityNameResolver
+from crime_named_entity_resolver import CrimeEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
-from municipal_election_party_names import party_names
-from municipal_election_importance_allocator import MunicipalElectionImportanceSelector
+from crime_importance_allocator import CrimeImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 
 
@@ -41,21 +36,20 @@ class CrimeNlgService(object):
         self.registry = Registry()
 
         # Load crime stats
-        crime_cache = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/crime_data.cache'))
+        crime_cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/crime_data.cache'))
         compute = None
-        if force_cache_refresh or not os.path.exists(crime_cache):
-            if not os.path.exists('../data/pyn_y12_comparison_ranks_outliers.csv'):
+        if force_cache_refresh or not os.path.exists(crime_cache_path):
+            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/pyn_crime_y12_comparison_ranks_outliers.csv'))
+            if not os.path.exists(csv_path):
+                log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
                 from fetch_crime_data import run as fetch_data
                 fetch_data()
-            compute = lambda _ : pd.DataFrame.from_csv('../data/pyn_y12_comparison_ranks_outliers.csv')
+            compute = lambda: pd.DataFrame.from_csv(csv_path)
         
         self.registry.register('crime-data', DataFrameStore(
-            moj_data_cache,
-            'crime_data',
+            crime_cache_path,
             compute=compute
         ))
-
-        print(self.registry.get('crime-data'))
 
         # Templates
         self.registry.register('templates', 
@@ -76,13 +70,13 @@ class CrimeNlgService(object):
         def _get_components(headline=False):
             # Put together the list of components
             # This varies depending on whether it's for headlines and whether we're using Omorphi
-            yield MunicipalElectionMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
-            yield MunicipalElectionImportanceSelector()
+            yield CrimeMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
+            yield CrimeImportanceSelector()
             yield HeadlineDocumentPlanner() if headline else BodyDocumentPlanner()
             yield TemplateSelector()
             yield Aggregator()
             yield NumeralFormatter()
-            yield MunicipalElectionEntityNameResolver()
+            yield CrimeEntityNameResolver()
             if not nomorphi:
                 # Don't even try importing Omorphi if we're not using it
                 from omorfi_generator import OmorfiGenerator
@@ -115,11 +109,11 @@ class CrimeNlgService(object):
         log.info('Loading templates')
         return read_templates_file(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates", "main.txt")))
 
-    def run_pipeline(self, language, who, who_type, where, where_type):
-        log.info("Running Body NLG pipeline: language={}, who={}, who_type={}, where={}, where_type={}".format(language, who, who_type, where, where_type))
+    def run_pipeline(self, language, where, where_type):
+        log.info("Running Body NLG pipeline: language={}, where={}, where_type={}".format(language, where, where_type))
         try:
             body = self.body_pipeline.run(
-                (who, who_type, where, where_type),
+                (where, where_type),
                 language,
                 prng_seed=self.registry.get('seed'),
             )[0]
@@ -135,7 +129,7 @@ class CrimeNlgService(object):
         try:
             headline_lang = "{}-head".format(language)
             headline = self.headline_pipeline.run(
-                (who, who_type, where, where_type),
+                (where, where_type),
                 headline_lang,
                 prng_seed=self.registry.get('seed'),
             )[0]
@@ -157,3 +151,16 @@ class CrimeNlgService(object):
 
     def get_languages(self):
         return list(self.registry.get('templates').keys())
+
+if __name__ == "__main__":
+    # Logging
+    import logging
+    formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(message)s')
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    log = logging.getLogger('root')
+    log.setLevel(logging.DEBUG)
+    log.addHandler(handler)
+
+    # Run
+    CrimeNlgService().run_pipeline('fi', 'Akaa', 'M')

@@ -1,0 +1,3 @@
+fi: {where_2, case=ssa}, muuttujan {what_type_2} arvo on {what_2} aikavälillä {when_1} - {when_2}
+en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+| where_type_2 = M

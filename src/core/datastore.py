@@ -2,7 +2,8 @@ import gzip
 import pickle
 import re
 from pandas import HDFStore as PandasHDFStore
-
+import logging
+log = logging.getLogger('root')
 
 class DataStore(object):
     pass
@@ -13,14 +14,18 @@ class DataFrameStore(DataStore):
     def __init__(self, path, compute=None):
         self.path = path
         if compute:
+            log.info('Computing contents for DataFrame at {}'.format(path))
             self.save(compute())
         with gzip.open(self.path, 'rb') as f:
+            log.debug('Loading DataFrame from {}'.format(path))
             self.dataframe = pickle.load(f)
  
     def query(self, query):
+        log.debug('Running query "{}" against DataFrame at {}'.format(query, self.path))
         return self.dataframe.query(query)
 
     def save(self, dataframe):
+        log.debug('Storing DataFrame at {}'.format(self.path))
         with gzip.open(self.path, 'wb') as f:
             pickle.dump(dataframe, f)
             

@@ -88,7 +88,7 @@ class FinnishNumeralFormatter():
     def _unit_base(self, slot):
         match = self.value_type_re.match(slot.value)
         unit = match.group(2)
-        new_value = self.UNITS[unit]['sg']
+        new_value = self.UNITS.get(unit, {}).get('sg', unit)
         return self._unit_set_value(slot, new_value)
 
     def _unit_percentage(self, slot):
@@ -181,13 +181,13 @@ class FinnishNumeralFormatter():
                 prev_slot.attributes['case'] = 'nominative'
 
     def _ordinal(self, token):
-        token = "{:n}".format(token)
+        token = "{}".format(token)
         if token in self.SMALL_ORDINALS:
             return self.SMALL_ORDINALS[token]
         return token + "."
 
     def _cardinal(self, token):
-        token_str = "{:n}".format(token)
+        token_str = "{}".format(token)
         if "." in token_str:
             token_str = re.sub(r'(\d+).(\d+)', r'\1,\2', token_str)
         if token_str in self.SMALL_CARDINALS:

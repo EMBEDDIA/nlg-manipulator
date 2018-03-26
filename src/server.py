@@ -22,7 +22,7 @@ formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 log = logging.getLogger('root')
-log.setLevel(logging.ERROR)
+log.setLevel(logging.DEBUG)
 log.addHandler(handler)
 
 # Bottle
@@ -52,9 +52,19 @@ def get_article(language, where, where_type):
 def index():
     redirect('/random')
 
-@app.route('/api')
+@app.get('/api')
+@allow_cors
 def api_index():
     redirect('/api/random')
+
+@app.get('/api/')
+@allow_cors
+def api_index_slash():
+    redirect('/api/random')
+
+@app.get('/news/')
+def news_html_slash():
+    redirect('/news')
 
 @app.get('/news')
 @view('news-article')
@@ -103,13 +113,10 @@ def news_api():
 
 def random_news():
     language = request.query.language or "fi"
-    geodata = service.registry.get('geodata-lookup')
-    options = list(geodata.get(language, geodata["fi"])["M"].keys())
-    m = random.choice(options)
 
-    header, body = get_article(language, None, None, m, "M")
+    header, body = get_article(language, "Akaa", "M")
     return dict({
-        "where": m,
+        "where": "Akaa",
         "where_type": "M",
         "language": language,
         "header": header,
@@ -127,7 +134,7 @@ def random_news_api():
     return random_news()
 
 def main():
-    log.info("Starting with options port={}, redis={}".format(args.port, args.redis))
+    log.info("Starting with options port={}".format(args.port))
     run(app, server='meinheld', host='0.0.0.0', port=args.port)
     log.info("Stopping")
 
