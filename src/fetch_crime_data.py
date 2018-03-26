@@ -15,10 +15,12 @@ def run():
     wanted_px = [px for px in all_px if 'statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_003.px' in str(px)]
 
     # Download the data
-    download_px(wanted_px)
+    download_px(wanted_px, target_dir='..')
+
+    print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
 
     # Store and store population data
-    df = Px('database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px', language='en').pd_dataframe()
+    df = Px('../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px', language='en').pd_dataframe()
     df = flatten(df)
     df = pythonify_column_names(df)
     df.rename(columns={
@@ -28,15 +30,17 @@ def run():
         , inplace=True)
     df = df[['when', 'where', 'population']]
     df.replace(['"-"', '".."'], 0, inplace=True)
-    df.to_csv('population.csv')
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv'))
 
     # flatten and store crime statistics
-    df = Px("database/StatFin/oik/rpk/statfin_rpk_pxt_001.px", language='en').pd_dataframe().transpose()
+    df = Px("../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px", language='en').pd_dataframe().transpose()
     df = flatten(df, stacked_cols=[0])
     df = pythonify_column_names(df)
     df.rename(columns={'level_0': 'when', 'level_1': 'where'}, inplace=True)
     df.replace(['"-"', '".."'], 0, inplace=True)
-    df.to_csv('crime.csv')
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/crime.csv'))
+
+    print(os.path.join(os.path.dirname(__file__), '../data/crime.csv'))
 
     print('Converter')
     ConverterC()
@@ -66,12 +70,12 @@ class ImporterC:
         self.cdc = self._add_ranks_to_comparison_data(self.cdc, self.cdc_interesting_columns)
         self.cdc = self._add_outlierness_to_comparison_data(self.cdc, self.cdc_interesting_columns, self.cdc_id_columns)
         self.cdc = self._sort_columns(self.cdc, self.cdc_id_columns)
-        self.cdc.to_csv(prefix + "pyn_crime_y12_comparison_ranks_outliers.csv", index=False)
+        self.cdc.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "pyn_crime_y12_comparison_ranks_outliers.csv"), index=False)
         #'''
 
     def _load_data(self, prefix):
-        self.crime_data = pd.read_csv(prefix + "pyn_crime.csv")
-        self.comparison_data = pd.read_csv(prefix + "pyn_crime_y12_comparison.csv")
+        self.crime_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "pyn_crime.csv"))
+        self.comparison_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' +prefix + "pyn_crime_y12_comparison.csv"))
         self.crime_data = self._add_year_stamp(self.crime_data, 'when')
 
         self.cd = self.crime_data
@@ -374,8 +378,8 @@ class ConverterC:
             prefix = ""
         time_read_files = timer()
 
-        self.crime_data = pd.read_csv(prefix + "crime.csv")
-        self.population_data = pd.read_csv("population.csv")
+        self.crime_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "crime.csv"))
+        self.population_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "population.csv"))
 
         time_cleaning = timer()
 
@@ -405,7 +409,7 @@ class ConverterC:
         self._add_normalized_crime_numbers()
         self._reorder_crime_data_columns()
         self.crime_data.sort_values(by=['where', 'when'], ascending=[True, True], inplace=True)
-        self.crime_data.to_csv(prefix + "pyn_crime.csv", index=False)
+        self.crime_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "pyn_crime.csv"), index=False)
         #'''
 
         '''Read this if not making new crime data
@@ -418,7 +422,7 @@ class ConverterC:
         self._make_comparison_data1()
         self._reorder_comparison_data()
         self.crime_change_data.sort_values(by=['where', 'when1', 'when2'], ascending=[True, True, True], inplace=True)
-        self.crime_change_data.to_csv(prefix + 'pyn_crime_y12_comparison.csv', index=False)
+        self.crime_change_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + 'pyn_crime_y12_comparison.csv'), index=False)
         #'''
 
         time_comparison2 = timer()

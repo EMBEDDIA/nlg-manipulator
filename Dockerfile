@@ -58,4 +58,4 @@ RUN chmod a+rxw -R /app
 RUN adduser --disabled-password myuser
 USER myuser
 
-CMD python3 /app/src/server.py $PORT --redis
+CMD python3 /app/src/server.py $PORT
