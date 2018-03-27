@@ -133,6 +133,11 @@ def random_news_html():
 def random_news_api():
     return random_news()
 
+@app.route('/static/<filename:path>')
+@allow_cors
+def serve_static(filename="index.html"):
+    return static_file(filename, root=static_root)
+
 def main():
     log.info("Starting with options port={}".format(args.port))
     run(app, server='meinheld', host='0.0.0.0', port=args.port)
