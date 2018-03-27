@@ -24,6 +24,9 @@ class DataFrameStore(DataStore):
         log.debug('Running query "{}" against DataFrame at {}'.format(query, self.path))
         return self.dataframe.query(query)
 
+    def all(self):
+        return self.dataframe
+
     def save(self, dataframe):
         log.debug('Storing DataFrame at {}'.format(self.path))
         with gzip.open(self.path, 'wb') as f:

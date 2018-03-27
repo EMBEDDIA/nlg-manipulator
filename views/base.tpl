@@ -53,33 +53,11 @@
             </div>
             <div class="row">
               <div class="col s12">
-                <select id="entity-search" name="entity" placeholder="Ehdokas / Puolue"></select>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col s12">
                 <select id="language-select" name="language" placeholder="Language"></select>
               </div>
             </div>
-
             <div class="row">
-              <div class="col s12">
-                <a class="left waves-effect waves-light-blue blue btn disabled" id="geolocate">
-                  <div id="geo-wait" class="preloader-wrapper small active hide" style="width: 24px; height: 24px; position:relative; top: 6px;">
-                    <div class="spinner-layer spinner-blue-only">
-                      <div class="circle-clipper left">
-                        <div class="circle"></div>
-                      </div><div class="gap-patch">
-                        <div class="circle"></div>
-                      </div><div class="circle-clipper right">
-                        <div class="circle"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <i id="geo-icon" class="material-icons left">room</i>
-                  Paikanna
-                </a>
-                
+              <div class="col s12">               
                 <button class="right btn waves-effect waves-light-blue blue" type="submit" name="action">
                   Lue
                   <i class="material-icons right">send</i>
@@ -166,60 +144,20 @@
                       value: languages[i]
                     });
                 }
-
                 languageSelectize = $('#language-select').selectize({
                     options: selectables,
                     items: ['{{language}}'],
                     closeAfterSelect: true,
                 })[0].selectize;
             });
-
-            var entitySelectize = $('#entity-search').selectize({
-              options: [{
-                text: 'Kaikki alueen puolueet ja ehdokkaat',
-                value: 'no-selection'
-              }],
-              items: ['no-selection'],
-              closeAfterSelect: true,
-            })[0].selectize;
                 
             var locationSelectize;
-
-            function updateEntitySelections(value) {
-              url = 'api/entities?language={{language}}&l=' + value;
-              $.getJSON(url, function(response) {
-                options = [{
-                  text: 'Kaikki alueen puolueet ja ehdokkaat',
-                  value: 'Nno-entity'
-                }];
-                for (var id in response.parties) {
-                  options.push({
-                    text: response.parties[id].full,
-                    value: 'P'+id
-                  });
-                };
-                for (var candidate in response.candidates) {
-                  options.push({
-                    text: response.candidates[candidate].full,
-                    value: 'C'+candidate
-                  });
-                };
-                console.log('')
-                entitySelectize.clearOptions();
-                entitySelectize.addOption(options);
-                entitySelectize.refreshOptions(false);
-                entitySelectize.clear();
-                entitySelectize.addItem(['Nno-entity']);
-              });
-            }
-
             $.getJSON('api/geodata?language={{language}}', function(rawdata) {
                 data = rawdata.data;
                 geo_autocomplete = [{text:data["fi"].name, value:"Cfi"}];
                 for (var id in data["fi"].children) {
                     rec_add(geo_autocomplete, data["fi"].children[id], data["fi"].name);
                 }
-
                 locationSelectize = $('#location-search').selectize({
                     options: geo_autocomplete,
                     items: ['{{where_type}}{{where}}'],
@@ -228,8 +166,7 @@
                       updateEntitySelections(value);
                     }
                 })[0].selectize;
-                
-                updateEntitySelections('{{where_type}}{{where}}');
+
                 $('#search-wait').addClass('hide');
                 $('#search').removeClass('hide');
             });

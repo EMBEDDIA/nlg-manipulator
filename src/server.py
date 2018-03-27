@@ -49,8 +49,14 @@ def get_article(language, where, where_type):
     return service.run_pipeline(language, where, where_type)
 
 @app.route('/')
+@view('index')
 def index():
-    redirect('/random')
+    return {}
+
+@app.route('/tietosuoja')
+@view('tietosuoja')
+def tietosuoja():
+    return {}
 
 @app.get('/api')
 @allow_cors
@@ -61,6 +67,22 @@ def api_index():
 @allow_cors
 def api_index_slash():
     redirect('/api/random')
+
+@app.post('/news')
+def news_html_search():
+    language = request.forms.get('language')
+    if not language:
+        language = "fi"
+
+    location = request.forms.get('location')
+    if not location:
+        where_type = 'C'
+        where = 'fi'
+    else:
+        where_type = location[0]
+        where = location[1:]
+
+    redirect('/news?language={}&where={}&where_type={}'.format(language, where, where_type))
 
 @app.get('/news/')
 def news_html_slash():
@@ -142,6 +164,12 @@ def serve_static(filename="index.html"):
 @allow_cors
 def get_languages():
     return {"languages": ["fi", "en"]}
+
+@app.route('/api/geodata')
+@allow_cors
+def get_geodata():
+    language = request.query.language or "fi"
+    return {"data": service.get_geodata(language)}
 
 def main():
     log.info("Starting with options port={}".format(args.port))

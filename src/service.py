@@ -19,6 +19,7 @@ from crime_named_entity_resolver import CrimeEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from crime_importance_allocator import CrimeImportanceSelector
 from language_constants import pronouns, vocabulary, errors
+from locations import LocationHierarchy
 
 
 class CrimeNlgService(object):
@@ -63,6 +64,17 @@ class CrimeNlgService(object):
         # Language metadata
         self.registry.register('pronouns', pronouns)
         self.registry.register('vocabulary', vocabulary)
+
+
+        # Geodata
+        # Location names (hierarchy, localized names)
+        geodata, geodata_lookup, geodata_index = self._get_cached_or_compute(
+                '../data/geodata.cache', 
+                self._generate_geographic_information,
+                force_cache_refresh=force_cache_refresh)
+        self.registry.register('geodata', geodata)
+        self.registry.register('geodata-lookup', geodata_lookup)
+        self.registry.register('geodata-hierarchy', geodata_index)
 
         # PRNG seed
         self._set_seed(seed_val=random_seed)
@@ -109,6 +121,9 @@ class CrimeNlgService(object):
         log.info('Loading templates')
         return read_templates_file(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates", "main.txt")))
 
+    def _load_geodata(self):
+        return list(self.registry.get('crime-data').all()['where'].unique())
+
     def run_pipeline(self, language, where, where_type):
         log.info("Running Body NLG pipeline: language={}, where={}, where_type={}".format(language, where, where_type))
         try:
@@ -151,6 +166,57 @@ class CrimeNlgService(object):
 
     def get_languages(self):
         return list(self.registry.get('templates').keys())
+
+    def _generate_geographic_information(self):
+        geodata = {}
+        geodata_lookup = {}
+        geodata_index = {}
+        for language, area_name, country_name in [
+                ("fi", "area_name_fi", "Suomi"),
+                ("sv", "area_name_sv", "Finland"),
+                ("en","area_name_fi", "Finland")]:
+            if language not in self.registry.get('templates').keys():
+                continue
+            log.info("Generating geographic information for language {}".format(language))
+            this_geodata, this_geodata_lookup = self._generate_geographic_information_for_language(area_name, country_name)
+            geodata[language] = this_geodata
+            geodata_lookup[language] = this_geodata_lookup
+
+            # Now we've got the geodata, pre-compute an index so we can easily look things up in the hierarchy
+            geodata_index[language] = LocationHierarchy(this_geodata["fi"])
+
+            return geodata, geodata_lookup, geodata_index
+
+    def _generate_geographic_information_for_language(self, name_field, country_name):
+        geodata = {}
+        geodata_lookup = {
+            'C': {},
+            'M': {},
+        }
+
+        geodata["fi"] = {
+            "name": country_name,
+            "id": "FI",
+            "type": "C",
+            "children": {},
+        }
+        geodata_lookup["C"]["FI"] = country_name
+    
+        municipalities = self.registry.get('crime-data').query('where_type == "M"')['where'].unique()
+        geodata["fi"]["children"] = {m: {
+                "name": m, 
+                "id": m,
+                "type": "M",
+                "children": {}
+            } for m in municipalities
+        }
+        geodata_lookup["M"] = {m:m for m in municipalities}
+        return geodata, geodata_lookup
+
+    def get_geodata(self, language):
+        geodata = self.registry.get('geodata')
+        return geodata.get(language, geodata["fi"])
+
 
 if __name__ == "__main__":
     # Logging
