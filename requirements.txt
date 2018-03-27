@@ -1,8 +1,4 @@
 bottle==0.12.13
-httplib2==0.10.3
 meinheld==0.6.1
-numexpr==2.6.2
 numpy==1.13.1
 pandas==0.20.2
-redis==2.10.5
-tables==3.4.2
