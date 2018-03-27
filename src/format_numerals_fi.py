@@ -54,10 +54,23 @@ class FinnishNumeralFormatter():
         'votes': {
             'sg': "ääni",
             'pl': "äänet"
+        },
+        '1_offences_and_infractions_total_all_offences':{
+            'sg': "rikos", #ToDo: this is not the correct name, fix
+            'pl': "rikokset"
+        },
+        '4_endangerment_of_traffic_safety_hitandrun_traffic_infraction_all_offences':{
+            'sg': "liikennerikos", #ToDo: this is not the correct name, fix
+            'pl': "liikennerikokset"
+        },
+        'traffic_infraction_violation_of_social_welfare_legislation_on_road_traffic_all_offences':{
+            'sg': "liikennerikos", #ToDo: this is not the correct name, fix
+            'pl': "liikennerikokset"
         }
     }
 
-    value_type_re = re.compile(r'(percentage_|total_)?([a-z]+)(_change)?(_rank(_reverse)?)?')
+    value_type_re = re.compile(
+        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
 
     def __init__(self):
 
@@ -87,12 +100,15 @@ class FinnishNumeralFormatter():
 
     def _unit_base(self, slot):
         match = self.value_type_re.match(slot.value)
-        unit = match.group(2)
+        unit = match.group(1)
         new_value = self.UNITS.get(unit, {}).get('sg', unit)
         return self._unit_set_value(slot, new_value)
 
     def _unit_percentage(self, slot):
+        # The capture groups are:
+        # (unit)(normalized)(percentage)(change)(rank)
         match = self.value_type_re.match(slot.value)
+        unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -100,7 +116,7 @@ class FinnishNumeralFormatter():
         idx += 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        new_slot = LiteralSlot(self.UNITS[match.group(2)]['pl'])
+        new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
         new_slot.attributes['case'] = 'elative'
         template.add_component(idx, new_slot)
         idx += 1
@@ -108,11 +124,14 @@ class FinnishNumeralFormatter():
         return added_slots
 
     def _unit_change(self, slot):
+        # The capture groups are:
+        # (unit)(normalized)(percentage)(change)(rank)
         match = self.value_type_re.match(slot.value)
+        unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
         # If the value_type starts with percentage_ or total_
-        if match.group(1) and match.group(1) == 'percentage_':
+        if match.group(3):
             added_slots = self._unit_set_value(slot, "prosenttiyksikkö")
         else:
             added_slots = self._unit_base(slot)
@@ -126,8 +145,8 @@ class FinnishNumeralFormatter():
         added_slots += 1
         idx += 1
         # For the percentage values we also need to realize the original unit
-        if match.group(1) == 'percentage_':
-            new_slot = LiteralSlot(self.UNITS[match.group(2)]['pl'])
+        if match.group(3):
+            new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
             new_slot.attributes['case'] = 'partitive'
             template.add_component(idx, new_slot)
             added_slots += 1
@@ -135,7 +154,10 @@ class FinnishNumeralFormatter():
         return added_slots
 
     def _unit_rank(self, slot):
+        # The capture groups are:
+        # (unit)(normalized)(percentage)(change)(rank)
         match = self.value_type_re.match(slot.value)
+        unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -153,7 +175,7 @@ class FinnishNumeralFormatter():
         # ToDo: This is still not finished, probably needs more stuff to work properly in all cases.
         slot.value = lambda x: "eniten"
         idx += 1
-        new_slot = LiteralSlot(self.UNITS[match.group(2)]['pl'])
+        new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
         new_slot.attributes['case'] = 'partitive'
         template.add_component(idx, new_slot)
         added_slots += 1
