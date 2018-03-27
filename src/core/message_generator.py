@@ -37,10 +37,10 @@ class MessageGenerator(NLGPipelineComponent):
             query.append("where_type=={!r}".format(where_type_query))
         
         if when1_query:
-            query.append("when1=={!r}".format(when_query))
+            query.append("when1=={!r}".format(when1_query))
 
         if when2_query:
-            query.append("when2=={!r}".format(when_query))
+            query.append("when2=={!r}".format(when2_query))
 
         if when_type_query:
             query.append("when_type=={!r}".format(when_type_query))
