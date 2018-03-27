@@ -138,6 +138,11 @@ def random_news_api():
 def serve_static(filename="index.html"):
     return static_file(filename, root=static_root)
 
+@app.route('/api/languages')
+@allow_cors
+def get_languages():
+    return {"languages": ["fi", "en"]}
+
 def main():
     log.info("Starting with options port={}".format(args.port))
     run(app, server='meinheld', host='0.0.0.0', port=args.port)
