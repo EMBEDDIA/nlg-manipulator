@@ -48,7 +48,7 @@ class NumeralFormatter(NLGPipelineComponent):
             log.debug("Visiting leaf {}".format(this))
             try:
                 slot_type = this.slot_type
-            except (AttributeError):
+            except AttributeError:
                 log.info("Got an AttributeError when checking slot_type in format_numerals. Probably not a slot.")
                 slot_type = 'n/a'
             if slot_type[:-2] == 'what':
@@ -84,10 +84,10 @@ class NumeralFormatter(NLGPipelineComponent):
         value_type_re = re.compile(r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
         match = value_type_re.match(slot.value)
         try:
-            if match.group(5):
-                new_slots = self._formatter.units.get('rank', self._default_unit)(slot)
-            elif match.group(4):
+            if match.group(4):
                 new_slots = self._formatter.units.get('change', self._default_unit)(slot)
+            elif match.group(6):
+                new_slots = self._formatter.units.get('rank', self._default_unit)(slot)
             elif match.group(3):
                 new_slots = self._formatter.units.get('percentage', self._default_unit)(slot)
             else:
