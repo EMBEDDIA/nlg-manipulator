@@ -136,6 +136,12 @@ class Aggregator(NLGPipelineComponent):
             # Are completely different, are not same
             return False
 
+        try:
+            if getattr(c1.fact, c1.slot_type[:-2] + "_type" + c1.slot_type[-2:]) != getattr(c2.fact, c2.slot_type[:-2] + "_type" + c2.slot_type[-2:]):
+                return False
+        except AttributeError:
+            pass
+
         # They are apparently same, check cases
         c1_case = "no-case"
         c2_case = "no-case"
