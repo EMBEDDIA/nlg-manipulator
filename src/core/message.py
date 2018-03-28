@@ -41,6 +41,7 @@ class Message(object):
         self._score = score
         self._polarity = polarity
         self._main_fact = self._facts[0]
+        self._prevent_aggregation = False
 
     @property
     def facts(self):
@@ -49,6 +50,14 @@ class Message(object):
     @facts.setter
     def facts(self, new_facts):
         self._facts = new_facts
+
+    @property
+    def prevent_aggregation(self):
+        return self._prevent_aggregation
+
+    @prevent_aggregation.setter
+    def prevent_aggregation(self, new_value):
+        self._prevent_aggregation = new_value
 
     # Added for backwards compatibility, returns by default the primary fact for this Message.
     @property

@@ -113,6 +113,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             if message.importance_coefficient < 1.:
                 expanded_nuclei += 1
 
+            message.prevent_aggregation = True
             nuclei.append(message)
             messages = [message]
             current_location = message.fact.where_2
@@ -165,7 +166,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # ToDo: Decide how to deal with the nuclei. Can they be elaborated by something else? Can they be used to
         # elaborate less important message? At the moment they cannot be either part of an elaborate relation.
         for idx, msg in enumerate(messages):
-            if type(msg) is DocumentPlan:
+            if type(msg) is DocumentPlan or msg.prevent_aggregation:
                 continue
             rel = self._check_relation(msg, satellite)
             if rel != Relation.SEQUENCE:
