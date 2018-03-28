@@ -1,3 +1,30 @@
-fi: {where_2, case=ssa} tapahtui {what_2} {what_type_2} aikavälillä {when_1} - {when_2}
+# fi: {name} sai {value} {unit} [{place, case=ssa}]
+# fi: {name} sai {place, case=ssa} {value} {unit}
+# en: {name} got {value} {unit} [in {place}]
+# | what_type_2 in {base}, what_2 > 0, when_2 = 2017
+
+# ---Group definitions---
+
+# ${base}: total_votes, percentage_votes
+# ${change}: percentage_votes_change, seats_change, total_votes_change
+# ${vote_change}: percentage_votes_change, total_votes_change
+
+
+# Regex example:
+
+# fi: {name} sai {time} {value} {unit} [{place, case=ssa}]
+# | what_type_2 = .*_votes, what_2 > 0, when_2 = 2017
+
+
+
+fi: {where_2, case=ssa} tapahtui {what_2} {what_type_2} {when_2}
 en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
-| where_type_2 = M
+| where_type_2 = M, when_1 = when_2
+
+fi: {where_2, case=ssa} {what_2} {what_type_2} aikavälillä {when_1} - {when_2}
+en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+| where_type_2 = M, what_type_2 = .*change
+
+fi: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
+en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+| where_type_2 = M, what_type_2 = .*change_.*

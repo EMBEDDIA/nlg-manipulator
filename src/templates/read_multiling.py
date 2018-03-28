@@ -358,6 +358,8 @@ def parse_matcher_expr(constraint_line):
                 # Translate from 1-based indexing to 0-based indexing
                 idx = int(idx) - 1
                 value = ReferentialExpr(idx, field)
+            elif value in FACT_FIELD_MAP:
+                value = FactField(value)
             else:
                 # It's a normal value
                 # Allow ints and floats to be written without any special typing: just detect them
