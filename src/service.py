@@ -196,11 +196,11 @@ class CrimeNlgService(object):
 
         geodata["fi"] = {
             "name": country_name,
-            "id": "FI",
+            "id": "fi",
             "type": "C",
             "children": {},
         }
-        geodata_lookup["C"]["FI"] = country_name
+        geodata_lookup["C"]["fi"] = country_name
     
         municipalities = self.registry.get('crime-data').query('where_type == "M"')['where'].unique()
         geodata["fi"]["children"] = {m: {
