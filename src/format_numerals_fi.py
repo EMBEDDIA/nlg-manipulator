@@ -135,6 +135,10 @@ class FinnishNumeralFormatter():
             added_slots = self._unit_rank(slot)
             # Move the index to the slot before the unit
             idx += added_slots - 1
+            if match.group(2):
+                template.add_component(idx, LiteralSlot("suhteellinen"))
+                added_slots += 1
+                idx += 1
             new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
             new_slot.attributes['case'] = 'genitive'
             template.add_component(idx, new_slot)
