@@ -10,7 +10,7 @@ from urllib import request
 class StatfiReaderService(object):
 
     def __init__(self):
-        self._reader = StatfiReader()
+        self._reader = Importer()
 
     def fetch(self, *args, **kwargs):
         return self._reader.load_pretty(*args, **kwargs)
@@ -132,7 +132,7 @@ class Importer(object):
 
 
 if __name__ == "__main__":
-    reader = StatfiReader()
+    reader = Importer()
     data = reader.load_pretty(
         "Elections",
         "Municipal elections",
