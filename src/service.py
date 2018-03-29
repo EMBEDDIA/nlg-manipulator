@@ -5,6 +5,7 @@ import pickle
 import urllib
 from random import randint
 import pandas as pd
+from collections import OrderedDict
 
 log = logging.getLogger('root')
 
@@ -211,6 +212,10 @@ class CrimeNlgService(object):
             } for m in municipalities
         }
         geodata_lookup["M"] = {m:m for m in municipalities}
+
+        # Sort geodata
+        geodata['fi']['children'] = OrderedDict(sorted(geodata['fi']['children'].items(), key=lambda i: i[1]['name']))
+
         return geodata, geodata_lookup
 
     def get_geodata(self, language):
