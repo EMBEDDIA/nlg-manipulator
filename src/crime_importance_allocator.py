@@ -56,7 +56,7 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         when_score = min(1, (1 / (2019 - fact.when_2)**2))
 
         # total importance score
-        message_score = where_type_score * what_score
+        message_score = where_type_score * what_score * when_score
         # message_score = "{:.5f}".format(message_score)
 
         if "_rank" in fact.what_type_2:
