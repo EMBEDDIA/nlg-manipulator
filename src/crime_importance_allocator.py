@@ -40,7 +40,7 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         what_score = what_type_score * outlier_score
 
         # importance of time
-        when_score = 1 / (2019 - fact.when_2)
+        when_score = 1 / (2019 - fact.when_2)**2
 
         # total importance score
         message_score = where_type_score * what_score
