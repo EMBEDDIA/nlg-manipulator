@@ -76,7 +76,7 @@ class MessageGenerator(NLGPipelineComponent):
             what_type_1 = what_type_2 = col_name
             what_1 = what_2 = row[col_name]
             # When value need to be reset for each loop because they may be changed within the loop
-            when_1 = row['when1'] if 'when1' in row else None
+            when_1 = row['when1'] if (row['when1'] and not isnan(row['when1'])) else None
             when_2 = row['when2']
 
             outlierness_col_name = col_name + "_outlierness"

@@ -45,7 +45,7 @@ class CrimeNlgService(object):
                 log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
                 from fetch_crime_data import run as fetch_data
                 fetch_data()
-            compute = lambda: pd.DataFrame.from_csv(csv_path)
+            compute = lambda: pd.read_csv(csv_path, index_col=False)
         
         self.registry.register('crime-data', DataFrameStore(
             crime_cache_path,
