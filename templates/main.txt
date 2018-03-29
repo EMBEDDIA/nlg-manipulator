@@ -27,10 +27,10 @@ fi: {where_2, case=ssa} {what_2} {what_type_2} aikavälillä {when_1} - {when_2
 fi-head: {where_2, case=ssa} {what_2} {what_type_2} aikavälillä {when_1} - {when_2}
 en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
 en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
-| where_type_2 = M, what_type_2 = .*change
+| where_type_2 = M, what_type_2 = .*change, when_1 != when_2
 
 fi: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
 fi-head: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
 en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
 en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
-| where_type_2 = M, what_type_2 = .*change_.*
+| where_type_2 = M, what_type_2 = .*change_.*, when_1 != when_2
