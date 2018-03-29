@@ -10,16 +10,31 @@ Configuration file containing 'importance' constants for crime facts
 # then others that have 4 years, 2 years, and 0 years that get a score of 3, 2, and 1 respectively.
 # Source of the sentences are available here: https://www.finlex.fi/en/laki/kaannokset/1889/en18890039.pdf
 
-base_property_offences_total = 3
-base_life_offences_total = 5
-base_health_offences_total = 4
-base_sexual_crimes_total = 4
-base_authority_related_offences_total = 3
-base_traffic_offences_total = 2
-base_narcotic_offences_total = 4
-base_alcohol_offences_total = 3
-base_investigations_total = 1
-base_other_offences_total = 3
+# dictionary of parameters
+
+crime_parameters = {
+    'property': "3",
+    'life': "5",
+    'health': "4",
+    'sexual': "4",
+    'authority': "3",
+    'traffic': "2",
+    'narcotic': "4",
+    'alcohol': "3",
+    'investigations': "1",
+    'other': "3",
+}
+
+# base_property_offences_total = 3
+# base_life_offences_total = 5
+# base_health_offences_total = 4
+# base_sexual_crimes_total = 4
+# base_authority_related_offences_total = 3
+# base_traffic_offences_total = 2
+# base_narcotic_offences_total = 4
+# base_alcohol_offences_total = 3
+# base_investigations_total = 1
+# base_other_offences_total = 3
 
 comparison_change = 4
 # I am making the assumption that the comparison_change is more important in crime data than the comparison_empty,
