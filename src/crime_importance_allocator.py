@@ -34,7 +34,20 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         where_type_score = 1
 
         # importance of fact
-        what_type_score = 1
+        def get_interestingness(wht_tpe):
+            wht_tpe = wht_tpe
+
+            # Assign the parameters
+            parm_dict = pfg.crime_parameters
+
+            # Get the interestingness value
+            var = wht_tpe.split("_")[0]
+            wht_tpe_score = parm_dict[var]
+
+            return wht_tpe_score
+
+        what_type_score = get_interestingness(fact.what_type_2)
+        # what_type_score = 1
 
         # importance of value
         what_score = what_type_score * outlier_score
