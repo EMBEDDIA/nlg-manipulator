@@ -41,7 +41,7 @@ class CrimeNlgService(object):
         crime_cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/crime_data.cache'))
         compute = None
         if force_cache_refresh or not os.path.exists(crime_cache_path):
-            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/pyn_crime_y12_comparison_ranks_outliers.csv'))
+            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/crime_pyn_comp_ranks_outliers.csv'))
             if not os.path.exists(csv_path):
                 log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
                 from fetch_crime_data import run as fetch_data

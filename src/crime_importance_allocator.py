@@ -42,7 +42,8 @@ class CrimeImportanceSelector(NLGPipelineComponent):
 
             # Get the interestingness value
             var = wht_tpe.split("_")[0]
-            wht_tpe_score = parm_dict[var]
+            #wht_tpe_score = parm_dict[var]
+            wht_tpe_score = int(parm_dict.get(var, 1))
 
             return wht_tpe_score
 
