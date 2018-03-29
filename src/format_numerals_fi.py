@@ -56,12 +56,12 @@ class FinnishNumeralFormatter():
             'pl': "äänet"
         },
         '1_offences_and_infractions_total_all_offences':{
-            'sg': "rikos", #ToDo: this is not the correct name, fix
-            'pl': "rikokset"
+            'sg': "1-rikos", #ToDo: this is not the correct name, fix
+            'pl': "1-rikokset"
         },
         '4_endangerment_of_traffic_safety_hitandrun_traffic_infraction_all_offences':{
-            'sg': "liikennerikos", #ToDo: this is not the correct name, fix
-            'pl': "liikennerikokset"
+            'sg': "4-liikennerikos", #ToDo: this is not the correct name, fix
+            'pl': "4-liikennerikokset"
         },
         'traffic_infraction_violation_of_social_welfare_legislation_on_road_traffic_all_offences':{
             'sg': "liikennerikos", #ToDo: this is not the correct name, fix
@@ -130,23 +130,40 @@ class FinnishNumeralFormatter():
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
+        added_slots = 0
+        value_plus_unit_length = 2
         # If type change_rank
         if match.group(6):
-            added_slots = self._unit_rank(slot)
-            # Move the index to the slot before the unit
-            idx += added_slots - 1
-            if match.group(2):
-                template.add_component(idx, LiteralSlot("suhteellinen"))
-                added_slots += 1
-                idx += 1
-            new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
-            new_slot.attributes['case'] = 'genitive'
-            template.add_component(idx, new_slot)
+            # rikosten määrä kasvoi viidenneksi eniten
+            new_slots = self._unit_rank(slot)
+            added_slots += new_slots
+            value_plus_unit_length += new_slots
+        elif match.group(3):
+            # rikosten määrä kasvoi viisi prosenttiyksikköä
+            new_slots = self._unit_set_value(slot, "prosenttiyksikkö")
+            added_slots += new_slots
+            value_plus_unit_length += new_slots
+        else:
+            # rikosten määrä kasvoi viidellä
+            prev_slot = template.components[idx - 1]
+            prev_slot.attributes['case'] = 'adessive'
+            slot.value = lambda x: ""
+        # Move the index to the slot before the value + unit
+        idx += added_slots - 1
+        if match.group(2):
+            template.add_component(idx, LiteralSlot("suhteellinen"))
             added_slots += 1
             idx += 1
-            template.add_component(idx, LiteralSlot("määrä kasvoi"))
-            added_slots += 1
-            idx += 3
+        new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
+        new_slot.attributes['case'] = 'genitive'
+        template.add_component(idx, new_slot)
+        added_slots += 1
+        idx += 1
+        template.add_component(idx, LiteralSlot("määrä kasvoi"))
+        added_slots += 1
+        idx += 1
+        idx += value_plus_unit_length
+        if match.group(5):
             template.add_component(idx, LiteralSlot("muihin"))
             added_slots += 1
             idx += 1
@@ -158,27 +175,6 @@ class FinnishNumeralFormatter():
                 template.add_component(idx, LiteralSlot("alueisiin verrattuna"))
                 added_slots += 1
                 idx += 1
-        # If the value_type contains 'percentage'
-        elif match.group(3):
-            added_slots = self._unit_set_value(slot, "prosenttiyksikkö")
-        else:
-            added_slots = self._unit_base(slot)
-        # if slot.attributes.get('form') == 'short':
-        #     return added_slots
-        # idx += 1
-        # if slot.fact.what_2 < 0:
-        #     template.add_component(idx, LiteralSlot("vähemmän"))
-        # else:
-        #     template.add_component(idx, LiteralSlot("enemmän"))
-        # added_slots += 1
-        # idx += 1
-        # # For the percentage values we also need to realize the original unit
-        # if match.group(3):
-        #     new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
-        #     new_slot.attributes['case'] = 'partitive'
-        #     template.add_component(idx, new_slot)
-        #     added_slots += 1
-        #     idx += 1
         return added_slots
 
     def _unit_rank(self, slot):
@@ -201,7 +197,12 @@ class FinnishNumeralFormatter():
                     prev_slot.attributes['case'] = 'translative'
         # This also works for _rank_reverse, since the difference is communicated using different verbs.
         # ToDo: This is still not finished, probably needs more stuff to work properly in all cases.
-        slot.value = lambda x: "eniten"
+        if match.group(6) == "_rank":
+            slot.value = lambda x: "eniten"
+        elif match.group(6) == "_rank_reverse":
+            slot.value = lambda x: "vähiten"
+        else:
+            raise Exception("This is impossible. The regex accepts only the two options above for this group.")
         idx += 1
         # If talking about changes, we will do the rest in the change handler
         if match.group(4):
