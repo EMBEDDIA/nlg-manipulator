@@ -18,7 +18,7 @@ def run():
     download_px(wanted_px, target_dir='..')
 
     print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
-    os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'))
+    os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
 
     # Store and store population data
     df = Px('../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px', language='en').pd_dataframe()
