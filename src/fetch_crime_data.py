@@ -18,7 +18,7 @@ def run():
     download_px(wanted_px, target_dir='..')
 
     print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
-    os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'))
+    os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
 
     # Store and store population data
     df = Px('../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px', language='en').pd_dataframe()
@@ -444,8 +444,8 @@ class ConverterC:
     Rename some columns and values for convenience.
     '''
     def _rename_entries_and_columns(self):
-        self.crime_data['where'].replace(to_replace='Total', value='FI', inplace=True)
-        self.population_data['where'].replace(to_replace='WHOLE COUNTRY', value='FI', inplace=True)
+        self.crime_data['where'].replace(to_replace='Total', value='fi', inplace=True)
+        self.population_data['where'].replace(to_replace='WHOLE COUNTRY', value='fi', inplace=True)
         self.population_data['population'].replace(to_replace='..', value=np.nan, inplace=True)
 
     '''
@@ -522,7 +522,7 @@ class ConverterC:
     def _add_where_type_column(self):
         where_types = []
         for place in self.crime_data['where']:
-            if place == "FI":
+            if place == "fi":
                 where_types.append('C')
             else:
                 where_types.append('M')

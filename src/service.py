@@ -5,6 +5,7 @@ import pickle
 import urllib
 from random import randint
 import pandas as pd
+from collections import OrderedDict
 
 log = logging.getLogger('root')
 
@@ -196,11 +197,11 @@ class CrimeNlgService(object):
 
         geodata["fi"] = {
             "name": country_name,
-            "id": "FI",
+            "id": "fi",
             "type": "C",
             "children": {},
         }
-        geodata_lookup["C"]["FI"] = country_name
+        geodata_lookup["C"]["fi"] = country_name
     
         municipalities = self.registry.get('crime-data').query('where_type == "M"')['where'].unique()
         geodata["fi"]["children"] = {m: {
@@ -211,6 +212,10 @@ class CrimeNlgService(object):
             } for m in municipalities
         }
         geodata_lookup["M"] = {m:m for m in municipalities}
+
+        # Sort geodata
+        geodata['fi']['children'] = OrderedDict(sorted(geodata['fi']['children'].items(), key=lambda i: i[1]['name']))
+
         return geodata, geodata_lookup
 
     def get_geodata(self, language):

@@ -18,13 +18,19 @@
 
 
 fi: {where_2, case=ssa} tapahtui {what_2} {what_type_2} {when_2}
+fi-head: {where_2, case=ssa} tapahtui {what_2} {what_type_2} {when_2}
 en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
 | where_type_2 = M, when_1 = when_2
 
 fi: {where_2, case=ssa} {what_2} {what_type_2} aikavälillä {when_1} - {when_2}
+fi-head: {where_2, case=ssa} {what_2} {what_type_2} aikavälillä {when_1} - {when_2}
 en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
 | where_type_2 = M, what_type_2 = .*change
 
 fi: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
+fi-head: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
 en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
 | where_type_2 = M, what_type_2 = .*change_.*
