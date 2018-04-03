@@ -73,12 +73,12 @@ class NumeralFormatter(NLGPipelineComponent):
                 num_type = 'cardinal'
             value = slot.value
             if type(value) is str:
-                return None
+                return 0
             modified_value = self._formatter.numerals.get(num_type, self._default_numeral)(abs(value))
             slot.value = lambda x: modified_value
         except AttributeError:
             log.error("Error in value realization of slot {}".format(slot))
-            pass
+        return 0
 
     def _realize_unit(self, slot):
         value_type_re = re.compile(r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')

@@ -1,6 +1,8 @@
 import re
+import logging
 
 from core.template import LiteralSlot
+log = logging.getLogger('root')
 
 
 class EnglishNumeralFormatter():
@@ -44,7 +46,8 @@ class EnglishNumeralFormatter():
         }
     }
 
-    value_type_re = re.compile(r'(percentage_|total_)?([a-z]+)(_change)?(_rank(_reverse)?)?')
+    value_type_re = re.compile(
+        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
 
     def __init__(self):
 
@@ -67,65 +70,118 @@ class EnglishNumeralFormatter():
 
     def _unit_base(self, slot):
         match = self.value_type_re.match(slot.value)
-        unit = match.group(2)
+        unit = match.group(1)
         if abs(slot.fact.what_2) == 1:
-            new_value = self.UNITS[unit]['sg']
+            new_value = self.UNITS.get(unit, {}).get('sg', unit)
         else:
-            new_value = self.UNITS[unit]['pl']
+            new_value = self.UNITS.get(unit, {}).get('pl', unit)
         return self._update_slot_value(slot, new_value)
 
     def _unit_percentage_points(self, slot):
         template = slot.parent
         prev_slot = template.components[template.components.index(slot) - 1]
-        # If the previous slot contains a value, we can just append the percent sign to the value.
-        if prev_slot.slot_type == 'what_2':
+        # If the previous slot contains a value larger than 10, we can just append the percent sign to the value.
+        if prev_slot.slot_type == 'what_2' and prev_slot.fact.what_2 > 10:
             current_value = prev_slot.value
             prev_slot.value = lambda x: current_value + "%"
-            template.components.remove(slot)
-            return -1
+            # Set the slot to contain an empty string, these are ignored later.
+            return self._update_slot_value(slot, "")
         # Otherwise, use the written form
         else:
             return self._update_slot_value(slot, "percent")
 
     def _unit_percentage(self, slot):
+        # The capture groups are:
+        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.match(slot.value)
+        unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = self._unit_percentage_points(slot)
         idx += added_slots + 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        template.add_component(idx, LiteralSlot("of the " + self.UNITS[match.group(2)]['pl']))
+        template.add_component(idx, LiteralSlot("of the " + self.UNITS.get(unit, {}).get('pl', unit)))
         added_slots += 1
         idx += 1
         return added_slots
 
     def _unit_change(self, slot):
+        if slot.attributes.get('type', '') == 'comparison':
+            return self._unit_comparison(slot)
+        # The capture groups are:
+        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.match(slot.value)
+        unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
-        # If the value_type starts with percentage_ or total_
-        if match.group(1) and match.group(1) == 'percentage_':
-            added_slots = self._update_slot_value(slot, "percentage points")
-            idx += 1
+        what_slot = None
+        # Check whether the following slot contains the value
+        if template.components[idx + 1].slot_type == 'what_2':
+            what_slot = template.components[idx + 1]
         else:
-            # Note: in this case we must not increase the idx in order to have the quantifier _before_ the unit
-            # e.g. "5 more votes" instead of "5 votes more"
-            added_slots = self._unit_base(slot)
-        if slot.attributes.get('form') == 'short':
-            return added_slots
-        if slot.fact.what_2 < 0:
-            template.add_component(idx, LiteralSlot("less"))
-        else:
-            template.add_component(idx, LiteralSlot("more"))
-        added_slots += 1
+            log.error("The english change template should have a value slot following a unit slot!")
+            return 0
+        added_slots = 0
+        self._update_slot_value(slot, self.UNITS.get(unit, {}).get('pl', unit))
         idx += 1
-        # For the percentage values we also need to realize the original unit
-        if match.group(1) == 'percentage_':
-            new_slot = LiteralSlot(self.UNITS[match.group(2)]['pl'])
-            template.add_component(idx, new_slot)
+        if slot.fact.what_2 == 0:
+            self._update_slot_value(what_slot, "stayed the same")
+            # In the case of no change, we're done
+            return added_slots
+        elif slot.fact.what_2 < 0:
+            template.add_component(idx, LiteralSlot("decreased"))
+        else:
+            template.add_component(idx, LiteralSlot("increased"))
+        idx += 1
+        # If we are talking about a rank value
+        if match.group(6):
+            if what_slot.value == 1:
+                self._update_slot_value(what_slot, "")
+            template.add_component(idx, LiteralSlot("the"))
             added_slots += 1
+            # Skip over the what_slot
+            idx += 2
+            if match.group(6) == "_rank":
+                template.add_component(idx, LiteralSlot("most"))
+            elif match.group(6) == "_rank_reverse":
+                template.add_component(idx, LiteralSlot("least"))
+            else:
+                raise Exception("This is impossible. The regex accepts only the two options above for group 6.")
             idx += 1
+            added_slots += 1
+            return added_slots
+        else:
+            template.add_component(idx, LiteralSlot("by"))
+            added_slots += 1
+            # Skip the value slot
+            idx += 2
+            # If we are talking about percentages
+            if match.group(3):
+                if what_slot.fact.what_2 > 10:
+                    current_value = what_slot.value
+                    what_slot.value = lambda x: current_value + "%"
+                else:
+                    template.add_component(idx, LiteralSlot("percent"))
+                    added_slots += 1
+                    idx += 1
+        return added_slots
+
+    def _unit_comparison(self, slot):
+        # The capture groups are:
+        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
+        match = self.value_type_re.match(slot.value)
+        grouped_by = match.group(5)
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
+        # If compared to other crimes
+        if grouped_by == '_time_place':
+            self._update_slot_value(slot, "crimes")
+        elif grouped_by == '_crime_time':
+            self._update_slot_value(slot, "municipalities")
+        else:
+            raise Exception("This is impossible. The regex accepts only the two options above for group 5.")
         return added_slots
 
     def _unit_rank(self, slot):

@@ -31,6 +31,6 @@ en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {w
 
 fi: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
 fi-head: {where_2, case=ssa} {what_2} {what_type_2} {when_1, case=ela} {when_2, case=ill}
-en: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
+en: in {where_2}, the number of {what_type_2} {what_2} {when_1, prep=from} {when_2, prep=to} compared to other {what_type_2, type=comparison} # In Akaa, the number of car thefts increased/decreased by five (percent)/the most from 2011 to 2013 compared to other crimes/municipalities
 en-head: in {where_2}, the variable {what_type_2} has value {what_2} between {when_1} - {when_2}
 | where_type_2 = M, what_type_2 = .*change_.*, when_1 != when_2
