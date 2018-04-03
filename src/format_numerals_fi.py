@@ -101,7 +101,8 @@ class FinnishNumeralFormatter():
     def _unit_base(self, slot):
         match = self.value_type_re.match(slot.value)
         unit = match.group(1)
-        new_value = self.UNITS.get(unit, {}).get('sg', unit)
+        # new_value = self.CRIME_TYPES.get(unit, {}).get('sg', unit)
+        new_value = CRIME_TYPES.get(unit, unit)
         return self._unit_set_value(slot, new_value)
 
     def _unit_percentage(self, slot):
@@ -116,7 +117,8 @@ class FinnishNumeralFormatter():
         idx += 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
+        # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
+        new_slot = LiteralSlot(CRIME_TYPES.get(unit, unit))
         new_slot.attributes['case'] = 'elative'
         template.add_component(idx, new_slot)
         idx += 1
@@ -154,7 +156,8 @@ class FinnishNumeralFormatter():
             template.add_component(idx, LiteralSlot("suhteellinen"))
             added_slots += 1
             idx += 1
-        new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
+        # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
+        new_slot = LiteralSlot(CRIME_TYPES.get(unit, unit))
         new_slot.attributes['case'] = 'genitive'
         template.add_component(idx, new_slot)
         added_slots += 1
@@ -207,7 +210,7 @@ class FinnishNumeralFormatter():
         # If talking about changes, we will do the rest in the change handler
         if match.group(4):
             return added_slots
-        new_slot = LiteralSlot(self.UNITS.get(unit, {}).get('pl', unit))
+        new_slot = LiteralSlot(CRIME_TYPES.get(unit, unit))
         new_slot.attributes['case'] = 'partitive'
         template.add_component(idx, new_slot)
         added_slots += 1
