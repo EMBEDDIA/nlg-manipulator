@@ -1,6 +1,6 @@
 import re
-
 from core.template import LiteralSlot
+from format_crimetypes_fi import CRIME_TYPES
 
 
 class FinnishNumeralFormatter():
