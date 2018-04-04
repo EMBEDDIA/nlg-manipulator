@@ -102,7 +102,10 @@ class FinnishNumeralFormatter():
         match = self.value_type_re.match(slot.value)
         unit = match.group(1)
         # new_value = self.CRIME_TYPES.get(unit, {}).get('sg', unit)
-        new_value = CRIME_TYPES.get(unit, unit)
+        try:
+            new_value, non_case_idxs = CRIME_TYPES.get(unit, unit)
+        except ValueError:
+            new_value = CRIME_TYPES.get(unit, unit)
         return self._unit_set_value(slot, new_value)
 
     def _unit_percentage(self, slot):
@@ -118,11 +121,9 @@ class FinnishNumeralFormatter():
         if slot.attributes.get('form') == 'short':
             return added_slots
         # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        new_slot = LiteralSlot(CRIME_TYPES.get(unit, unit))
-        new_slot.attributes['case'] = 'elative'
-        template.add_component(idx, new_slot)
-        idx += 1
-        added_slots += 1
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='elative')
+        idx += added
+        added_slots += added
         return added_slots
 
     def _unit_change(self, slot):
@@ -157,11 +158,9 @@ class FinnishNumeralFormatter():
             added_slots += 1
             idx += 1
         # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        new_slot = LiteralSlot(CRIME_TYPES.get(unit, unit))
-        new_slot.attributes['case'] = 'genitive'
-        template.add_component(idx, new_slot)
-        added_slots += 1
-        idx += 1
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='genitive')
+        idx += added
+        added_slots += added
         template.add_component(idx, LiteralSlot("määrä kasvoi"))
         added_slots += 1
         idx += 1
@@ -210,11 +209,32 @@ class FinnishNumeralFormatter():
         # If talking about changes, we will do the rest in the change handler
         if match.group(4):
             return added_slots
-        new_slot = LiteralSlot(CRIME_TYPES.get(unit, unit))
-        new_slot.attributes['case'] = 'partitive'
-        template.add_component(idx, new_slot)
-        added_slots += 1
-        idx += 1
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='partitive')
+        idx += added
+        added_slots += added
+        return added_slots
+
+    def _add_slots(self, template, idx, content, case=None):
+        added_slots = 0
+        # Assume the the content is a tuple consisting of a string and a list of indexes not to be inflected
+        try:
+            words, non_case_idx = content
+            words = words.split()
+            for content_idx, word in enumerate(words):
+                new_slot = LiteralSlot(word)
+                if case and content_idx not in non_case_idx:
+                    new_slot.attributes['case'] = case
+                template.add_component(idx + added_slots, new_slot)
+                added_slots += 1
+        # If the content doesn't contain a list of indexes, assume that all words in it should be inflected:
+        except ValueError:
+            words = content.split()
+            for word in words:
+                new_slot = LiteralSlot(word)
+                if case :
+                    new_slot.attributes['case'] = case
+                template.add_component(idx + added_slots, new_slot)
+                added_slots += 1
         return added_slots
 
     def _unit_set_accusative(self, slot):
