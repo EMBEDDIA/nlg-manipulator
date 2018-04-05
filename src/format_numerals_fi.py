@@ -1,7 +1,8 @@
 import re
+import logging
 from core.template import LiteralSlot
 from format_crimetypes_fi import CRIME_TYPES
-
+log = logging.getLogger('root')
 
 class FinnishNumeralFormatter():
 
@@ -91,6 +92,10 @@ class FinnishNumeralFormatter():
             'year': self._time_year,
         }
 
+    def _update_slot_value(self, slot, new_value):
+        slot.value = lambda x: new_value
+        return 0
+
     def _unit_set_value(self, slot, new_value):
         slot.value = lambda x: new_value
         # If case hasn't been defined, assume accusative
@@ -133,44 +138,63 @@ class FinnishNumeralFormatter():
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
+        # Check whether the following slot contains the value
+        if template.components[idx - 1].slot_type == 'what_2':
+            what_slot = template.components[idx - 1]
+        else:
+            log.error("The Finnish change template should have a value slot preceding a unit slot!")
+            return 0
         added_slots = 0
-        value_plus_unit_length = 2
-        # If type change_rank
+        # Move the pointer to the value slot
+        idx -= 1
+        # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='genitive')
+        idx += added
+        added_slots += added
+        if match.group(2):
+            template.add_component(idx, LiteralSlot("suhteellinen"))
+            added_slots += 1
+            idx += 1
+        template.add_component(idx, LiteralSlot("määrä"))
+        added_slots += 1
+        idx += 1
+
+        if slot.fact.what_2 > 0:
+            template.add_component(idx, LiteralSlot("kasvoi"))
+        elif slot.fact.what_2 < 0:
+            template.add_component(idx, LiteralSlot("laski"))
+        else:
+            template.add_component(idx, LiteralSlot("säilyi"))
+            # Replace the what slot with "ennallaan"
+            self._update_slot_value(what_slot, "ennallaan")
+            return added_slots + 1
+        added_slots += 1
+        # Jump over the what_slot
+        idx += 2
+
+        # The base unit
         if match.group(6):
             # rikosten määrä kasvoi viidenneksi eniten
             new_slots = self._unit_rank(slot)
             added_slots += new_slots
-            value_plus_unit_length += new_slots
         elif match.group(3):
             # rikosten määrä kasvoi viisi prosenttiyksikköä
             new_slots = self._unit_set_value(slot, "prosenttiyksikkö")
             added_slots += new_slots
-            value_plus_unit_length += new_slots
         else:
             # rikosten määrä kasvoi viidellä
             prev_slot = template.components[idx - 1]
             prev_slot.attributes['case'] = 'adessive'
             slot.value = lambda x: ""
-        # Move the index to the slot before the value + unit
-        idx += added_slots - 1
-        if match.group(2):
-            template.add_component(idx, LiteralSlot("suhteellinen"))
-            added_slots += 1
-            idx += 1
-        # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='genitive')
-        idx += added
-        added_slots += added
-        template.add_component(idx, LiteralSlot("määrä kasvoi"))
-        added_slots += 1
         idx += 1
-        idx += value_plus_unit_length
+
+        # The end comparison
         if match.group(5):
             template.add_component(idx, LiteralSlot("muihin"))
             added_slots += 1
             idx += 1
             if match.group(5) == '_time_place':
-                template.add_component(idx, LiteralSlot("rikoksiin verrattuna"))
+                template.add_component(idx, LiteralSlot("rikostyyppeihin verrattuna"))
                 added_slots += 1
                 idx += 1
             else:
