@@ -13,16 +13,16 @@ def run():
     all_px = list_available_px()
     
     # Find Crime stats and Population stats
-    wanted_px = [px for px in all_px if 'statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_003.px' in str(px)]
+    wanted_px = [px for px in all_px if ('statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_003.px' in str(px)) and px.language == 'fi']
 
     # Download the data
-    download_px(wanted_px, target_dir='..')
+    download_px(wanted_px, target_dir=os.path.join(os.path.dirname(__file__), '..'))
 
     print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
     os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
 
     # Store and store population data
-    df = Px('../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px', language='en').pd_dataframe()
+    df = Px(os.path.join(os.path.dirname(__file__), '../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px'), language='en').pd_dataframe()
     df = flatten(df)
     df = pythonify_column_names(df)
     df.rename(columns={
@@ -35,7 +35,7 @@ def run():
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv'))
 
     # flatten and store crime statistics
-    df = Px("../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px", language='en').pd_dataframe().transpose()
+    df = Px(os.path.join(os.path.dirname(__file__), "../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px"), language='en').pd_dataframe().transpose()
     df = flatten(df, stacked_cols=[0])
     df = pythonify_column_names(df)
     df.rename(columns={'level_0': 'when', 'level_1': 'where'}, inplace=True)

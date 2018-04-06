@@ -17,15 +17,17 @@ class PxInfo(object):
 
     _timeformat = '%Y-%m-%d %H:%M' #Just a cache place for dateformat
 
-    def __init__(self, path, size, created, updated, variables, tablesize, _type, language, title, *args):
-        self.path = path.strip()
-        self.size = size.strip()
-        self.created = created.strip()
-        self.updated = updated.strip()
+    def __init__(self, pathname, filesize, fileupdate, tablesize, languagecode, 
+        variables, languages, nextupdate, synonyms, decimals, matrix, subject_code, 
+        subject_area, copyright, description, title, contents, units, contvariable, 
+        last_updated, contact, source, official_statistics, note, *args):
+
+        self.path = pathname.strip()
+        self.size = filesize.strip()
+        self.updated = last_updated.strip()
         self.variables = variables.strip()
         self.tablesize = tablesize.strip()
-        self.type = _type.strip()
-        self.language = language.strip()
+        self.language = languagecode.strip()
         self.title = title.strip()
 
     def __str__(self):
@@ -48,7 +50,7 @@ def list_available_px(url='http://pxnet2.stat.fi/database/StatFin/StatFin_rap.cs
     Url's default value points to Statfin databases contents CSV.
     """
     response = urllib.request.urlopen(url)
-    lines = iter(response.read().decode('iso-8859-1').splitlines())
+    lines = iter(response.read().decode('utf-8').splitlines())
     next(lines) # Skip headers
     return [PxInfo(*i) for i in csv.reader(lines, delimiter=";")]
 
