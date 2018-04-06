@@ -28,6 +28,9 @@ class CrimeEntityNameResolver(EntityNameResolver):
     def resolve_surface_form(self, registry, random, language, code, name_type):
         entity_type, entity = self._parse_code(code)
         if entity_type in ["C", "D", "M", "P"]:
-            return entity
+            if name_type == 'full':
+                return entity
+            else:
+                return ""
 
         raise ValueError("Unknown entity: {}".format(code))

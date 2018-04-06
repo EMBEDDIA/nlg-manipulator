@@ -101,6 +101,9 @@ class EntityNameResolver(NLGPipelineComponent):
             this.value = lambda x: surface_form
             this.attributes["entity_type"] = entity_type
             this.attributes["name_type"] = name_type
+            # If the entity shouldn't be realized, remove the case marking to prevent Omorfi from getting confused
+            if not surface_form:
+                this.attributes.pop('case')
 
             previous_entities[confusion_group] = entity
 
