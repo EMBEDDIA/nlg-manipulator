@@ -5,10 +5,11 @@ import numpy as np
 from math import sqrt
 import math
 import os.path
-from timeit import default_timer as timer
+import columns as cls
 
 def run():
     # Download list of available PX files
+    
     all_px = list_available_px()
     
     # Find Crime stats and Population stats
@@ -104,22 +105,22 @@ class ImporterC:
         self.bccd_id_columns = ['when', 'when_type', 'where', 'where_type', 'population', 'year']
         self.bccdc_id_columns = ['when1', 'when2', 'when_type', 'where', 'where_type']
 
-        self.cd_uninteresting_columns = ['_total', '_total_normalized']
+        self.cd_uninteresting_columns = ['all_total', 'all_total_normalized']
         cd_all_columns = list(self.cd.columns.values)
         self.cd_interesting_columns = [x for x in cd_all_columns if
                                        x not in self.cd_id_columns and x not in self.cd_uninteresting_columns]
 
-        self.cdc_uninteresting_columns = ['_total_change', '_total_normalized_change', '_total_percentage_change', '_total_normalized_percentage_change']
+        self.cdc_uninteresting_columns = ['all_total_change', 'all_total_normalized_change', 'all_total_percentage_change', 'all_total_normalized_percentage_change']
         cdc_all_columns = list(self.cdc.columns.values)
         self.cdc_interesting_columns = [x for x in cdc_all_columns if
                                         x not in self.cdc_id_columns and x not in self.cdc_uninteresting_columns]
 
-        self.bccd_uninteresting_columns = ['_total', '_total_normalized']
+        self.bccd_uninteresting_columns = ['all_total', 'all_total_normalized']
         bccd_all_columns = list(self.bccd.columns.values)
         self.bccd_interesting_columns = [x for x in bccd_all_columns if
                                        x not in self.bccd_id_columns and x not in self.bccd_uninteresting_columns]
 
-        self.bccdc_uninteresting_columns = ['_total_change', '_total_normalized_change', '_total_percentage_change', '_total_normalized_percentage_change']
+        self.bccdc_uninteresting_columns = ['all_total_change', 'all_total_normalized_change', 'all_total_percentage_change', 'all_total_normalized_percentage_change']
         bccdc_all_columns = list(self.bccdc.columns.values)
         self.bccdc_interesting_columns = [x for x in bccdc_all_columns if
                                         x not in self.bccdc_id_columns and x not in self.bccdc_uninteresting_columns]
@@ -406,8 +407,8 @@ class ConverterC:
         # Remove and rename
         #self.crime_data = dh.drop_columns(self.crime_data, "column/keep_columns")
         #self.crime_data = dh.rename_columns(self.crime_data, "column/rename_columns_table.csv")
-        self.crime_data = drop_columns(self.crime_data, "column/keep_columns")
-        self.crime_data = rename_columns(self.crime_data, "column/rename_columns_table.csv")
+        self.crime_data = drop_columns(self.crime_data, cls.keep_columns)
+        self.crime_data = rename_columns(self.crime_data, cls.rename_columns)
         self._rename_entries_and_columns()
 
         # Memorize some things
@@ -427,20 +428,19 @@ class ConverterC:
 
         # Make broad categories df
         #self.bc_crime_data = dh.calculate_sums(self.crime_data, "column/new_columns_table.csv", "column/carryover_columns")
-        self.bc_crime_data = calculate_sums(self.crime_data, "column/new_columns_table.csv",
-                                               "column/carryover_columns")
+        self.bc_crime_data = calculate_sums(self.crime_data, cls.new_columns, cls.carryover_columns)
 
         # Add total columns
         #self.crime_data = dh.total_column(self.crime_data, "column/ignore_columns")
         #self.bc_crime_data = dh.total_column(self.bc_crime_data, "column/ignore_columns")
-        self.crime_data = total_column(self.crime_data, "column/ignore_columns")
-        self.bc_crime_data = total_column(self.bc_crime_data, "column/ignore_columns")
+        self.crime_data = total_column(self.crime_data, cls.ignore_columns)
+        self.bc_crime_data = total_column(self.bc_crime_data, cls.ignore_columns)
 
         # Normalize columns
         #self.crime_data = dh.normalize(self.crime_data,  "population", "column/ignore_columns")
         #self.bc_crime_data = dh.normalize(self.bc_crime_data, "population", "column/ignore_columns")
-        self.crime_data = normalize(self.crime_data,  "population", "column/ignore_columns")
-        self.bc_crime_data = normalize(self.bc_crime_data, "population", "column/ignore_columns")
+        self.crime_data = normalize(self.crime_data,  "population", cls.ignore_columns)
+        self.bc_crime_data = normalize(self.bc_crime_data, "population", cls.ignore_columns)
 
         # Save data
         self.crime_data.sort_values(by=['where', 'when'], ascending=[True, True], inplace=True)
@@ -449,8 +449,8 @@ class ConverterC:
         self.bc_crime_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + "bc_crime_pyn.csv"), index=False)
 
         # Make comparison data
-        self.crime_comp_data = self._make_comparison_data(self.crime_data, "column/ignore_columns")
-        self.bc_crime_comp_data = self._make_comparison_data(self.bc_crime_data, "column/ignore_columns")
+        self.crime_comp_data = self._make_comparison_data(self.crime_data, cls.ignore_columns)
+        self.bc_crime_comp_data = self._make_comparison_data(self.bc_crime_data, cls.ignore_columns)
 
         # Save comparison data
         self.crime_comp_data.sort_values(by=['where', 'when1', 'when2'], ascending=[True, True, True], inplace=True)
@@ -566,13 +566,11 @@ class ConverterC:
     Compares how crime numbers change between consecutive years.
     '''
     def _make_comparison_data(self, df, ignore_columns_p):
-        with open(os.path.join(os.path.dirname(__file__), ignore_columns_p), 'r') as f:
-            icols = f.read().splitlines()
         comparison_columns = ['when1', 'when2', 'when_type', 'where', 'where_type']
         change_columns1 = []
         change_columns2 = []
 
-        interesting_columns = [x for x in df.columns.values if x not in icols]
+        interesting_columns = [x for x in df.columns.values if x not in ignore_columns_p]
         for column in interesting_columns:
             change_columns1.append(column + "_change")
             change_columns2.append(column + "_percentage_change")
@@ -619,47 +617,37 @@ class ConverterC:
         return pd.DataFrame(data=change_data, columns=comparison_columns)
 
 
-def drop_columns(df, keep_columns_p):
-    with open(os.path.join(os.path.dirname(__file__), keep_columns_p), 'r') as f:
-        cols = f.read().splitlines()
-    return df[cols]
+def drop_columns(df, keepcols):
+    return df[keepcols]
 
 
-def rename_columns(df, rename_columns_p):
+def rename_columns(df, recols):
     renamed_df = df
-    with open(os.path.join(os.path.dirname(__file__), rename_columns_p), 'r') as f:
-        cols = f.read().splitlines()
-    for col in cols:
-        old_new = col.split(",")
-        renamed_df.rename(columns={old_new[0]: old_new[1]}, inplace=True)
+    for key, value in recols.items():
+        renamed_df.rename(columns={key: value}, inplace=True)
     return renamed_df
 
 
-def calculate_sums(df, new_columns_p, carryover_columns_p):
-    cdf = pd.read_csv(os.path.join(os.path.dirname(__file__), new_columns_p))
+def calculate_sums(df, newcols, carryovercols):
     ndf = df
-    ndf = drop_columns(ndf, carryover_columns_p)
-    for new_column in cdf.columns.values:
-        sum_columns = list(cdf[new_column].dropna())
+    ndf = drop_columns(ndf, carryovercols)
+    for new_column in newcols.keys():
+        sum_columns = newcols.get(new_column)
         new_values = list(df[sum_columns].sum(axis=1))
         ndf = pd.concat([ndf, pd.DataFrame(columns=[new_column], data=new_values)], axis=1)
     return ndf
 
 
-def total_column(df, ignore_columns_p, name="_total"):
+def total_column(df, ignorecols, name="all_total"):
     dft = df
-    with open(os.path.join(os.path.dirname(__file__), ignore_columns_p), 'r') as f:
-        cols = f.read().splitlines()
-    sum_columns = [x for x in df.columns.values if x not in cols]
+    sum_columns = [x for x in df.columns.values if x not in ignorecols]
     dft[name] = df[sum_columns].sum(axis=1)
     return dft
 
 
-def normalize(df, normalizer, ignore_columns_p, n=1000):
+def normalize(df, normalizer, ignorecols, n=1000):
     normalizer_column = np.array(df[normalizer])
-    with open(os.path.join(os.path.dirname(__file__), ignore_columns_p), 'r') as f:
-        cols = f.read().splitlines()
-    normalize_columns = [x for x in df.columns.values if x not in cols]
+    normalize_columns = [x for x in df.columns.values if x not in ignorecols]
     for normalize_col in normalize_columns:
         normalize_column = np.array(df[normalize_col])
         df[normalize_col + "_normalized"] = (n * normalize_column) / normalizer_column
