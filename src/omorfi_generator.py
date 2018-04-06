@@ -261,6 +261,9 @@ class OmorfiGenerator(object):
         analyses = []
         for analysis in self._omorfi.analyse(token):
             analyses.append(analysis[0])
+        numerical_analyses = [a for a in analyses if "[UPOS=NUM]" in a]
+        if numerical_analyses:
+            analyses = numerical_analyses
         nominative_analyses = [a for a in analyses if "[CASE=NOM]" in a]
         if nominative_analyses:
             analyses = nominative_analyses
