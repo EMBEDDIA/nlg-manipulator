@@ -164,10 +164,10 @@ class FinnishNumeralFormatter():
         elif slot.fact.what_2 < 0:
             template.add_component(idx, LiteralSlot("laski"))
         else:
-            template.add_component(idx, LiteralSlot("säilyi"))
-            # Replace the what slot with "ennallaan"
-            self._update_slot_value(what_slot, "ennallaan")
-            return added_slots + 1
+            self._update_slot_value(slot, "säilyi ennallaan")
+            # Clear the value slot
+            self._update_slot_value(what_slot, "")
+            return added_slots
         added_slots += 1
         # Jump over the what_slot
         idx += 2
