@@ -151,13 +151,15 @@ class FinnishNumeralFormatter():
         added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='genitive')
         idx += added
         added_slots += added
-        if match.group(2):
-            template.add_component(idx, LiteralSlot("suhteellinen"))
-            added_slots += 1
-            idx += 1
+
         template.add_component(idx, LiteralSlot("määrä"))
         added_slots += 1
         idx += 1
+
+        if match.group(2):
+            template.add_component(idx, LiteralSlot("suhteessa asukaslukuun"))
+            added_slots += 1
+            idx += 1
 
         if slot.fact.what_2 > 0:
             template.add_component(idx, LiteralSlot("kasvoi"))
