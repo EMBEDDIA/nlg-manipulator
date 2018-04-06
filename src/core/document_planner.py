@@ -45,6 +45,9 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     NLGPipeline that creates a DocumentPlan from the given nuclei and satellites.
     """
 
+    value_type_re = re.compile(
+        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
+
     def run(self, registry, random, language, scored_messages):
         """
         Run this pipeline component.
@@ -57,6 +60,10 @@ class BodyDocumentPlanner(NLGPipelineComponent):
 
         nuclei = []
         all_messages = scored_messages
+
+        # Drop messages with rank or rank_reverse values of more than 4
+        scored_messages = [msg for msg in scored_messages
+                           if (not self.value_type_re.match(msg.fact.what_type_2).group(6) or msg.fact.what_2 <= 4)]
 
         # In the first paragraph, don't ever use a message that's been added during expansion
         # These are recognisable by having a <1 importance coefficient
@@ -117,8 +124,9 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             nuclei.append(message)
             messages = [message]
             current_location = message.fact.where_2
-            scored_messages = [m for m in scored_messages if m.fact is not message.fact]
-            core_messages = [m for m in core_messages if m.fact is not message.fact]
+            # Drop the chosen message from the lists of remaining messages
+            scored_messages = [m for m in scored_messages if m is not message]
+            core_messages = [m for m in core_messages if m is not message]
 
             # Select satellites
             par_length = 1
@@ -134,7 +142,9 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 if template_checker.exists_template_for_message(satellite, location_required=require_location):
 
                     self._add_satellite(satellite, messages)
-                    scored_messages = [m for m in scored_messages if m.fact is not sat_fact]
+                    # Drop the chosen message from the lists of remaining messages
+                    scored_messages = [m for m in scored_messages if m is not satellite]
+                    core_messages = [m for m in core_messages if m is not satellite]
                     par_length += 1
                     if par_length >= SENTENCES_PER_PARAGRAPH:
                         # Reached max length of par, stop generating
@@ -156,10 +166,11 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return modified
 
     def _encourage_similarity(self, candidates, nucleus):
-        # Drop the messages that we won't consider at all instead of dropping the score to zero. This is much faster,
-        # especially in cases where there are a lot of messages only a few of which would be left with a non-zero score.
-        modified = [msg for msg in candidates if (nucleus.fact.where_2 == msg.fact.where_2)]
-
+        # Pick only messages about crimes that belong to the same generic crime type (in other words, that have a crime
+        # type starting with the same prefix as the nucleus
+        modified = [msg for msg in candidates
+                    if (nucleus.fact.where_2 == msg.fact.where_2
+                        and nucleus.fact.what_type_2.split("_")[0] == msg.fact.what_type_2.split("_")[0])]
         return modified
 
     def _add_satellite(self, satellite, messages):
