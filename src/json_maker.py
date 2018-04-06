@@ -4,6 +4,7 @@ from operator import itemgetter
 import matplotlib.pyplot as plt
 import json
 import os
+import columns as cls
 
 class GraphDataGetter:
 
@@ -12,7 +13,8 @@ class GraphDataGetter:
         self.comparison_data = pd.read_csv(os.path.join(os.path.dirname(__file__), "../data/crime_pyn_comp_ranks_outliers.csv"))
         self.bc_crime_data = pd.read_csv(os.path.join(os.path.dirname(__file__), "../data/bc_crime_pyn_ranks_outliers.csv"))
         self.bc_comparison_data = pd.read_csv(os.path.join(os.path.dirname(__file__), "../data/bc_crime_pyn_comp_ranks_outliers.csv"))
-        self.bc = pd.read_csv(os.path.join(os.path.dirname(__file__), "column/new_columns_table.csv"))
+        #self.bc = pd.read_csv(os.path.join(os.path.dirname(__file__), "column/new_columns_table.csv"))
+        self.bc = cls.new_columns
 
 
     def inc_dec_crimes(self, place, year, comp=1, context=5, broad_categories=True, percentage=True,
@@ -27,10 +29,10 @@ class GraphDataGetter:
             used_columns = list(data.columns.values)
             if len(category_names) > 0:
                 used_columns = []
-                for col in self.bc.columns.values:
+                for col in self.bc.keys():
                     if col not in category_names:
                         continue
-                    uc = list(self.bc[col].dropna())
+                    uc = list(self.bc[col])
                     used_columns = used_columns + uc
 
         comp_year = year - comp
@@ -91,7 +93,7 @@ class GraphDataGetter:
         most_inc_monthly_values = [float(round(x, 1)) for x in list(ddf[most_inc])]
         most_dec_monthly_values = [float(round(x, 1)) for x in list(ddf[most_dec])]
         #everything no just chosen categories
-        avg_monthly_values = list(ddf['_total'])
+        avg_monthly_values = list(ddf['all_total'])
         avg_monthly_values = [float(round(x/crimes, 1)) for x in avg_monthly_values]
         '''
         plt.plot(avg_monthly_values, label="average")
@@ -115,15 +117,15 @@ class GraphDataGetter:
             used_columns = list(data.columns.values)
             if len(category_names) > 0:
                 used_columns = []
-                for col in self.bc.columns.values:
+                for col in self.bc.keys():
                     if col not in category_names:
                         continue
-                    uc = list(self.bc[col].dropna())
+                    uc = list(self.bc[col])
                     used_columns = used_columns + uc
         year = str(year)
         df = data[(data['where'] == place) & (data['when'] == year)]
         cols = list(df.columns.values)
-        cols = [x for x in cols if x.endswith("_total") and not x.startswith("_total")]
+        cols = [x for x in cols if (x.endswith("_total") or x.endswith("_category")) and not x.startswith("all")]
         values = [float(x) for x in list(df[cols].iloc[0])]
         colval = zip(cols, values)
         colval = [x for x in colval if not np.isnan(x[1]) and x[0] in used_columns]
@@ -143,10 +145,3 @@ class GraphDataGetter:
         '''
         print(json.dumps(jd, sort_keys=False, indent=4, separators=(',', ':')))
         return jd
-
-
-
-
-
-
-
