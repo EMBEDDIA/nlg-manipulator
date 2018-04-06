@@ -45,6 +45,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     NLGPipeline that creates a DocumentPlan from the given nuclei and satellites.
     """
 
+    # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
     value_type_re = re.compile(
         r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
 
@@ -61,9 +62,17 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         nuclei = []
         all_messages = scored_messages
 
-        # Drop messages with rank or rank_reverse values of more than 4
+        # Drop messages with rank or rank_reverse values of more than 4 and messages with comparisons between
+        # municipalities using the reported values instead of normalized or percentage values
         scored_messages = [msg for msg in scored_messages
-                           if (not self.value_type_re.match(msg.fact.what_type_2).group(6) or msg.fact.what_2 <= 4)]
+                           # drop the message if it is about a rank or rank_reverse of more than 4 ...
+                           if not ((self.value_type_re.match(msg.fact.what_type_2).group(6) and msg.fact.what_2 > 4)
+                                   # ... or if the message is not normalized ...
+                                   or (not (self.value_type_re.match(msg.fact.what_type_2).group(2)
+                                            # ... or percentage ...
+                                            or self.value_type_re.match(msg.fact.what_type_2).group(3))
+                                       # ... and is comparing different municipalities
+                                       and self.value_type_re.match(msg.fact.what_type_2).group(5) == '_crime_time'))]
 
         # In the first paragraph, don't ever use a message that's been added during expansion
         # These are recognisable by having a <1 importance coefficient
