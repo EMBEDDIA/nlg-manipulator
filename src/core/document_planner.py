@@ -170,9 +170,12 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     def _penalize_similarity(self, candidates, nuclei):
         if not nuclei:
             return candidates
-        # ToDo: Need to determine some similarity measure to replace the old one that compared the who-values
-        modified = [msg for msg in candidates]
-        return modified
+        # Pick only messages about crimes that belong to DIFFERENT generic crime type but share a location
+        for nucleus in nuclei:
+            candidates = [msg for msg in candidates
+                    if (nucleus.fact.where_2 == msg.fact.where_2
+                        and nucleus.fact.what_type_2.split("_")[0] != msg.fact.what_type_2.split("_")[0])]
+        return candidates
 
     def _encourage_similarity(self, candidates, nucleus):
         # Pick only messages about crimes that belong to the same generic crime type (in other words, that have a crime
