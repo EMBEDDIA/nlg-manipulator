@@ -346,7 +346,7 @@ def parse_matcher_expr(constraint_line):
             try:
                 value = LOCATION_TYPE_MAP[value]
             except KeyError:
-                raise TemplateReadingError("unknown where_type '{}'. Expected one of: {}".format(
+                log.info("Unknown where_type '{}'. Expected one of: {}. It better be a valid regex!".format(
                     value, ", ".join("'{}'".format(v) for v in LOCATION_TYPE_MAP.keys())
                 ))
         elif lhs.field_name[:-2] != 'what_type':
