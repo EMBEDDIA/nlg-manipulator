@@ -10,7 +10,7 @@ log = logging.getLogger('root')
 # For now, these parameters are hard-coded
 MIN_PARAGRAPHS_PER_DOC = 3  # Try really hard to get at least this many
 MAX_PARAGRAPHS_PER_DOC = 5
-SENTENCES_PER_PARAGRAPH = 6
+SENTENCES_PER_PARAGRAPH = 10
 # How many messages are we allowed to take from the expanded set
 MAX_EXPANDED_NUCLEI = 2
 
