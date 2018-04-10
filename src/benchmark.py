@@ -1,4 +1,4 @@
-from service import ElectionNlgService
+from service import CrimeNlgService
 import os
 import sys
 import time
@@ -29,51 +29,31 @@ def print_progress(iteration, total, decimals=1):
     sys.stdout.flush()
 
 
-
 def benchmark():
     print("Initializing ", end="")
-    service = ElectionNlgService(
+    service = CrimeNlgService(
         random_seed = 4551546,
         force_cache_refresh=False,
-        nomorphi=True, # Remove to use omorphi
+        #nomorphi=True, # Remove to use omorphi
     )
     print(".", end="")
 
     municipalities = service.registry.get('geodata-lookup')["fi"]['M'].keys()
     print(".", end="")
-
-    electoral_districts = service.registry.get('geodata-lookup')["fi"]['D'].keys()
-    print(". done.")
     
-    total = 4 + len(municipalities) + len(electoral_districts)
+    total = 1 + len(municipalities)
+    print(" done.")
 
     print("\nRunning benchmark with {} generations".format(total))
     start = time.perf_counter()
 
     i = 1
-    service.run_pipeline(language='fi', who=None, who_type=None, where="fi", where_type="C")
-    print_progress(i, total)
-
-    i += 1
-    service.run_pipeline(language='fi', who=None, who_type=None, where="fi", where_type="C")
-    print_progress(i, total)
-
-    i += 1
-    service.run_pipeline(language='fi', who="VIHR", who_type="party", where="fi", where_type="C")
-    print_progress(i, total)
-
-    i += 1
-    service.run_pipeline(language='fi', who="KESK", who_type="party", where="fi", where_type="C")
+    service.run_pipeline(language='fi', where="fi", where_type="C")
     print_progress(i, total)
 
     for m in municipalities:
         i += 1
-        service.run_pipeline(language='fi', who=None, who_type=None, where=m, where_type="M")
-        print_progress(i, total)
-    
-    for d in electoral_districts:
-        i += 1
-        service.run_pipeline(language='fi', who=None, who_type=None, where=str(d), where_type="D")
+        service.run_pipeline(language='fi', where=m, where_type="M")
         print_progress(i, total)
 
     delta = time.perf_counter() - start
