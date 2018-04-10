@@ -34,21 +34,12 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         where_type_score = 1
 
         # importance of fact
-        def get_interestingness(wht_tpe):
-            wht_tpe = wht_tpe
-
-            # Assign the parameters
-            parm_dict = pfg.crime_parameters
-
-            # Get the interestingness value
-            var = wht_tpe.split("_")[0]
-            #wht_tpe_score = parm_dict[var]
-            wht_tpe_score = int(parm_dict.get(var, 1))
-
-            return wht_tpe_score
-
-        what_type_score = get_interestingness(fact.what_type_2)
-        # what_type_score = 1
+        category = fact.what_type_2.split('_')[0]
+        what_type_score = pfg.category_scores.get(category, 1)
+        if '_rank_reverse' in fact.what_type_2:
+            what_type_score *= pfg.rank_reverse_weight
+        elif '_rank' in fact.what_type_2:
+            what_type_score *= pfg.rank_weight
 
         # importance of value
         what_score = what_type_score * outlier_score
