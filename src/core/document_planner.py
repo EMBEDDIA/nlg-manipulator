@@ -145,6 +145,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 score = satellite.score
                 sat_fact = satellite.fact
                 if score == 0:
+                    log.info("No more interesting things to include in paragraph, ending it")
                     break
 
                 # Drop messages that have been EFFECTIVELY TOLD by another semantically-equivalent message
@@ -162,7 +163,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                     core_messages = [m for m in core_messages if m is not satellite]
                     par_length += 1
                     if par_length >= SENTENCES_PER_PARAGRAPH:
-                        # Reached max length of par, stop generating
+                        log.info("Reached max length of paragraph, ending it")
                         break
 
             dp.children.append(
