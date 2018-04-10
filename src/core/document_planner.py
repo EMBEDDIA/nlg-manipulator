@@ -1,4 +1,5 @@
 import logging
+from .message import Message
 from .pipeline import NLGPipelineComponent
 from .document_plan import DocumentPlan, Relation
 from .message_generator import NoMessagesForSelectionException
@@ -145,6 +146,11 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 sat_fact = satellite.fact
                 if score == 0:
                     break
+
+                # Drop messages that have been EFFECTIVELY TOLD by another semantically-equivalent message
+                if self._is_effectively_repetition(satellite, messages):
+                    continue
+
                 require_location = current_location is None or sat_fact.where_2 != current_location
                 # Only use the fact if we have a template to express it
                 # Otherwise skip to the next most relevant
@@ -166,6 +172,52 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             max_score = max(message.score, max_score)
 
         return (dp, all_messages)
+
+    def _is_effectively_repetition(self, candidate, messages):
+        log.debug("Checking if {} is already being effectively told".format(candidate.fact.what_type_2))
+        unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.match(candidate.fact.what_type_2).groups()
+        
+        flat_messages = self._flatten(messages)
+        if not flat_messages:
+            log.debug("A lone template is never repetitious")
+            return False
+
+        for other in flat_messages:
+            if candidate.fact.where_2 != other.fact.where_2:
+                # Not repetition if we are not event talking about the same location
+                continue
+            other_groups = self.value_type_re.match(other.fact.what_type_2).groups()
+            (existing_unit, existing_normalized, existing_percentage, existing_change, existing_grouped_by, existing_rank) = other_groups
+            if (
+                unit == existing_unit 
+                and percentage == existing_percentage 
+                and change == existing_change 
+                and grouped_by == existing_grouped_by 
+                and (
+                    (rank and existing_rank) 
+                    or (not rank and not existing_rank)
+                )
+                ):
+                # Notably, we consider ranks and reverse ranks the same and similarly consider the normalized
+                # variant of a fact to be repetitive with the un-normalized fact. 
+                log.debug("Yes, it's already being effectively told by {}".format(other.fact.what_type_2))
+                return True
+        log.debug("It does not seem to be repetition, including in DocumentPlan")
+        return False
+
+    def _flatten(self, messages):
+        flat = []
+        # Copy the list, since modifying it modifies also the resulting DocumentPlan.
+        todo = messages[:]
+        while todo:
+            m = todo.pop()
+            if isinstance(m, Message):
+                flat.append(m)
+            else:
+                # Extend with non-None children
+                todo.extend([c for c in m.children if c])
+        return flat
+
 
     def _penalize_similarity(self, candidates, nuclei):
         if not nuclei:
