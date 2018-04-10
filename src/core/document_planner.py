@@ -142,9 +142,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             par_length = 1
             satellite_candidates = self._encourage_similarity(scored_messages, message)
             for satellite in satellite_candidates:
-                score = satellite.score
-                sat_fact = satellite.fact
-                if score == 0:
+                if satellite.score == 0:
                     log.info("No more interesting things to include in paragraph, ending it")
                     break
 
@@ -152,7 +150,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 if self._is_effectively_repetition(satellite, messages):
                     continue
 
-                require_location = current_location is None or sat_fact.where_2 != current_location
+                require_location = current_location is None or satellite.fact.where_2 != current_location
                 # Only use the fact if we have a template to express it
                 # Otherwise skip to the next most relevant
                 if template_checker.exists_template_for_message(satellite, location_required=require_location):
