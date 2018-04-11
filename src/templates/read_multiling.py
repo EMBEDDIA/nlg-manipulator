@@ -402,17 +402,17 @@ def parse_matcher_lhs(text):
 # Defines alternative, equivalent names for cases, so we can be flexible with the templates
 CASE_NAMES = {
     "nominative": ["nominatiivi", "nom"],
-    "genitive": ["genitiivi", "gen", "n"],
-    "partitive": ["partitiivi", "par", "p", "a", "ä"],
+    "genitive": ["genitiivi", "gen"],
+    "partitive": ["partitiivi", "par"],
     "accusative": ["akkusatiivi", "acc"],
-    "inessive": ["inessiivi", "ssa", "ssä"],
-    "elative": ["elatiivi", "ela", "sta", "stä"],
-    "illative": ["illatiivi", "ill", "iin"],
-    "adessive": ["adessiivi", "ade", "lla", "llä"],
-    "ablative": ["ablatiivi", "abl", "lta", "ltä"],
+    "inessive": ["inessiivi", "ine", "ssa"],
+    "elative": ["elatiivi", "ela", "sta"],
+    "illative": ["illatiivi", "ill"],
+    "adessive": ["adessiivi", "ade", "lla"],
+    "ablative": ["ablatiivi", "abl", "lta"],
     "allative": ["allatiivi", "all", "lle"],
-    "essive": ["ess", "na"],
-    "translative": ["translatiivi", "tra", "ksi"],
+    "essive": ["essiivi", "ess"],
+    "translative": ["translatiivi", "tra"],
 }
 
 
@@ -425,7 +425,8 @@ def process_attributes(attrs):
             try:
                 case_name = next(case for (case, alts) in CASE_NAMES.items() if case == val or val in alts)
             except StopIteration:
-                raise TemplateReadingError("unknown case name '{}'".format(val))
+                log.info("unknown case name '{}', using the given form and hoping that Omorfi recognizes it".format(val))
+                case_name = val
             proc_attrs[attr] = case_name
         else:
             proc_attrs[attr] = val
