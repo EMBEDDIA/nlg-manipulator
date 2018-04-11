@@ -102,7 +102,7 @@ new_columns = {
         'investigation_missing_persons_total',
         'investigation_deer_collisions_total',
         'investigation_other_accident_investigation_total',
-        'investigation_file_investigation_total',
+        'investigation_fire_investigation_total',
         'investigation_investigation_issuing_business_prohibition_total',
         'investigation_investigation_extradition_proceedings_of_offender_total'
     ],
@@ -208,7 +208,7 @@ rename_columns = {
     'missing_persons_all_offences': 'investigation_missing_persons_total',
     'deer_collisions_all_offences': 'investigation_deer_collisions_total',
     'other_accident_investigation_all_offences': 'investigation_other_accident_investigation_total',
-    'fire_investigation_all_offences': 'investigation_file_investigation_total',
+    'fire_investigation_all_offences': 'investigation_fire_investigation_total',
     'investigation_to_issuing_a_business_prohibition_all_offences': 'investigation_investigation_issuing_business_prohibition_total',
     'investigation_of_extradition_proceedings_of_an_offender_all_offences': 'investigation_investigation_extradition_proceedings_of_offender_total',
     'report_on_an_offence_evidently_not_to_be_included_in_the_statistics_as_an_offence_all_offences': 'other_misclassified_offences_total',
