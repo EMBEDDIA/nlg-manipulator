@@ -45,7 +45,12 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         what_score = what_type_score * outlier_score
 
         # importance of time
-        when_score = min(1, (1 / (2019 - fact.when_2)**2))
+        if fact.when_type == "year":
+            when_score = min(1, (1 / (2019 - int(fact.when_2))**2))
+        elif fact.when_type == "month":
+            year, month = fact.when.split('M')
+            when_score = min(1, (1 / (2019 - int(year))**2))
+            when_score *= min(1, (1 / (13 - int(month))))
 
         # total importance score
         message_score = where_type_score * what_score * when_score

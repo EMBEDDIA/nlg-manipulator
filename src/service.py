@@ -37,21 +37,27 @@ class CrimeNlgService(object):
         # New registry and result importer
         self.registry = Registry()
 
-        # Load crime stats
-        crime_cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/crime_data.cache'))
-        compute = None
-        if force_cache_refresh or not os.path.exists(crime_cache_path):
-            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../data/crime_pyn_comp_ranks_outliers.csv'))
-            if not os.path.exists(csv_path):
-                log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
-                from fetch_crime_data import run as fetch_data
-                fetch_data()
-            compute = lambda: pd.read_csv(csv_path, index_col=False)
+        crime_data = [
+            ('../data/bc_crime_pyn_comp_ranks_outliers.csv', '../data/bc_crime_comp.cache', 'crime-bc-comp-data'),
+            ('../data/bc_crime_pyn_ranks_outliers.csv', '../data/bc_crime.cache', 'crime-bc-data'),
+            ('../data/crime_pyn_comp_ranks_outliers.csv', '../data/crime_comp.cache', 'crime-comp-data'),
+            ('../data/crime_pyn_ranks_outliers.csv', '../data/crime.cache', 'crime-data'),
+        ]
         
-        self.registry.register('crime-data', DataFrameStore(
-            crime_cache_path,
-            compute=compute
-        ))
+        for csv_path, cache_path, registry_name in crime_data:
+            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
+            cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
+            compute = None
+            if force_cache_refresh or not os.path.exists(cache_path):
+                if not os.path.exists(csv_path):
+                    log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
+                    from fetch_crime_data import run as fetch_data
+                    fetch_data()
+                compute = lambda: pd.read_csv(csv_path, index_col=False)
+            self.registry.register(registry_name, DataFrameStore(
+                cache_path,
+                compute=compute
+            ))
 
         # Templates
         self.registry.register('templates', 

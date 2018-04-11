@@ -36,11 +36,19 @@ class MessageGenerator(NLGPipelineComponent):
         if where_type_query:
             query.append("where_type=={!r}".format(where_type_query))
         
-        if when1_query:
-            query.append("when1=={!r}".format(when1_query))
+        if 'when' in datastore.all():
+            # The DataFrame only has a 'when' column, not 'when1' and 'when2'
+            if when1_query:
+                query.append("when=={!r}".format(when1_query))
 
-        if when2_query:
-            query.append("when2=={!r}".format(when2_query))
+            if when2_query:
+                query.append("when=={!r}".format(when2_query))
+        else:
+            if when1_query:
+                query.append("when1=={!r}".format(when1_query))
+
+            if when2_query:
+                query.append("when2=={!r}".format(when2_query))
 
         if when_type_query:
             query.append("when_type=={!r}".format(when_type_query))
@@ -76,8 +84,11 @@ class MessageGenerator(NLGPipelineComponent):
             what_type = col_name
             what = row[col_name]
             # When value need to be reset for each loop because they may be changed within the loop
-            when_1 = row['when1'] if (row['when1'] and not isnan(row['when1'])) else None
-            when_2 = row['when2']
+            if 'when1' in row:
+                when_1 = row['when1'] if (row['when1'] and not isnan(row['when1'])) else None
+                when_2 = row['when2']
+            else:
+                when_1 = when_2 = row['when']
 
             outlierness_col_name = col_name + "_outlierness"
             outlierness = row.get(outlierness_col_name, None)
