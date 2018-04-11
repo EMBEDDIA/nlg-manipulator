@@ -68,7 +68,7 @@ class MessageGenerator(NLGPipelineComponent):
         ]
         df.apply(self._gen_messages, axis=1, args=(col_names, messages))
 
-        if log.isEnabledFor(logging.DEBUG):
+        if log.getEffectiveLevel() <= 5:
             for m in messages:
                 log.debug("Extracted {}".format(m.fact))
 
