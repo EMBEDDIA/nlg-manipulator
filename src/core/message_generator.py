@@ -68,13 +68,13 @@ class MessageGenerator(NLGPipelineComponent):
         return (messages, )
 
     def _gen_messages(self, row, col_names, messages, importance_coefficient=1.0, polarity=0.0):
-        where_1 = where_2 = row['where']
-        where_type_1 = where_type_2 = row['where_type']
-        when_type_1 = when_type_2 = row['when_type']
+        where = row['where']
+        where_type = row['where_type']
+        when_type = row['when_type']
 
         for col_name in col_names:            
-            what_type_1 = what_type_2 = col_name
-            what_1 = what_2 = row[col_name]
+            what_type = col_name
+            what = row[col_name]
             # When value need to be reset for each loop because they may be changed within the loop
             when_1 = row['when1'] if (row['when1'] and not isnan(row['when1'])) else None
             when_2 = row['when2']
@@ -82,17 +82,17 @@ class MessageGenerator(NLGPipelineComponent):
             outlierness_col_name = col_name + "_outlierness"
             outlierness = row.get(outlierness_col_name, None)
 
-            if what_2 is None or what_2 == "" or (isinstance(what_2, float) and isnan(what_2)):
+            if what is None or what == "" or (isinstance(what, float) and isnan(what)):
                 # 'what' is effectively undefined, do not REALLY generate the message.
                 continue
 
             if callable(importance_coefficient):
                 # Allow the importance coefficient to be a function that computes the weight from the field vals
-                importance_coefficient = importance_coefficient(where_2, where_type_2, when_2, when_type_2, what_2, what_type_2)
+                raise NotImplementedError("Not implemented")
 
-            fact = Fact(where_1=where_1, where_type_1=where_type_1, where_2=where_2, where_type_2=where_type_2,
-                        when_1=when_1, when_type_1=when_type_1, when_2=when_2, when_type_2=when_type_2,
-                        what_1=what_1, what_type_1=what_type_1, what_2=what_2, what_type_2=what_type_2,
-                        outlierness=outlierness)
+            fact = Fact(
+                where=where, where_type=where_type, when_1=when_1, when_2=when_2, when_type=when_type, 
+                what=what, what_type=what_type, outlierness=outlierness
+            )
             message = Message(facts=fact, importance_coefficient=importance_coefficient, polarity=polarity)
             messages.append(message)

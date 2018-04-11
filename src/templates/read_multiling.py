@@ -266,7 +266,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             ))
 
                         # Only some of the field names are allowed to be used in templates
-                        if field_name not in ["what_1", "what_2", "where_1", "where_2", "when_1", "when_2", "what_type_2"]:
+                        if field_name not in ["what", "where", "when_1", "when_2", "what_type"]:
                             raise TemplateReadingError("invalid field name '{}' for use in a template: {}".format(
                                 field_name, expanded_template_line
                             ))
@@ -289,7 +289,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
 
                     if field_name[0] in ["'", '"']:
                         to_value = LiteralSource(field_name[1:-1])
-                    elif field_name[:-2] == 'where':
+                    elif field_name == 'where':
                         to_value = EntitySource(field_name)
                     else:
                         to_value = FactFieldSource(field_name)
@@ -333,23 +333,23 @@ def parse_matcher_expr(constraint_line):
             raise TemplateReadingError("missing value part of constraint in: {}".format(constraint_line))
 
         # If the field name (name = value) isn't one we know, we assume that it's a shorthand for:
-        #  what_type_2 = name, what_2 = value
+        #  what_type = name, what = value
         if lhs.field_name not in FACT_FIELD_MAP:
             # First yield the what_type=name constraint
-            yield FactField("what_type_2"), "=", lhs.field_name
+            yield FactField("what_type"), "=", lhs.field_name
             # Continue with parsing the RHS as if we'd got a what specifier
-            lhs = FactField("what_2")
+            lhs = FactField("what")
 
         # For certain fields, we only allow string values and limit them to a given set
         # We also map them from a set of alternatives onto a canonical form
-        if lhs.field_name[:-2] == 'where_type':
+        if lhs.field_name == 'where_type':
             try:
                 value = LOCATION_TYPE_MAP[value]
             except KeyError:
                 log.info("Unknown where_type '{}'. Expected one of: {}. It better be a valid regex!".format(
                     value, ", ".join("'{}'".format(v) for v in LOCATION_TYPE_MAP.keys())
                 ))
-        elif lhs.field_name[:-2] != 'what_type':
+        elif lhs.field_name != 'what_type':
             # Don't do RHS parsing for what_type
             # Special case: value references another fact???
             matches = referential_value_re.match(value)

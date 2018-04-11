@@ -39,7 +39,7 @@ class TemplateSelector(NLGPipelineComponent):
             # Will result in an AttributeError if the child is not a Message
             try:
                 # Check whether the location has changed and we therefore need to express the new one
-                location_required = current_location is None or child.fact.where_2 != current_location
+                location_required = current_location is None or child.fact.where != current_location
                 templates = list(template_checker.all_templates_for_message(child, location_required=location_required))
                 if len(templates) == 0:
                     # If there are no templates, something's gone horribly wrong
@@ -68,7 +68,7 @@ class TemplateSelector(NLGPipelineComponent):
                     self._add_template_to_message(child, template, all_messages)
 
                     # Update the current location to the one we just expressed (or implicitly did)
-                    current_location = child.fact.where_2
+                    current_location = child.fact.where
                     # If we explicitly expressed the location, reset the counter
                     if template.expresses_location:
                         since_location = 0

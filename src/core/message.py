@@ -2,18 +2,13 @@ from collections import namedtuple
 
 
 Fact = namedtuple('fact', [
-    'where_1',
-    'where_2',
-    'where_type_1',
-    'where_type_2',
-    'what_1',
-    'what_2',
-    'what_type_1',
-    'what_type_2',
+    'where',
+    'where_type',
+    'what',
+    'what_type',
     'when_1',
     'when_2',
-    'when_type_1',
-    'when_type_2',
+    'when_type',
     'outlierness',
 ])
 

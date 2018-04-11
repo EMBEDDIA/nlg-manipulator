@@ -51,20 +51,19 @@ class NumeralFormatter(NLGPipelineComponent):
             except AttributeError:
                 log.info("Got an AttributeError when checking slot_type in format_numerals. Probably not a slot.")
                 slot_type = 'n/a'
-            if slot_type[:-2] == 'what':
+            if slot_type == 'what':
                 added_slots = self._realize_value(this)
                 return added_slots
             elif slot_type[:-2] == 'when':
                 added_slots = self._realize_time(this)
                 return added_slots
-            elif slot_type[:-2] == 'what_type':
+            elif slot_type == 'what_type':
                 added_slots = self._realize_unit(this)
                 return added_slots
 
     def _realize_value(self, slot):
         try:
-            slot_suffix = slot.slot_type[-2:]
-            what_type = getattr(slot.fact, 'what_type' + slot_suffix)
+            what_type = slot.fact.what_type
             if 'rank' in what_type:
                 slot.attributes['num_type'] = 'ordinal'
                 num_type = 'ordinal'
@@ -98,14 +97,8 @@ class NumeralFormatter(NLGPipelineComponent):
             return 0
 
     def _realize_time(self, slot):
-        # slot_suffix is either '_1' or '_2'
-        slot_suffix = slot.slot_type[-2:]
         try:
-            # Check the when_type corresponding to the slot_suffix of the current slot, just to be sure. Usually the
-            # type should be same for both suffixes
-            when_type = getattr(slot.fact, 'when_type' + slot_suffix)
-            added_slots = self._formatter.time.get(when_type, self._default_time)(slot)
-            return added_slots
+            return self._formatter.time.get(slot.fact.when_type, self._default_time)(slot)
         except AttributeError:
             log.error("Error in time realization of slot {}".format(slot))
             return 0

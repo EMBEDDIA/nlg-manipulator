@@ -139,7 +139,7 @@ class FinnishNumeralFormatter():
         template = slot.parent
         idx = template.components.index(slot)
         # Check whether the following slot contains the value
-        if template.components[idx - 1].slot_type == 'what_2':
+        if template.components[idx - 1].slot_type == 'what':
             what_slot = template.components[idx - 1]
         else:
             log.error("The Finnish change template should have a value slot preceding a unit slot!")
@@ -161,9 +161,9 @@ class FinnishNumeralFormatter():
             added_slots += 1
             idx += 1
 
-        if slot.fact.what_2 > 0:
+        if slot.fact.what > 0:
             template.add_component(idx, LiteralSlot("kasvoi"))
-        elif slot.fact.what_2 < 0:
+        elif slot.fact.what < 0:
             template.add_component(idx, LiteralSlot("laski"))
         else:
             self._update_slot_value(slot, "säilyi ennallaan")
@@ -214,13 +214,13 @@ class FinnishNumeralFormatter():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-        if prev_slot.slot_type == 'what_2':
+        if prev_slot.slot_type == 'what':
             # If the rank is first, the actual numeral isn't realized at all
-            if slot.fact.what_2 == 1:
+            if slot.fact.what == 1:
                 prev_slot.value = lambda x: ""
             # If the numeral is realized, it needs to be an ordinal and in the translative case
             else:
-                prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what_2)
+                prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
                 if 'case' not in prev_slot.attributes.keys():
                     prev_slot.attributes['case'] = 'translative'
         # This also works for _rank_reverse, since the difference is communicated using different verbs.
@@ -273,14 +273,14 @@ class FinnishNumeralFormatter():
         """
         prev_slot = slot.parent.components[slot.parent.components.index(slot) - 1]
         # "yhden paikan/äänen/etc."
-        if abs(slot.fact.what_2) == 1:
+        if abs(slot.fact.what) == 1:
             slot.attributes['case'] = 'genitive'
-            if prev_slot.slot_type == 'what_2':
+            if prev_slot.slot_type == 'what':
                 prev_slot.attributes['case'] = 'genitive'
         # "kaksi/kolme paikkaa/ääntä"
         else:
             slot.attributes['case'] = 'partitive'
-            if prev_slot.slot_type == 'what_2':
+            if prev_slot.slot_type == 'what':
                 prev_slot.attributes['case'] = 'nominative'
 
     def _ordinal(self, token):

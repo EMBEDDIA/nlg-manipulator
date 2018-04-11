@@ -67,13 +67,13 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # municipalities using the reported values instead of normalized or percentage values
         scored_messages = [msg for msg in scored_messages
                            # drop the message if it is about a rank or rank_reverse of more than 4 ...
-                           if not ((self.value_type_re.match(msg.fact.what_type_2).group(6) and msg.fact.what_2 > 4)
+                           if not ((self.value_type_re.match(msg.fact.what_type).group(6) and msg.fact.what > 4)
                                    # ... or if the message is not normalized ...
-                                   or (not (self.value_type_re.match(msg.fact.what_type_2).group(2)
+                                   or (not (self.value_type_re.match(msg.fact.what_type).group(2)
                                             # ... or percentage ...
-                                            or self.value_type_re.match(msg.fact.what_type_2).group(3))
+                                            or self.value_type_re.match(msg.fact.what_type).group(3))
                                        # ... and is comparing different municipalities
-                                       and self.value_type_re.match(msg.fact.what_type_2).group(5) == '_crime_time'))]
+                                       and self.value_type_re.match(msg.fact.what_type).group(5) == '_crime_time'))]
 
         # In the first paragraph, don't ever use a message that's been added during expansion
         # These are recognisable by having a <1 importance coefficient
@@ -100,7 +100,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 break
 
             for message in penalized_candidates:
-                require_location = current_location is None or message.fact.where_2 != current_location
+                require_location = current_location is None or message.fact.where != current_location
                 # Check whether this nucleus is even expressable, given our templates and contextual requirements
                 # (Currently no contextual requirements, but location expression will soon be constrained)
                 # If the message can't be expressed, choose another one
@@ -133,7 +133,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             message.prevent_aggregation = True
             nuclei.append(message)
             messages = [message]
-            current_location = message.fact.where_2
+            current_location = message.fact.where
             # Drop the chosen message from the lists of remaining messages
             scored_messages = [m for m in scored_messages if m is not message]
             core_messages = [m for m in core_messages if m is not message]
@@ -150,7 +150,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 if self._is_effectively_repetition(satellite, messages):
                     continue
 
-                require_location = current_location is None or satellite.fact.where_2 != current_location
+                require_location = current_location is None or satellite.fact.where != current_location
                 # Only use the fact if we have a template to express it
                 # Otherwise skip to the next most relevant
                 if template_checker.exists_template_for_message(satellite, location_required=require_location):
@@ -173,8 +173,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return (dp, all_messages)
 
     def _is_effectively_repetition(self, candidate, messages):
-        log.debug("Checking if {} is already being effectively told".format(candidate.fact.what_type_2))
-        unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.match(candidate.fact.what_type_2).groups()
+        log.debug("Checking if {} is already being effectively told".format(candidate.fact.what_type))
+        unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.match(candidate.fact.what_type).groups()
         
         flat_messages = self._flatten(messages)
         if not flat_messages:
@@ -182,10 +182,10 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             return False
 
         for other in flat_messages:
-            if candidate.fact.where_2 != other.fact.where_2:
+            if candidate.fact.where != other.fact.where:
                 # Not repetition if we are not event talking about the same location
                 continue
-            other_groups = self.value_type_re.match(other.fact.what_type_2).groups()
+            other_groups = self.value_type_re.match(other.fact.what_type).groups()
             (existing_unit, existing_normalized, existing_percentage, existing_change, existing_grouped_by, existing_rank) = other_groups
             if (
                 unit == existing_unit 
@@ -199,7 +199,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 ):
                 # Notably, we consider ranks and reverse ranks the same and similarly consider the normalized
                 # variant of a fact to be repetitive with the un-normalized fact. 
-                log.debug("Yes, it's already being effectively told by {}".format(other.fact.what_type_2))
+                log.debug("Yes, it's already being effectively told by {}".format(other.fact.what_type))
                 return True
         log.debug("It does not seem to be repetition, including in DocumentPlan")
         return False
@@ -224,16 +224,16 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # Pick only messages about crimes that belong to DIFFERENT generic crime type but share a location
         for nucleus in nuclei:
             candidates = [msg for msg in candidates
-                    if (nucleus.fact.where_2 == msg.fact.where_2
-                        and nucleus.fact.what_type_2.split("_")[0] != msg.fact.what_type_2.split("_")[0])]
+                    if (nucleus.fact.where == msg.fact.where
+                        and nucleus.fact.what_type.split("_")[0] != msg.fact.what_type.split("_")[0])]
         return candidates
 
     def _encourage_similarity(self, candidates, nucleus):
         # Pick only messages about crimes that belong to the same generic crime type (in other words, that have a crime
         # type starting with the same prefix as the nucleus
         modified = [msg for msg in candidates
-                    if (nucleus.fact.where_2 == msg.fact.where_2
-                        and nucleus.fact.what_type_2.split("_")[0] == msg.fact.what_type_2.split("_")[0])]
+                    if (nucleus.fact.where == msg.fact.where
+                        and nucleus.fact.what_type.split("_")[0] == msg.fact.what_type.split("_")[0])]
         return modified
 
     def _add_satellite(self, satellite, messages):
@@ -266,8 +266,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         fact_2 = msg_2.fact
 
         # Comparison of the same what_type between different place or time
-        if (fact_1.where_2 != fact_2.where_2 or fact_1.when_2 != fact_2.when_2) and \
-                (fact_1.what_type_2 == fact_2.what_type_2):
+        if (fact_1.where != fact_2.where or fact_1.when_2 != fact_2.when_2) and \
+                (fact_1.what_type == fact_2.what_type):
             return Relation.CONTRAST
 
         # msg_2 is an elaboration of msg_1
@@ -288,15 +288,15 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         :param fact2:
         :return: True, if fact2 is an elaboration of fact1, False otherwise
         """
-        same_context = (fact1.where_2, fact1.when_2) == (fact2.where_2, fact2.when_2)
+        same_context = (fact1.where, fact1.when_2) == (fact2.where, fact2.when_2)
         if not same_context:
             return False
         # An elaboration can't have the same fact type in both facts.
-        if fact1.what_type_2 == fact2.what_type_2:
+        if fact1.what_type == fact2.what_type:
             return False
         value_type_re = re.compile(r'(percentage_|total_)?([a-z]+)(_change)?(_rank(_reverse)?)?')
-        match_1 = value_type_re.match(fact1.what_type_2)
-        match_2 = value_type_re.match(fact2.what_type_2)
+        match_1 = value_type_re.match(fact1.what_type)
+        match_2 = value_type_re.match(fact2.what_type)
         # If the facts have different base unit, they can't have an elaboration relation
         if match_1.group(2) != match_2.group(2):
             return False

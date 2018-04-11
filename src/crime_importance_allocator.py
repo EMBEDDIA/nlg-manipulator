@@ -34,11 +34,11 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         where_type_score = 1
 
         # importance of fact
-        category = fact.what_type_2.split('_')[0]
+        category = fact.what_type.split('_')[0]
         what_type_score = pfg.category_scores.get(category, 1)
-        if '_rank_reverse' in fact.what_type_2:
+        if '_rank_reverse' in fact.what_type:
             what_type_score *= pfg.rank_reverse_weight
-        elif '_rank' in fact.what_type_2:
+        elif '_rank' in fact.what_type:
             what_type_score *= pfg.rank_weight
 
         # importance of value
@@ -51,11 +51,11 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         message_score = where_type_score * what_score * when_score
         # message_score = "{:.5f}".format(message_score)
 
-        if "_rank" in fact.what_type_2:
-            message_score *= math.pow(0.7, fact.what_1 - 1)
+        if "_rank" in fact.what_type:
+            message_score *= math.pow(0.7, fact.what - 1)
 
-        if "_reverse" in fact.what_type_2:
-            if "_change" in fact.what_type_2:
+        if "_reverse" in fact.what_type:
+            if "_change" in fact.what_type:
                 message_score *= 0.7
             else:
                 message_score *= 0.25

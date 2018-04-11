@@ -134,7 +134,7 @@ class Template(DocumentPlan):
         if self._expresses_location is None:
             # Check each slot to see whether it expresses a where field
             for slot in self.slots:
-                if slot.slot_type in ["where_1", "where_2"]:
+                if slot.slot_type == "where":
                     self._expresses_location = True
                     break
             else:

@@ -108,20 +108,20 @@ class Aggregator(NLGPipelineComponent):
         log.debug("Elaborating {} with {}".format([c.value for c in first.components], [c.value for c in second.components]))
         result = [c for c in first.components]
         try:
-            first_type = first.facts[0].what_type_2
-            second_type = second.facts[0].what_type_2
+            first_type = first.facts[0].what_type
+            second_type = second.facts[0].what_type
             if first_type + "_change" == second_type:
                 result.append(Literal(
                     registry.get('vocabulary').get(language, {}).get('subord_clause_start', "MISSING-COMBINER")))
-                result.append(Slot(FactFieldSource('what_2'), fact=second.facts[0]))
-                result.append(Slot(FactFieldSource('what_type_2'), fact=second.facts[0]))
+                result.append(Slot(FactFieldSource('what'), fact=second.facts[0]))
+                result.append(Slot(FactFieldSource('what_type'), fact=second.facts[0]))
                 result[-1].attributes['form'] = 'full'
                 result.append(Literal(registry.get('vocabulary').get(language, {}).get('comparator', "MISSING-COMBINER")))
                 result.append(Slot(FactFieldSource('when_1'), fact=second.facts[0]))
             else:
                 result.append(Literal("("))
-                result.append(Slot(FactFieldSource('what_2'), fact=second.facts[0]))
-                result.append(Slot(FactFieldSource("what_type_2"), fact=second.facts[0]))
+                result.append(Slot(FactFieldSource('what'), fact=second.facts[0]))
+                result.append(Slot(FactFieldSource("what_type"), fact=second.facts[0]))
                 attributes = {"form": "short", "case": "accusative"}
                 result[-1].attributes = attributes
                 result.append(Literal(")"))
@@ -137,7 +137,7 @@ class Aggregator(NLGPipelineComponent):
             return False
 
         try:
-            if getattr(c1.fact, c1.slot_type[:-2] + "_type" + c1.slot_type[-2:]) != getattr(c2.fact, c2.slot_type[:-2] + "_type" + c2.slot_type[-2:]):
+            if getattr(c1.fact, c1.slot_type + "_type" + c1.slot_type) != getattr(c2.fact, c2.slot_type + "_type" + c2.slot_type):
                 return False
         except AttributeError:
             pass
@@ -175,7 +175,7 @@ class Aggregator(NLGPipelineComponent):
     def _message_positive(self, message):
         fact = message.template.slots[0].fact
         try:
-            return ("_rank_reverse" not in fact.what_type_2) and fact.what_2 >= 0
+            return ("_rank_reverse" not in fact.what_type) and fact.what >= 0
         # This will happen, if the fact is non-numeric
         except TypeError:
             return True

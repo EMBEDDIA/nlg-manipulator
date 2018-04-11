@@ -71,7 +71,7 @@ class EnglishNumeralFormatter():
     def _unit_base(self, slot):
         match = self.value_type_re.match(slot.value)
         unit = match.group(1)
-        if abs(slot.fact.what_2) == 1:
+        if abs(slot.fact.what) == 1:
             new_value = self.UNITS.get(unit, {}).get('sg', unit)
         else:
             new_value = self.UNITS.get(unit, {}).get('pl', unit)
@@ -81,7 +81,7 @@ class EnglishNumeralFormatter():
         template = slot.parent
         prev_slot = template.components[template.components.index(slot) - 1]
         # If the previous slot contains a value larger than 10, we can just append the percent sign to the value.
-        if prev_slot.slot_type == 'what_2' and prev_slot.fact.what_2 > 10:
+        if prev_slot.slot_type == 'what' and prev_slot.fact.what > 10:
             current_value = prev_slot.value
             prev_slot.value = lambda x: current_value + "%"
             # Set the slot to contain an empty string, these are ignored later.
@@ -117,7 +117,7 @@ class EnglishNumeralFormatter():
         idx = template.components.index(slot)
         what_slot = None
         # Check whether the following slot contains the value
-        if template.components[idx + 1].slot_type == 'what_2':
+        if template.components[idx + 1].slot_type == 'what':
             what_slot = template.components[idx + 1]
         else:
             log.error("The english change template should have a value slot following a unit slot!")
@@ -125,11 +125,11 @@ class EnglishNumeralFormatter():
         added_slots = 0
         self._update_slot_value(slot, self.UNITS.get(unit, {}).get('pl', unit))
         idx += 1
-        if slot.fact.what_2 == 0:
+        if slot.fact.what == 0:
             self._update_slot_value(what_slot, "stayed the same")
             # In the case of no change, we're done
             return added_slots
-        elif slot.fact.what_2 < 0:
+        elif slot.fact.what < 0:
             template.add_component(idx, LiteralSlot("decreased"))
         else:
             template.add_component(idx, LiteralSlot("increased"))
@@ -158,7 +158,7 @@ class EnglishNumeralFormatter():
             idx += 2
             # If we are talking about percentages
             if match.group(3):
-                if what_slot.fact.what_2 > 10:
+                if what_slot.fact.what > 10:
                     current_value = what_slot.value
                     what_slot.value = lambda x: current_value + "%"
                 else:

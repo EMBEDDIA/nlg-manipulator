@@ -63,7 +63,7 @@ class SwedishNumeralFormatter():
     def _unit_base(self, slot):
         match = self.value_type_re.match(slot.value)
         unit = match.group(2)
-        if abs(slot.fact.what_2) == 1:
+        if abs(slot.fact.what) == 1:
             new_value = self.UNITS[unit]['sg']
         else:
             new_value = self.UNITS[unit]['pl']
@@ -97,7 +97,7 @@ class SwedishNumeralFormatter():
             added_slots = self._unit_base(slot)
         if slot.attributes.get('form') == 'short':
             return added_slots
-        if slot.fact.what_2 < 0:
+        if slot.fact.what < 0:
             template.add_component(idx, LiteralSlot("färre"))
         else:
             template.add_component(idx, LiteralSlot("fler"))
