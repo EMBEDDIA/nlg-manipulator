@@ -31,7 +31,6 @@ class EntitySource(SlotSource):
     """
     Special type of SlotSource for named entities.
     """
-    # ToDo: replace this with an ordinary FactFieldSource and do the Entity marking elsewhere?
     def __init__(self, field_name):
         self.field_name = field_name
 
@@ -40,3 +39,15 @@ class EntitySource(SlotSource):
 
     def __str__(self):
         return "fact.{}".format(self.field_name)
+
+
+class TimeSource(SlotSource):
+    """
+    Special type of SlotSource for time entries.
+    """
+    def __call__(self, message):
+        return "[TIME:{}:{}]".format(getattr(message, 'when_1'),
+                                       getattr(message, 'when_2'))
+
+    def __str__(self):
+        return "fact.time"

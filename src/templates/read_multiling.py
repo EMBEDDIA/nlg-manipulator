@@ -40,9 +40,9 @@ import warnings
 import logging
 
 from core.template import Literal, Template, Slot
-from templates import FACT_FIELDS, FACT_FIELD_MAP, LOCATION_TYPE_MAP
+from templates import FACT_FIELD_MAP, LOCATION_TYPE_MAP
 from templates.matchers import OPERATORS, Matcher, FactField, ReferentialExpr
-from templates.substitutions import FactFieldSource, LiteralSource, EntitySource
+from templates.substitutions import FactFieldSource, LiteralSource, EntitySource, TimeSource
 
 log = logging.getLogger('root')
 
@@ -243,6 +243,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                         rule_ref = None
                     else:
                         # The first thing is the base value to substitute, which should be one of the fact fields
+                        # or the new {time} slot, which refers to both when-fields
                         field_name = subst_parts[0]
 
                         # It may specify which of the facts it's referring to, though this is not required (default to first)
@@ -266,7 +267,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             ))
 
                         # Only some of the field names are allowed to be used in templates
-                        if field_name not in ["what", "where", "when_1", "when_2", "what_type"]:
+                        if field_name not in ['what', 'where', 'when_1', 'when_2', 'what_type', 'time']:
                             raise TemplateReadingError("invalid field name '{}' for use in a template: {}".format(
                                 field_name, expanded_template_line
                             ))
@@ -291,6 +292,8 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                         to_value = LiteralSource(field_name[1:-1])
                     elif field_name == 'where':
                         to_value = EntitySource(field_name)
+                    elif field_name == 'time':
+                        to_value = TimeSource()
                     else:
                         to_value = FactFieldSource(field_name)
 
