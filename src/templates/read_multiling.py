@@ -62,7 +62,7 @@ or their variants with "_type" appended.
 1st capture group is the part before the dot.
 2nd capture group is the part after the dot.
 """
-referential_value_re = re.compile(r"(\d+)\.((who|where|what|when)(_1|_2|(_type(_1|_2))))")
+referential_value_re = re.compile(r"^(\d+)\.((?:who|where|what)(?:_type)?|when(?:_1|_2|_type))$")
 
 lang_spec_re = re.compile(r"(?P<lang>\S*):\s(?P<template>.*)")
 multi_space_re = re.compile(r"\s+")
