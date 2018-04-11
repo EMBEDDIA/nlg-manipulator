@@ -262,7 +262,6 @@ class ImporterC:
 
         return df
 
-    # semi copy paste garbage
     def _add_ranks_to_comparison_data(self, df, ranked_columns):
 
         for col_name in ranked_columns:
@@ -291,7 +290,7 @@ class ImporterC:
         normalized_change_asc = df[normalized_change_columns].rank(ascending=True, method="dense", axis=1)
         percentage_change_ranked_asc = df[percentage_change_columns].rank(ascending=True, method="dense", axis=1)
         normalized_percentage_change_asc = df[normalized_percentage_change_columns].rank(ascending=True,
-                                                                                          method="dense", axis=1)
+                                                                                         method="dense", axis=1)
 
         raw_change_ranked_desc = raw_change_ranked_desc.add_suffix("_grouped_by_time_place_rank")
         normalized_change_desc = normalized_change_desc.add_suffix("_grouped_by_time_place_rank")
@@ -302,6 +301,89 @@ class ImporterC:
         normalized_change_asc = normalized_change_asc.add_suffix("_grouped_by_time_place_rank_reverse")
         percentage_change_ranked_asc = percentage_change_ranked_asc.add_suffix("_grouped_by_time_place_rank_reverse")
         normalized_percentage_change_asc = normalized_percentage_change_asc.add_suffix("_grouped_by_time_place_rank_reverse")
+
+        df = pd.concat([df, raw_change_ranked_desc], axis=1)
+        df = pd.concat([df, normalized_change_desc], axis=1)
+        df = pd.concat([df, percentage_change_ranked_desc], axis=1)
+        df = pd.concat([df, normalized_percentage_change_desc], axis=1)
+        df = pd.concat([df, raw_change_ranked_asc], axis=1)
+        df = pd.concat([df, normalized_change_asc], axis=1)
+        df = pd.concat([df, percentage_change_ranked_asc], axis=1)
+        df = pd.concat([df, normalized_percentage_change_asc], axis=1)
+
+        '''
+        newstuff
+        '''
+        for col_name in ranked_columns:
+            # Different rankings:
+            #   fixed crime and time (where specific crime was committed most, second most, ... during a specific time)
+            pos_ranked_col_name = "{}_grouped_by_crime_time_increase_rank".format(col_name)
+            neg_ranked_col_name = "{}_grouped_by_crime_time_decrease_rank".format(col_name)
+            pos_grouped = df.copy()
+            neg_grouped = df.copy()
+            pos_grouped.loc[pos_grouped[col_name] <= 0, col_name] = np.nan
+            neg_grouped.loc[neg_grouped[col_name] >= 0, col_name] = np.nan
+            pos_grouped = pos_grouped.groupby(["when1", "when2", "when_type"])[col_name]
+            neg_grouped = neg_grouped.groupby(["when1", "when2", "when_type"])[col_name]
+            df[pos_ranked_col_name] = pos_grouped.rank(ascending=False, method="dense", na_option='keep')
+            df[neg_ranked_col_name] = neg_grouped.rank(ascending=True, method="dense", na_option='keep')
+
+        # Last ranking:
+        #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
+        raw = df[raw_change_columns].copy()
+        norm = df[normalized_change_columns].copy()
+        per = df[percentage_change_columns].copy()
+        nope = df[normalized_percentage_change_columns].copy()
+
+        pos_raw = raw.copy()
+        pos_norm = norm.copy()
+        pos_per = per.copy()
+        pos_nope = nope.copy()
+
+        neg_raw = raw.copy()
+        neg_norm = norm.copy()
+        neg_per = per.copy()
+        neg_nope = nope.copy()
+
+        pos_raw[pos_raw <= 0] = np.nan
+        pos_norm[pos_norm <= 0] = np.nan
+        pos_per[pos_per <= 0] = np.nan
+        pos_nope[pos_nope <= 0] = np.nan
+
+        neg_raw[neg_raw >= 0] = np.nan
+        neg_norm[neg_norm >= 0] = np.nan
+        neg_per[neg_per >= 0] = np.nan
+        neg_nope[neg_nope >= 0] = np.nan
+
+        raw_change_ranked_desc = pos_raw[raw_change_columns].rank(ascending=False, method="dense", axis=1,
+                                                                  na_option='keep')
+        normalized_change_desc = pos_norm[normalized_change_columns].rank(ascending=False, method="dense", axis=1,
+                                                                          na_option='keep')
+        percentage_change_ranked_desc = pos_per[percentage_change_columns].rank(ascending=False, method="dense", axis=1,
+                                                                                na_option='keep')
+        normalized_percentage_change_desc = pos_nope[normalized_percentage_change_columns].rank(ascending=False,
+                                                                                                method="dense", axis=1,
+                                                                                                na_option='keep')
+
+        raw_change_ranked_asc = neg_raw[raw_change_columns].rank(ascending=True, method="dense", axis=1,
+                                                                 na_option='keep')
+        normalized_change_asc = neg_norm[normalized_change_columns].rank(ascending=True, method="dense", axis=1,
+                                                                         na_option='keep')
+        percentage_change_ranked_asc = neg_per[percentage_change_columns].rank(ascending=True, method="dense", axis=1,
+                                                                               na_option='keep')
+        normalized_percentage_change_asc = neg_nope[normalized_percentage_change_columns].rank(ascending=True,
+                                                                                               method="dense", axis=1,
+                                                                                               na_option='keep')
+
+        raw_change_ranked_desc = raw_change_ranked_desc.add_suffix("_grouped_by_time_place_increase_rank")
+        normalized_change_desc = normalized_change_desc.add_suffix("_grouped_by_time_place_increase_rank")
+        percentage_change_ranked_desc = percentage_change_ranked_desc.add_suffix("_grouped_by_time_place_increase_rank")
+        normalized_percentage_change_desc = normalized_percentage_change_desc.add_suffix("_grouped_by_time_place_increase_rank")
+
+        raw_change_ranked_asc = raw_change_ranked_asc.add_suffix("_grouped_by_time_place_decrease_rank")
+        normalized_change_asc = normalized_change_asc.add_suffix("_grouped_by_time_place_decrease_rank")
+        percentage_change_ranked_asc = percentage_change_ranked_asc.add_suffix("_grouped_by_time_place_decrease_rank")
+        normalized_percentage_change_asc = normalized_percentage_change_asc.add_suffix("_grouped_by_time_place_decrease_rank")
 
         df = pd.concat([df, raw_change_ranked_desc], axis=1)
         df = pd.concat([df, normalized_change_desc], axis=1)
@@ -382,7 +464,7 @@ class ImporterC:
         df = pd.concat([df, normalized_percentage_change_outlierness], axis=1)
 
         for rank_column_name in rank_columns:
-            normal_column_name = rank_column_name.replace("_reverse", "").replace("_rank", "")
+            normal_column_name = rank_column_name.replace("_decrease_rank", "").replace("_increase_rank", "").replace("_rank", "").replace("_reverse", "")
             outlierness_rank_column_name = "{}_outlierness".format(rank_column_name)
             outlierness_normal_column_name = "{}_outlierness".format(normal_column_name)
             df[outlierness_rank_column_name] = df[outlierness_normal_column_name]
