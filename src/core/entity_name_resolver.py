@@ -111,6 +111,3 @@ class EntityNameResolver(NLGPipelineComponent):
 
     def is_entity(self, maybe_entity):
         raise NotImplementedError("Not implemented")
-
-    def resolve(self, registry, random, language, code, name_type):
-        raise NotImplementedError("Not implemented")

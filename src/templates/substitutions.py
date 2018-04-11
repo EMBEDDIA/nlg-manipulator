@@ -35,7 +35,7 @@ class EntitySource(SlotSource):
         self.field_name = field_name
 
     def __call__(self, message):
-        return "[ENTITY:{}:{}]".format(getattr(message, self.field_name + '_type'), getattr(message, self.field_name))
+        return "[PLACE:{}:{}]".format(getattr(message, self.field_name + '_type'), getattr(message, self.field_name))
 
     def __str__(self):
         return "fact.{}".format(self.field_name)
