@@ -137,7 +137,7 @@ class Aggregator(NLGPipelineComponent):
             return False
 
         try:
-            if getattr(c1.fact, c1.slot_type + "_type" + c1.slot_type) != getattr(c2.fact, c2.slot_type + "_type" + c2.slot_type):
+            if getattr(c1.fact, c1.slot_type + "_type") != getattr(c2.fact, c2.slot_type + "_type"):
                 return False
         except AttributeError:
             pass
