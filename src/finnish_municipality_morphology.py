@@ -465,4 +465,5 @@ INESSIVE_ADESSIVE_MAP = {
     "Ähtäri": "inessive",
     "Äänekoski": "adessive",
     "äänestysalue": "adessive",
+    "paikkakunta": "adessive",
 }
