@@ -13,7 +13,8 @@ FACT_FIELD_ALIASES = {
     "where_type": ["place_type"],
     "where": ["place"],
     "when_1": [],
-    "when_2": ["time"],
+    "when_2": [],
+    "time": [],
 }
 FACT_FIELD_MAP = canonical_map(FACT_FIELD_ALIASES)
 

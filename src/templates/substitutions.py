@@ -45,6 +45,9 @@ class TimeSource(SlotSource):
     """
     Special type of SlotSource for time entries.
     """
+    def __init__(self, field_name):
+        self.field_name = field_name
+
     def __call__(self, message):
         return "[TIME:{}:{}]".format(getattr(message, 'when_1'),
                                        getattr(message, 'when_2'))

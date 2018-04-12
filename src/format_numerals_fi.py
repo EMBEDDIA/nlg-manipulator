@@ -33,15 +33,15 @@ class FinnishNumeralFormatter():
     }
 
     MONTHS = {
-        '1': "tammikuu",
-        '2': "helmikuu",
-        '3': "maaliskuu",
-        '4': "huhtikuu",
-        '5': "toukokuu",
-        '6': "kesäkuu",
-        '7': "heinäkuu",
-        '8': "elokuu",
-        '9': "syyskuu",
+        '01': "tammikuu",
+        '02': "helmikuu",
+        '03': "maaliskuu",
+        '04': "huhtikuu",
+        '05': "toukokuu",
+        '06': "kesäkuu",
+        '07': "heinäkuu",
+        '08': "elokuu",
+        '09': "syyskuu",
         '10': "lokakuu",
         '11': "marraskuu",
         '12': "joulukuu",
@@ -90,6 +90,8 @@ class FinnishNumeralFormatter():
         self.time = {
             'month': self._time_month,
             'year': self._time_year,
+            'month_change': self._time_change_month,
+            'year_change': self._time_change_year
         }
 
     def _update_slot_value(self, slot, new_value):
@@ -318,11 +320,7 @@ class FinnishNumeralFormatter():
         return added_slots
 
     def _time_month(self, slot):
-        # Here I'm assuming that the when_type will use format yyyy/mm. Fix as needed when the format is finalized.
-        year, __, month = slot.value.partition("/")
-        # Remove possible zero-padding
-        if month[0] == "0":
-            month = month[1:]
+        year, __, month = slot.value.partition("M")
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
@@ -333,3 +331,97 @@ class FinnishNumeralFormatter():
         idx += 1
         slot.value = lambda x: year
         return added_slots
+
+    def _time_change_year(self, random, slot):
+        time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
+        match = time_matcher.fullmatch(slot.value)
+        added_slots = 0
+        template = slot.parent
+        idx = template.components.index(slot)
+        if slot.attributes['name_type'] == 'full':
+            if 'case' in slot.attributes.keys():
+                new_slot = LiteralSlot("aikaväli")
+                new_slot.attributes['case'] = slot.attributes['case']
+                template.add_component(idx, new_slot)
+                added_slots += 1
+                idx += 1
+                self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
+                slot.attributes['case'] = 'nominative'
+            else:
+                new_slot = LiteralSlot("vuosi")
+                new_slot.attributes['case'] = 'elative'
+                template.add_component(idx, new_slot)
+                added_slots += 1
+                idx += 1
+                template.add_component(idx, LiteralSlot(match.group(1)))
+                added_slots += 1
+                idx += 1
+                new_slot = LiteralSlot("vuosi")
+                new_slot.attributes['case'] = 'illative'
+                template.add_component(idx, new_slot)
+                added_slots += 1
+                idx += 1
+                self._update_slot_value(slot, match.group(2))
+        elif slot.attributes['name_type'] == 'short':
+            self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
+            slot.attributes['case'] = 'nominative'
+        else:
+            self._update_slot_value(slot, "")
+            if 'case' in slot.attributes.keys():
+                slot.attributes.pop('case')
+        return added_slots
+
+    def _time_change_month(self, random, slot):
+        time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
+        match = time_matcher.fullmatch(slot.value)
+        year1, _, month1 = match.group(1).partition('M')
+        year2, _, month2 = match.group(2).partition('M')
+        added_slots = 0
+        template = slot.parent
+        idx = template.components.index(slot)
+        if slot.attributes['name_type'] == 'full':
+            if 'case' in slot.attributes.keys():
+                new_slot = LiteralSlot("aikaväli")
+                new_slot.attributes['case'] = slot.attributes['case']
+                template.add_component(idx, new_slot)
+                added_slots += 1
+                idx += 1
+                self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
+                slot.attributes['case'] = 'nominative'
+            else:
+                new_slot = LiteralSlot(self.MONTHS[month1])
+                new_slot.attributes['case'] = 'elative'
+                template.add_component(idx, new_slot)
+                added_slots += 1
+                idx += 1
+                template.add_component(idx, LiteralSlot(year1))
+                added_slots += 1
+                idx += 1
+                new_slot = LiteralSlot(self.MONTHS[month2])
+                new_slot.attributes['case'] = 'illative'
+                template.add_component(idx, new_slot)
+                added_slots += 1
+                idx += 1
+                template.add_component(idx, LiteralSlot(year2))
+                added_slots += 1
+                idx += 1
+        elif slot.attributes['name_type'] == 'short':
+            self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
+            slot.attributes['case'] = 'nominative'
+        else:
+            self._update_slot_value(slot, "")
+            slot.attributes.pop('case')
+        return added_slots
+
+    def place(self, random, slot):
+        place_matcher = re.compile("\[PLACE:([^\]:]*):([^\]]*)\]")
+        entity_code = slot.value
+        place_type, place = place_matcher.match(entity_code).groups()
+        if place_type == 'C' and place == 'fi':
+            place = "Suomi"
+        if place_type in ["C", "D", "M", "P"]:
+            if slot.attributes['name_type'] == 'full':
+                self._update_slot_value(slot, place)
+            else:
+                self._update_slot_value(slot, "paikkakunta")
+        return 0

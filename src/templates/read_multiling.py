@@ -293,7 +293,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                     elif field_name == 'where':
                         to_value = EntitySource(field_name)
                     elif field_name == 'time':
-                        to_value = TimeSource()
+                        to_value = TimeSource(field_name)
                     else:
                         to_value = FactFieldSource(field_name)
 

@@ -32,12 +32,6 @@ class EntityNameResolver(NLGPipelineComponent):
     # In this implementation, it is enough to define the multi-entity_type confusion groups, as we
     # can simply use the default parameter in dict.get() to return the key for other cases-
 
-    # ToDo: These can probably be removed, but left them here for now.
-    confusion_groups = {
-        'party': 'party-candidate',
-        'candidate': 'party-candidate',
-    }
-
     def run(self, registry, random, language, document_plan):
         """
         Run this pipeline component.
@@ -64,50 +58,58 @@ class EntityNameResolver(NLGPipelineComponent):
 
         try:
             # Try to use the current root as a non-leaf.
-            children = this.children
             log.debug("Visiting non-leaf '{}'".format(this))
-            for child in children:
-                encountered, previous_entities = self._recurse(registry, random, language, child, previous_entities, encountered)
+            idx = 0
+            while idx < len(this.children):
+                slots_added, encountered, previous_entities = self._recurse(registry, random, language,
+                                                                            this.children[idx], previous_entities,
+                                                                            encountered)
+                if slots_added:
+                    idx += slots_added
+                idx += 1
+            return slots_added, encountered, previous_entities
         except AttributeError as ex:
             # Had no children, must be a leaf node
 
+            added_slots = 0
             entity = this.value
-            
+
             if not self.is_entity(entity):
                 log.debug("Visited leaf non-NE leaf node {}".format(entity))
-                return encountered, previous_entities
+                return added_slots, encountered, previous_entities
 
             log.debug("Visiting NE leaf {}".format(entity))
             entity_type = self.resolve_entity_type(entity)
 
-            confusion_group = self.confusion_groups.get(entity_type, entity_type)
-            if previous_entities[confusion_group] == entity:
+            if previous_entities[entity_type] == entity:
                 log.debug("Same as previous entity")
-                name_type = "pronoun"
+                this.attributes['name_type'] = 'pronoun'
 
             elif entity in encountered:
                 log.debug("Different entity than previous, but has been previously encountered")
-                name_type = "short"
+                this.attributes['name_type'] = 'short'
 
             else:
                 log.debug("First time encountering this entity")
-                name_type = "full"
+                this.attributes['name_type'] = 'full'
                 encountered.add(entity)
                 log.debug("Added entity to encountered, all encountered: {}".format(encountered))
 
-            surface_form = self.resolve_surface_form(registry, random, language, entity, name_type)
-            log.debug("Resolved entity name to {}".format(surface_form))
+            added_slots = self.resolve_surface_form(registry, random, language, this)
+            log.debug("Resolved entity name adding {} new slot(s)".format(added_slots))
 
-            this.value = lambda x: surface_form
-            this.attributes["entity_type"] = entity_type
-            this.attributes["name_type"] = name_type
+            this.attributes['entity_type'] = entity_type
             # If the entity shouldn't be realized, remove the case marking to prevent Omorfi from getting confused
-            if not surface_form:
-                this.attributes.pop('case')
+            # ToDo: Make sure this has been done in the realizer
+            #if not surface_form:
+            #    this.attributes.pop('case')
 
-            previous_entities[confusion_group] = entity
+            previous_entities[entity_type] = entity
 
-        return encountered, previous_entities
+            return added_slots, encountered, previous_entities
 
     def is_entity(self, maybe_entity):
+        raise NotImplementedError("Not implemented")
+
+    def resolve_entity_type(self, entity):
         raise NotImplementedError("Not implemented")
