@@ -44,13 +44,27 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         # importance of value
         what_score = what_type_score * outlier_score
 
+        when_score = 1
         # importance of time
         if fact.when_type == "year":
-            when_score = min(1, (1 / (2019 - int(fact.when_2))**2))
+            # For each year, the importance is simply 1 / diff^2,
+            # where diff is the difference between the next year (now 2019)
+            # and the year the fact discusses. That is, facts regarding
+            # the current year get a multiplier of 1, the year before that
+            # gets a multiplied of 0.25, the year before that 0.11... etc.
+            when_score *= min(1, (1 / (2019 - int(fact.when_2))**2))
         elif fact.when_type == "month":
-            year, month = fact.when.split('M')
-            when_score = min(1, (1 / (2019 - int(year))**2))
-            when_score *= min(1, (1 / (13 - int(month))))
+            # For months, the penalty is scaled linearly between the multiplers
+            # of the year it belongs to and the previous year. The notable
+            # complication here is that we consider the year to consists of 13
+            # months, so that (for example) the year 2020 is considered to be
+            # more newsworthy than the month 2019M12 by the same amount that
+            # 2019M12 is more newsworthy than 2019M11.
+            year, month = fact.when_2.split('M')
+            this_year = min(1, (1 / (2019 - int(year))**2))
+            prev_year = min(1, (1 / (2019 - (int(year)-1))**2))
+            month_effect = (this_year - prev_year) / (int(month)+1)
+            when_score *= this_year - month_effect
 
         # total importance score
         message_score = where_type_score * what_score * when_score
