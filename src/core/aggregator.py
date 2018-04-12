@@ -50,9 +50,6 @@ class Aggregator(NLGPipelineComponent):
                 new_children.append(t1)
                 log.debug("Did not combine. New Children: {}".format(new_children))
 
-        # This is still needed at least for handling CONTRAST types
-        if len(new_children) == 1:
-            return new_children[0]
         this.children.clear()
         this.children.extend(new_children)
         return this
