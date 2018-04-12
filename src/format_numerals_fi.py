@@ -110,9 +110,9 @@ class FinnishNumeralFormatter():
         unit = match.group(1)
         # new_value = self.CRIME_TYPES.get(unit, {}).get('sg', unit)
         try:
-            new_value, non_case_idxs = CRIME_TYPES.get(unit, unit)
+            new_value, non_case_idxs = CRIME_TYPES.get('sg').get(unit, unit)
         except ValueError:
-            new_value = CRIME_TYPES.get(unit, unit)
+            new_value = CRIME_TYPES.get('sg').get(unit, unit)
         return self._unit_set_value(slot, new_value)
 
     def _unit_percentage(self, slot):
@@ -128,7 +128,7 @@ class FinnishNumeralFormatter():
         if slot.attributes.get('form') == 'short':
             return added_slots
         # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='elative')
+        added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='elative')
         idx += added
         added_slots += added
         return added_slots
@@ -150,7 +150,7 @@ class FinnishNumeralFormatter():
         # Move the pointer to the value slot
         idx -= 1
         # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='genitive')
+        added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='genitive')
         idx += added
         added_slots += added
 
@@ -237,7 +237,7 @@ class FinnishNumeralFormatter():
         # If talking about changes, we will do the rest in the change handler
         if match.group(4):
             return added_slots
-        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, unit), case='partitive')
+        added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='partitive')
         idx += added
         added_slots += added
         return added_slots
