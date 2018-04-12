@@ -8,7 +8,7 @@ from format_numerals_en import EnglishNumeralFormatter
 class CrimeEntityNameResolver(EntityNameResolver):
 
     value_type_re = re.compile(
-        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
+        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?(_rank(?:_reverse)?)?$')
 
     def __init__(self):
         # [ENTITY:<group1>:<group2>] where group1 and group2 can contain anything but square brackets or double colon

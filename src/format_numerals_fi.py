@@ -71,7 +71,7 @@ class FinnishNumeralFormatter():
     }
 
     value_type_re = re.compile(
-        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
+        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?(_rank(?:_reverse)?)?')
 
     def __init__(self):
 
@@ -106,7 +106,7 @@ class FinnishNumeralFormatter():
         return 0
 
     def _unit_base(self, slot):
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         # new_value = self.CRIME_TYPES.get(unit, {}).get('sg', unit)
         try:
@@ -118,7 +118,7 @@ class FinnishNumeralFormatter():
     def _unit_percentage(self, slot):
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
@@ -136,7 +136,7 @@ class FinnishNumeralFormatter():
     def _unit_change(self, slot):
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
@@ -210,7 +210,7 @@ class FinnishNumeralFormatter():
     def _unit_rank(self, slot):
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
