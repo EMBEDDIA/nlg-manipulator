@@ -303,8 +303,16 @@ class FinnishNumeralFormatter():
             return self.SMALL_CARDINALS[token_str]
         return token_str
 
-    def _time_year(self, slot):
-        year = slot.value
+    def _time_year(self, random, slot):
+        if slot.slot_type[:-2] == 'when':
+            year = slot.value
+        elif slot.slot_type == 'time':
+            # If we are realizing a {time} slot, we can simply use either of the time values as the year
+            # Here we're choosing the latter one
+            year = slot.value[1:-1].split(":")[-1]
+        else:
+            log.error("Weird slot type '{}' sent to be realized as a year value. Hopefully it's valid.".format(slot.value))
+            year = slot.value
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
@@ -323,8 +331,11 @@ class FinnishNumeralFormatter():
             slot.value = lambda x: self._cardinal(year)
         return added_slots
 
-    def _time_month(self, slot):
-        year, __, month = slot.value.partition("M")
+    def _time_month(self, random, slot):
+        if slot.slot_type[:-2] == 'when':
+            year, month = slot.value.split("M")
+        elif slot.slot_type == 'time':
+            year, month = slot.value[1:-1].split(":")[-1].split("M")
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
@@ -378,8 +389,8 @@ class FinnishNumeralFormatter():
     def _time_change_month(self, random, slot):
         time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
         match = time_matcher.fullmatch(slot.value)
-        year1, _, month1 = match.group(1).partition('M')
-        year2, _, month2 = match.group(2).partition('M')
+        year1, month1 = match.group(1).split('M')
+        year2, month2 = match.group(2).split('M')
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)

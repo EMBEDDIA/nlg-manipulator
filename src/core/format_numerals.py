@@ -21,6 +21,7 @@ class NumeralFormatter(NLGPipelineComponent):
         self._default_numeral = lambda x: "{:n}".format(x)
         self._default_unit = lambda x: None
         self._default_time = lambda x: None
+        self._random = None
 
     def run(self, registry, random, language, document_plan):
         """
@@ -28,6 +29,7 @@ class NumeralFormatter(NLGPipelineComponent):
         """
         log.info("Fixing numerals")
         self._formatter = self._formatters[language[:2]]
+        self._random = random
         self._recurse(document_plan)
         return (document_plan, )
 
@@ -60,6 +62,8 @@ class NumeralFormatter(NLGPipelineComponent):
             elif slot_type == 'what_type':
                 added_slots = self._realize_unit(this)
                 return added_slots
+            else:
+                return 0
 
     def _realize_value(self, slot):
         try:
@@ -98,7 +102,7 @@ class NumeralFormatter(NLGPipelineComponent):
 
     def _realize_time(self, slot):
         try:
-            return self._formatter.time.get(slot.fact.when_type, self._default_time)(slot)
+            return self._formatter.time.get(slot.fact.when_type, self._default_time)(self._random, slot)
         except AttributeError:
             log.error("Error in time realization of slot {}".format(slot))
             return 0
