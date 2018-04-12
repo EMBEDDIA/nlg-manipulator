@@ -292,7 +292,7 @@ class FinnishNumeralFormatter():
         return token + "."
 
     def _cardinal(self, token):
-        token_str = "{:n}".format(token)
+        token_str = "{:.2f}".format(token).rstrip("0").rstrip(".")
         if "." in token_str:
             token_str = re.sub(r'(\d+).(\d+)', r'\1,\2', token_str)
         if token_str in self.SMALL_CARDINALS:
