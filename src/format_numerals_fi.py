@@ -216,6 +216,10 @@ class FinnishNumeralFormatter():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
+        if not match.group(4) and match.group(5) == '_time_place':
+            template.add_component(idx - 1, LiteralSlot("kaikista rikoksista"))
+            added_slots += 1
+            idx += 1
         if prev_slot.slot_type == 'what':
             # If the rank is first, the actual numeral isn't realized at all
             if slot.fact.what == 1:
