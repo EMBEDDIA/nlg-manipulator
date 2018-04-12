@@ -11,7 +11,7 @@ class CrimeMessageGenerator(MessageGenerator):
     def __init__(self, expand=True):
         super(CrimeMessageGenerator, self).__init__()
 
-    def run(self, registry, random, language, where, where_type, when1=None, when2=None, when_type="year"):
+    def run(self, registry, random, language, where, where_type, when1=None, when2=None, when_type=None):
         """
         Run this pipeline component.
         """
