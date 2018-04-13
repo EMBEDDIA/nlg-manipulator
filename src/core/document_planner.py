@@ -288,41 +288,38 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return Relation.SEQUENCE
 
     def _is_elaboration(self, fact1, fact2):
-        return False
-
-
-        # TODO: FIX THIS
         """
 
         :param fact1:
         :param fact2:
         :return: True, if fact2 is an elaboration of fact1, False otherwise
         """
-        same_context = (fact1.where, fact1.when_2) == (fact2.where, fact2.when_2)
+        same_context = (fact1.where, fact1.when_1, fact1.when_2) == (fact2.where, fact1.when_1, fact2.when_2)
         if not same_context:
             return False
         # An elaboration can't have the same fact type in both facts.
         if fact1.what_type == fact2.what_type:
             return False
-        value_type_re = re.compile(r'(percentage_|total_)?([a-z]+)(_change)?(_rank(_reverse)?)?')
-        match_1 = value_type_re.match(fact1.what_type)
-        match_2 = value_type_re.match(fact2.what_type)
+        # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
+        match_1 = self.value_type_re.fullmatch(fact1.what_type)
+        match_2 = self.value_type_re.fullmatch(fact2.what_type)
         # If the facts have different base unit, they can't have an elaboration relation
-        if match_1.group(2) != match_2.group(2):
+        if match_1.group(1) != match_2.group(1):
             return False
         # rank and rank_reverse are elaborated by the base values
-        if match_1.group(4) is not None:
-            return match_1.group(1,3) == match_2.group(1,3)
+        elif match_1.group(6):
+            return match_1.group(2, 3, 4) == match_2.group(2, 3, 4)
         # Rank and rank_reverse cannot be elaborations
-        if match_2.group(4) is not None:
+        elif match_2.group(6):
             return False
         # Change is an elaboration of the result value
-        if match_2.group(3) is not None and match_1.group(1) == match_2.group(1):
+        elif match_2.group(4) and match_1.group(2, 3) == match_2.group(2, 3):
             return True
         # total value is an elaboration of a percentage value
-        if match_1.group(3) == match_2.group(3) == None and match_1.group(1) == "percentage_":
+        elif match_1.group(4) == match_2.group(4) == None and match_1.group(2):
             return True
-        return False
+        else:
+            return False
 
     def _is_exemplification(self, fact1, fact2):
         """
