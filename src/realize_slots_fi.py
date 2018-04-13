@@ -70,10 +70,8 @@ class FinnishRealizer():
 
 
     def _unit_percentage(self, slot):
-        # The capture groups are:
-        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
+        unit, normalized, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -88,10 +86,8 @@ class FinnishRealizer():
         return added_slots
 
     def _unit_change(self, slot):
-        # The capture groups are:
-        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
+        unit, normalized, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         # Check whether the following slot contains the value
@@ -112,7 +108,7 @@ class FinnishRealizer():
         added_slots += 1
         idx += 1
 
-        if match.group(2):
+        if normalized:
             template.add_component(idx, LiteralSlot("suhteessa asukaslukuun"))
             added_slots += 1
             idx += 1
@@ -131,11 +127,11 @@ class FinnishRealizer():
         idx += 2
 
         # The base unit
-        if match.group(6):
+        if rank:
             # rikosten määrä kasvoi viidenneksi eniten
             new_slots = self._unit_rank(slot)
             added_slots += new_slots
-        elif match.group(3):
+        elif percentage:
             # rikosten määrä kasvoi viisi prosenttiyksikköä
             new_slots = self._unit_set_value(slot, "prosenttiyksikkö")
             added_slots += new_slots
@@ -147,30 +143,34 @@ class FinnishRealizer():
         idx += 1
 
         # The end comparison
-        if match.group(5):
+        if grouped_by:
             template.add_component(idx, LiteralSlot("muihin"))
             added_slots += 1
             idx += 1
-            if match.group(5) == '_time_place':
+            if grouped_by == '_time_place':
                 template.add_component(idx, LiteralSlot("rikostyyppeihin verrattuna"))
                 added_slots += 1
                 idx += 1
-            else:
+            elif grouped_by == '_crime_time':
                 template.add_component(idx, LiteralSlot("alueisiin verrattuna"))
                 added_slots += 1
                 idx += 1
+            elif grouped_by == 'crime_place_year':
+                template.add_component(idx, LiteralSlot("kuukausiin verrattuna"))
+                added_slots += 1
+                idx += 1
+            else:
+                raise Exception("This is impossible. The regex accepts only the above options for this group.")
         return added_slots
 
     def _unit_rank(self, slot):
-        # The capture groups are:
-        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
+        unit, normalized, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-        if not match.group(4) and match.group(5) == '_time_place':
+        if not change and grouped_by == '_time_place':
             template.add_component(idx - 1, LiteralSlot("kaikista rikoksista"))
             added_slots += 1
             idx += 1
@@ -183,17 +183,19 @@ class FinnishRealizer():
                 prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
                 if 'case' not in prev_slot.attributes.keys():
                     prev_slot.attributes['case'] = 'translative'
-        # This also works for _rank_reverse, since the difference is communicated using different verbs.
-        # ToDo: This is still not finished, probably needs more stuff to work properly in all cases.
-        if match.group(6) == "_rank":
+        if rank == '_rank':
             slot.value = lambda x: "eniten"
-        elif match.group(6) == "_rank_reverse":
+        elif rank == '_rank_reverse':
             slot.value = lambda x: "vähiten"
+        elif rank == '_increase_rank':
+            slot.value = "eniten???"
+        elif rank == '_decrease_rank':
+            slot.value = "eniten???"
         else:
-            raise Exception("This is impossible. The regex accepts only the two options above for this group.")
+            raise Exception("This is impossible. The regex accepts only the above options for this group.")
         idx += 1
         # If talking about changes, we will do the rest in the change handler
-        if match.group(4):
+        if change:
             return added_slots
         added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='partitive')
         idx += added
