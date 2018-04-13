@@ -163,6 +163,9 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                         log.info("Reached max length of paragraph, ending it")
                         break
 
+                else:
+                    log.warn('I wanted to express {}, but had no template for it'.format(satellite.fact))
+
             dp.children.append(
                 DocumentPlan(children=messages, relation=Relation.SEQUENCE)
             )
@@ -172,12 +175,10 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return (dp, all_messages)
 
     def _is_effectively_repetition(self, candidate, messages):
-        log.debug("Checking if {} is already being effectively told".format(candidate.fact.what_type))
         unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.fullmatch(candidate.fact.what_type).groups()
         
         flat_messages = self._flatten(messages)
         if not flat_messages:
-            log.debug("A lone template is never repetitious")
             return False
 
         for other in flat_messages:
@@ -198,7 +199,10 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 ):
                 # Notably, we consider ranks and reverse ranks the same and similarly consider the normalized
                 # variant of a fact to be repetitive with the un-normalized fact. 
-                log.debug("Yes, it's already being effectively told by {}".format(other.fact.what_type))
+                log.info("Skipping {}, as it's already being effectively told by {}".format(
+                    candidate.fact.what_type, 
+                    other.fact.what_type
+                ))
                 return True
         log.debug("It does not seem to be repetition, including in DocumentPlan")
         return False

@@ -22,7 +22,7 @@ formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 log = logging.getLogger('root')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 #log.setLevel(5) # Enable for way too much logging, even more than DEBUG
 log.addHandler(handler)
 
