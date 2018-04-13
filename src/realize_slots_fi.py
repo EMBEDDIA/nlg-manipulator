@@ -264,6 +264,8 @@ class FinnishRealizer():
             slot.value = lambda x: 'x'
         elif type(year) is not str:
             slot.value = lambda x: self._cardinal(year)
+        else:
+            self._update_slot_value(slot, year)
         return added_slots
 
     def _time_month(self, random, slot):
