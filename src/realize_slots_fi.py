@@ -42,13 +42,32 @@ class FinnishRealizer():
 
     def _unit_base(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
-        # new_value = self.CRIME_TYPES.get(unit, {}).get('sg', unit)
+        unit, normalized, percentage, change, grouped_by, rank = match.groups()
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
+        content = CRIME_TYPES.get('sg').get(unit, unit)
         try:
-            new_value, non_case_idxs = CRIME_TYPES.get('sg').get(unit, unit)
+            unit, non_case_idx = content
+            words = unit.split()
         except ValueError:
-            new_value = CRIME_TYPES.get('sg').get(unit, unit)
-        return self._unit_set_value(slot, new_value)
+            words = content.split()
+        if len(words) == 1:
+            added = self._unit_set_value(slot, words[0])
+            added_slots += added
+            idx += added
+        else:
+            case = slot.attributes.get('case', 'partitive')
+            self._update_slot_value(slot, "")
+            added = self._add_slots(template, idx, content, case)
+            added_slots += added
+            idx += added + 1
+        if normalized:
+            template.add_component(idx, LiteralSlot("tuhatta asukasta kohti"))
+            added_slots += 1
+            idx += 1
+        return added_slots
+
 
     def _unit_percentage(self, slot):
         # The capture groups are:
