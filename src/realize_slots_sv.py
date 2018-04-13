@@ -3,7 +3,7 @@ import re
 from core.template import LiteralSlot
 
 
-class SwedishNumeralFormatter():
+class SwedishRealizer():
 
     SMALL_ORDINALS = {
         # Först = adverbial form, which I think is the way we always want to do this

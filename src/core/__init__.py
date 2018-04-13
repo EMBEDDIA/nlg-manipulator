@@ -4,7 +4,7 @@ from .document_plan import *
 from .document_planner import *
 from .entity_name_resolver import *
 from .message_generator import *
-from .format_numerals import *
+from .realize_slots import *
 from .pipeline import *
 from .registry import *
 from .surface_realizer import *

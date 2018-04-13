@@ -1,9 +1,9 @@
 import re
 from core import EntityNameResolver
 
-from format_numerals_fi import FinnishNumeralFormatter
-from format_numerals_sv import SwedishNumeralFormatter
-from format_numerals_en import EnglishNumeralFormatter
+from realize_slots_fi import FinnishRealizer
+from realize_slots_sv import SwedishRealizer
+from realize_slots_en import EnglishRealizer
 
 class CrimeEntityNameResolver(EntityNameResolver):
     value_type_re = re.compile(
@@ -13,9 +13,9 @@ class CrimeEntityNameResolver(EntityNameResolver):
         # [ENTITY:<group1>:<group2>] where group1 and group2 can contain anything but square brackets or double colon
         self._matcher = re.compile("\[(PLACE|TIME):([^\]:]*):([^\]]*)\]")
         self._formatters = {
-            'fi': FinnishNumeralFormatter(),
-            'sv': SwedishNumeralFormatter(),
-            'en': EnglishNumeralFormatter(),
+            'fi': FinnishRealizer(),
+            'sv': SwedishRealizer(),
+            'en': EnglishRealizer(),
         }
 
     def is_entity(self, maybe_entity):

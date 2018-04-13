@@ -1,23 +1,23 @@
 from .pipeline import NLGPipelineComponent
 
-from format_numerals_fi import FinnishNumeralFormatter
-from format_numerals_sv import SwedishNumeralFormatter
-from format_numerals_en import EnglishNumeralFormatter
+from realize_slots_fi import FinnishRealizer
+from realize_slots_sv import SwedishRealizer
+from realize_slots_en import EnglishRealizer
 
 import logging
 import re
 log = logging.getLogger('root')
 
 
-class NumeralFormatter(NLGPipelineComponent):
+class SlotRealizer(NLGPipelineComponent):
 
     def __init__(self):
-        self._formatters = {
-            'fi': FinnishNumeralFormatter(),
-            'sv': SwedishNumeralFormatter(),
-            'en': EnglishNumeralFormatter(),
+        self._realizers = {
+            'fi': FinnishRealizer(),
+            'sv': SwedishRealizer(),
+            'en': EnglishRealizer(),
         }
-        self._formatter = None
+        self._realizer = None
         self._default_numeral = lambda x: "{:n}".format(x)
         self._default_unit = lambda x: None
         self._default_time = lambda x: None
@@ -27,8 +27,8 @@ class NumeralFormatter(NLGPipelineComponent):
         """
         Run this pipeline component.
         """
-        log.info("Fixing numerals")
-        self._formatter = self._formatters[language[:2]]
+        log.info("Realizing slots")
+        self._realizer = self._realizers[language[:2]]
         self._random = random
         self._recurse(document_plan)
         return (document_plan, )
@@ -51,7 +51,7 @@ class NumeralFormatter(NLGPipelineComponent):
             try:
                 slot_type = this.slot_type
             except AttributeError:
-                log.info("Got an AttributeError when checking slot_type in format_numerals. Probably not a slot.")
+                log.info("Got an AttributeError when checking slot_type in realize_slots. Probably not a slot.")
                 slot_type = 'n/a'
             if slot_type == 'what':
                 added_slots = self._realize_value(this)
@@ -77,7 +77,7 @@ class NumeralFormatter(NLGPipelineComponent):
             value = slot.value
             if type(value) is str:
                 return 0
-            modified_value = self._formatter.numerals.get(num_type, self._default_numeral)(abs(value))
+            modified_value = self._realizer.numerals.get(num_type, self._default_numeral)(abs(value))
             slot.value = lambda x: modified_value
         except AttributeError:
             log.error("Error in value realization of slot {}".format(slot))
@@ -89,13 +89,13 @@ class NumeralFormatter(NLGPipelineComponent):
         match = value_type_re.fullmatch(slot.value)
         try:
             if match.group(4):
-                new_slots = self._formatter.units.get('change', self._default_unit)(slot)
+                new_slots = self._realizer.units.get('change', self._default_unit)(slot)
             elif match.group(6):
-                new_slots = self._formatter.units.get('rank', self._default_unit)(slot)
+                new_slots = self._realizer.units.get('rank', self._default_unit)(slot)
             elif match.group(3):
-                new_slots = self._formatter.units.get('percentage', self._default_unit)(slot)
+                new_slots = self._realizer.units.get('percentage', self._default_unit)(slot)
             else:
-                new_slots = self._formatter.units.get('base', self._default_unit)(slot)
+                new_slots = self._realizer.units.get('base', self._default_unit)(slot)
             return new_slots
         except AttributeError:
             log.error("Error in unit realization of slot {}".format(slot))
@@ -103,7 +103,7 @@ class NumeralFormatter(NLGPipelineComponent):
 
     def _realize_time(self, slot):
         try:
-            return self._formatter.time.get(slot.fact.when_type, self._default_time)(self._random, slot)
+            return self._realizer.time.get(slot.fact.when_type, self._default_time)(self._random, slot)
         except AttributeError:
             log.error("Error in time realization of slot {}".format(slot))
             return 0

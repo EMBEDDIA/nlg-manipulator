@@ -4,7 +4,7 @@ from core.template import LiteralSlot
 from format_crimetypes_fi import CRIME_TYPES
 log = logging.getLogger('root')
 
-class FinnishNumeralFormatter():
+class FinnishRealizer():
 
     SMALL_ORDINALS = {
         '1': "ensimmäinen",

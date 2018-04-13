@@ -13,7 +13,7 @@ from core import Registry, NLGPipeline, DataFrameStore
 from crime_message_generator import CrimeMessageGenerator, NoMessagesForSelectionException
 from core import BodyDocumentPlanner, HeadlineDocumentPlanner
 from templates.read_multiling import read_templates_file
-from core import NumeralFormatter
+from core import SlotRealizer
 from core import TemplateSelector
 from core import Aggregator
 from crime_named_entity_resolver import CrimeEntityNameResolver
@@ -94,7 +94,7 @@ class CrimeNlgService(object):
             yield HeadlineDocumentPlanner() if headline else BodyDocumentPlanner()
             yield TemplateSelector()
             yield Aggregator()
-            yield NumeralFormatter()
+            yield SlotRealizer()
             yield CrimeEntityNameResolver()
             if not nomorphi:
                 # Don't even try importing Omorphi if we're not using it

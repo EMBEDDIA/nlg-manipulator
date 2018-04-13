@@ -5,7 +5,7 @@ from core.template import LiteralSlot
 log = logging.getLogger('root')
 
 
-class EnglishNumeralFormatter():
+class EnglishRealizer():
 
     SMALL_ORDINALS = {
         '1': "first",
