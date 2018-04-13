@@ -1,74 +1,10 @@
 import re
 import logging
 from core.template import LiteralSlot
-from format_crimetypes_fi import CRIME_TYPES
+from dictionary_fi import CRIME_TYPES, MONTHS, SMALL_CARDINALS, SMALL_ORDINALS
 log = logging.getLogger('root')
 
 class FinnishRealizer():
-
-    SMALL_ORDINALS = {
-        '1': "ensimmäinen",
-        '2': "toinen",
-        '3': "kolmas",
-        '4': "neljäs",
-        '5': "viides",
-        '6': "kuudes",
-        '7': "seitsemäs",
-        '8': "kahdeksas",
-        '9': "yhdeksäs",
-        '10': "kymmenes",
-    }
-
-    SMALL_CARDINALS = {
-        '1': "yksi",
-        '2': "kaksi",
-        '3': "kolme",
-        '4': "neljä",
-        '5': "viisi",
-        '6': "kuusi",
-        '7': "seitsemän",
-        '8': "kahdeksan",
-        '9': "yhdeksän",
-        '10': "kymmenen",
-    }
-
-    MONTHS = {
-        '01': "tammikuu",
-        '02': "helmikuu",
-        '03': "maaliskuu",
-        '04': "huhtikuu",
-        '05': "toukokuu",
-        '06': "kesäkuu",
-        '07': "heinäkuu",
-        '08': "elokuu",
-        '09': "syyskuu",
-        '10': "lokakuu",
-        '11': "marraskuu",
-        '12': "joulukuu",
-    }
-
-    UNITS = {
-        'seats': {
-            'sg': "paikka",
-            'pl': "paikat"
-        },
-        'votes': {
-            'sg': "ääni",
-            'pl': "äänet"
-        },
-        '1_offences_and_infractions_total_all_offences':{
-            'sg': "1-rikos", #ToDo: this is not the correct name, fix
-            'pl': "1-rikokset"
-        },
-        '4_endangerment_of_traffic_safety_hitandrun_traffic_infraction_all_offences':{
-            'sg': "4-liikennerikos", #ToDo: this is not the correct name, fix
-            'pl': "4-liikennerikokset"
-        },
-        'traffic_infraction_violation_of_social_welfare_legislation_on_road_traffic_all_offences':{
-            'sg': "liikennerikos", #ToDo: this is not the correct name, fix
-            'pl': "liikennerikokset"
-        }
-    }
 
     value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
 
@@ -290,16 +226,16 @@ class FinnishRealizer():
 
     def _ordinal(self, token):
         token = "{:n}".format(token)
-        if token in self.SMALL_ORDINALS:
-            return self.SMALL_ORDINALS[token]
+        if token in SMALL_ORDINALS:
+            return SMALL_ORDINALS[token]
         return token + "."
 
     def _cardinal(self, token):
         token_str = "{:.2f}".format(token).rstrip("0").rstrip(".")
         if "." in token_str:
             token_str = re.sub(r'(\d+).(\d+)', r'\1,\2', token_str)
-        if token_str in self.SMALL_CARDINALS:
-            return self.SMALL_CARDINALS[token_str]
+        if token_str in SMALL_CARDINALS:
+            return SMALL_CARDINALS[token_str]
         return token_str
 
     def _time_year(self, random, slot):
@@ -338,7 +274,7 @@ class FinnishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        new_slot = LiteralSlot(self.MONTHS[month])
+        new_slot = LiteralSlot(MONTHS[month])
         new_slot.attributes['case'] = 'inessive'
         template.add_component(idx, new_slot)
         added_slots += 1
@@ -403,7 +339,7 @@ class FinnishRealizer():
                 self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
                 slot.attributes['case'] = 'nominative'
             else:
-                new_slot = LiteralSlot(self.MONTHS[month1])
+                new_slot = LiteralSlot(MONTHS[month1])
                 new_slot.attributes['case'] = 'elative'
                 template.add_component(idx, new_slot)
                 added_slots += 1
@@ -411,7 +347,7 @@ class FinnishRealizer():
                 template.add_component(idx, LiteralSlot(year1))
                 added_slots += 1
                 idx += 1
-                new_slot = LiteralSlot(self.MONTHS[month2])
+                new_slot = LiteralSlot(MONTHS[month2])
                 new_slot.attributes['case'] = 'illative'
                 template.add_component(idx, new_slot)
                 added_slots += 1

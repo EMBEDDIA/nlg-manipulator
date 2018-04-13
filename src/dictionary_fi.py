@@ -1,5 +1,3 @@
-# ToDo: Figure out the correct Finnish terms
-
 
 CRIME_TYPES = {
     'sg': {
@@ -224,4 +222,45 @@ CRIME_TYPES = {
         'other_public_order_violation_total': "järjestysrikkomukset",
         'other_offences_against_other_acts_decrees_total': ("muita lakeja ja asetuksia vastaan tehdyt rikokset", [0, 1, 2, 3, 4]),
     }
+}
+
+SMALL_ORDINALS = {
+    '1': "ensimmäinen",
+    '2': "toinen",
+    '3': "kolmas",
+    '4': "neljäs",
+    '5': "viides",
+    '6': "kuudes",
+    '7': "seitsemäs",
+    '8': "kahdeksas",
+    '9': "yhdeksäs",
+    '10': "kymmenes",
+}
+
+SMALL_CARDINALS = {
+    '1': "yksi",
+    '2': "kaksi",
+    '3': "kolme",
+    '4': "neljä",
+    '5': "viisi",
+    '6': "kuusi",
+    '7': "seitsemän",
+    '8': "kahdeksan",
+    '9': "yhdeksän",
+    '10': "kymmenen",
+}
+
+MONTHS = {
+    '01': "tammikuu",
+    '02': "helmikuu",
+    '03': "maaliskuu",
+    '04': "huhtikuu",
+    '05': "toukokuu",
+    '06': "kesäkuu",
+    '07': "heinäkuu",
+    '08': "elokuu",
+    '09': "syyskuu",
+    '10': "lokakuu",
+    '11': "marraskuu",
+    '12': "joulukuu",
 }
