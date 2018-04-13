@@ -21,6 +21,7 @@ from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from crime_importance_allocator import CrimeImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 from locations import LocationHierarchy
+from locator_map_adder import LocatorMapAdder
 
 
 class CrimeNlgService(object):
@@ -36,6 +37,7 @@ class CrimeNlgService(object):
 
         # New registry and result importer
         self.registry = Registry()
+        self.locator_map_adder = LocatorMapAdder()
 
         crime_data = [
             ('../data/bc_crime_pyn_comp_ranks_outliers.csv', '../data/bc_crime_comp.cache', 'crime-bc-comp-data'),
@@ -160,6 +162,7 @@ class CrimeNlgService(object):
             headline = where
             log.error("%s", ex)
 
+        body = self.locator_map_adder.add(body, where)
         return headline, body
 
     def _set_seed(self, seed_val=None):
