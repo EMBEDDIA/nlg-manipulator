@@ -238,16 +238,10 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                     if (nucleus.fact.where == msg.fact.where
                         and nucleus.fact.what_type.split("_")[0] == msg.fact.what_type.split("_")[0]
                         and (
-                            (msg.fact.when_1 == nucleus.fact.when_1 and msg.fact.when_2 == nucleus.fact.when_2)
+                            (msg.fact.when_2 == nucleus.fact.when_2)
                             or (msg.fact.when_1 == nucleus.fact.when_1 and msg.fact.when_2 == nucleus.fact.when_1)
-                            or (msg.fact.when_1 == nucleus.fact.when_2 and msg.fact.when_2 == nucleus.fact.when_2)
-                            or (
-                                nucleus.fact.when_1 == nucleus.fact.when_2 
-                                and (
-                                    msg.fact.when_1 == nucleus.fact.when_1 
-                                    or msg.fact.when_2 == nucleus.fact.when_1
-                            ))
-                        ))]
+                            )
+                        )]
         return modified
 
     def _add_satellite(self, satellite, messages):
