@@ -487,8 +487,6 @@ class ConverterC:
         #, sep=';'encoding="ISO-8859-1",
 
         # Remove and rename
-        #self.crime_data = dh.drop_columns(self.crime_data, "column/keep_columns")
-        #self.crime_data = dh.rename_columns(self.crime_data, "column/rename_columns_table.csv")
         self.crime_data = drop_columns(self.crime_data, cls.keep_columns)
         self.crime_data = rename_columns(self.crime_data, cls.rename_columns)
         self._rename_entries_and_columns()
@@ -509,18 +507,13 @@ class ConverterC:
         self.crime_data = self._add_population_column(self.crime_data)
 
         # Make broad categories df
-        #self.bc_crime_data = dh.calculate_sums(self.crime_data, "column/new_columns_table.csv", "column/carryover_columns")
         self.bc_crime_data = calculate_sums(self.crime_data, cls.new_columns, cls.carryover_columns)
 
         # Add total columns
-        #self.crime_data = dh.total_column(self.crime_data, "column/ignore_columns")
-        #self.bc_crime_data = dh.total_column(self.bc_crime_data, "column/ignore_columns")
         self.crime_data = total_column(self.crime_data, cls.ignore_columns)
         self.bc_crime_data = total_column(self.bc_crime_data, cls.ignore_columns)
 
         # Normalize columns
-        #self.crime_data = dh.normalize(self.crime_data,  "population", "column/ignore_columns")
-        #self.bc_crime_data = dh.normalize(self.bc_crime_data, "population", "column/ignore_columns")
         self.crime_data = normalize(self.crime_data,  "population", cls.ignore_columns)
         self.bc_crime_data = normalize(self.bc_crime_data, "population", cls.ignore_columns)
 
