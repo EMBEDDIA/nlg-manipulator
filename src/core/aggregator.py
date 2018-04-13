@@ -119,7 +119,7 @@ class Aggregator(NLGPipelineComponent):
                 result.append(Literal("("))
                 result.append(Slot(FactFieldSource('what'), fact=second.facts[0]))
                 result.append(Slot(FactFieldSource("what_type"), fact=second.facts[0]))
-                attributes = {"form": "short", "case": "accusative"}
+                attributes = {"form": "short", "case": "partitive"}
                 result[-1].attributes = attributes
                 result.append(Literal(")"))
         except KeyError:
