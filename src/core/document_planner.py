@@ -47,8 +47,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     """
 
     # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-    value_type_re = re.compile(
-        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
+    value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
 
     def run(self, registry, random, language, scored_messages):
         """
@@ -67,13 +66,13 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # municipalities using the reported values instead of normalized or percentage values
         scored_messages = [msg for msg in scored_messages
                            # drop the message if it is about a rank or rank_reverse of more than 4 ...
-                           if not ((self.value_type_re.match(msg.fact.what_type).group(6) and msg.fact.what > 4)
+                           if not ((self.value_type_re.fullmatch(msg.fact.what_type).group(6) and msg.fact.what > 4)
                                    # ... or if the message is not normalized ...
-                                   or (not (self.value_type_re.match(msg.fact.what_type).group(2)
+                                   or (not (self.value_type_re.fullmatch(msg.fact.what_type).group(2)
                                             # ... or percentage ...
-                                            or self.value_type_re.match(msg.fact.what_type).group(3))
+                                            or self.value_type_re.fullmatch(msg.fact.what_type).group(3))
                                        # ... and is comparing different municipalities
-                                       and self.value_type_re.match(msg.fact.what_type).group(5) == '_crime_time'))]
+                                       and self.value_type_re.fullmatch(msg.fact.what_type).group(5) == '_crime_time'))]
 
         # In the first paragraph, don't ever use a message that's been added during expansion
         # These are recognisable by having a <1 importance coefficient
@@ -174,7 +173,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
 
     def _is_effectively_repetition(self, candidate, messages):
         log.debug("Checking if {} is already being effectively told".format(candidate.fact.what_type))
-        unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.match(candidate.fact.what_type).groups()
+        unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.fullmatch(candidate.fact.what_type).groups()
         
         flat_messages = self._flatten(messages)
         if not flat_messages:
@@ -183,9 +182,9 @@ class BodyDocumentPlanner(NLGPipelineComponent):
 
         for other in flat_messages:
             if candidate.fact.where != other.fact.where:
-                # Not repetition if we are not event talking about the same location
+                # Not repetition if we are not even talking about the same location
                 continue
-            other_groups = self.value_type_re.match(other.fact.what_type).groups()
+            other_groups = self.value_type_re.fullmatch(other.fact.what_type).groups()
             (existing_unit, existing_normalized, existing_percentage, existing_change, existing_grouped_by, existing_rank) = other_groups
             if (
                 unit == existing_unit 

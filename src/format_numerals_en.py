@@ -47,7 +47,7 @@ class EnglishNumeralFormatter():
     }
 
     value_type_re = re.compile(
-        r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time))?(_rank(?:_reverse)?)?$')
+        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
 
     def __init__(self):
 
@@ -69,7 +69,7 @@ class EnglishNumeralFormatter():
         }
 
     def _unit_base(self, slot):
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         if abs(slot.fact.what) == 1:
             new_value = self.UNITS.get(unit, {}).get('sg', unit)
@@ -93,7 +93,7 @@ class EnglishNumeralFormatter():
     def _unit_percentage(self, slot):
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
@@ -111,7 +111,7 @@ class EnglishNumeralFormatter():
             return self._unit_comparison(slot)
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
@@ -120,7 +120,7 @@ class EnglishNumeralFormatter():
         if template.components[idx + 1].slot_type == 'what':
             what_slot = template.components[idx + 1]
         else:
-            log.error("The english change template should have a value slot following a unit slot!")
+            log.error("The English change template should have a value slot following a unit slot!")
             return 0
         added_slots = 0
         self._update_slot_value(slot, self.UNITS.get(unit, {}).get('pl', unit))
@@ -170,7 +170,7 @@ class EnglishNumeralFormatter():
     def _unit_comparison(self, slot):
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         grouped_by = match.group(5)
         template = slot.parent
         idx = template.components.index(slot)

@@ -84,8 +84,9 @@ class NumeralFormatter(NLGPipelineComponent):
         return 0
 
     def _realize_unit(self, slot):
-        value_type_re = re.compile(r'^([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?(_rank(?:_reverse)?)?$')
-        match = value_type_re.match(slot.value)
+        value_type_re = re.compile(
+            r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+        match = value_type_re.fullmatch(slot.value)
         try:
             if match.group(4):
                 new_slots = self._formatter.units.get('change', self._default_unit)(slot)

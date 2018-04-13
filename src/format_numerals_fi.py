@@ -70,8 +70,7 @@ class FinnishNumeralFormatter():
         }
     }
 
-    value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?(_rank(?:_reverse)?)?')
+    value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
 
     def __init__(self):
 

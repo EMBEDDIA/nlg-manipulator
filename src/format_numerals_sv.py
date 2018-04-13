@@ -37,7 +37,8 @@ class SwedishNumeralFormatter():
         }
     }
 
-    value_type_re = re.compile(r'(percentage_|total_)?([a-z]+)(_change)?(_rank(_reverse)?)?')
+    value_type_re = re.compile(
+        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
 
     def __init__(self):
 
@@ -61,7 +62,7 @@ class SwedishNumeralFormatter():
         }
 
     def _unit_base(self, slot):
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(2)
         if abs(slot.fact.what) == 1:
             new_value = self.UNITS[unit]['sg']
@@ -70,7 +71,7 @@ class SwedishNumeralFormatter():
         return self._update_slot_value(slot, new_value)
 
     def _unit_percentage(self, slot):
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -84,7 +85,7 @@ class SwedishNumeralFormatter():
         return added_slots
 
     def _unit_change(self, slot):
-        match = self.value_type_re.match(slot.value)
+        match = self.value_type_re.fullmatch(slot.value)
         template = slot.parent
         idx = template.components.index(slot)
         # If the value_type starts with percentage_ or total_
