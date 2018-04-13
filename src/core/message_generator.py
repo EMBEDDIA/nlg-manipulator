@@ -92,6 +92,13 @@ class MessageGenerator(NLGPipelineComponent):
 
             outlierness_col_name = col_name + "_outlierness"
             outlierness = row.get(outlierness_col_name, None)
+            # For the crime totals, there are two (or three) outliernesses to choose from:
+            # _grouped_by_time_place_outlierness,
+            # _grouped_by_crime_time_outlierness, and for the monthly statistics
+            # _grouped_by_crime_place_year_outlierness
+            # Adjusted the code to choose the _time_place_outlierness for now
+            if not outlierness:
+                outlierness = row.get(col_name + '_grouped_by_time_place_outlierness', None)
 
             if what is None or what == "" or (isinstance(what, float) and isnan(what)):
                 # 'what' is effectively undefined, do not REALLY generate the message.
