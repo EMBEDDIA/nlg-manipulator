@@ -317,8 +317,6 @@ class FinnishRealizer():
             slot.attributes['case'] = 'nominative'
         else:
             self._update_slot_value(slot, "")
-            if 'case' in slot.attributes.keys():
-                slot.attributes.pop('case')
         return added_slots
 
     def _time_change_month(self, random, slot):
@@ -360,7 +358,6 @@ class FinnishRealizer():
             slot.attributes['case'] = 'nominative'
         else:
             self._update_slot_value(slot, "")
-            slot.attributes.pop('case')
         return added_slots
 
     def place(self, random, slot):

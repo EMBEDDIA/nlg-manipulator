@@ -171,6 +171,10 @@ class OmorfiGenerator(object):
 
             log.debug("Found a slot with a 'case' attribute: {}".format(this))
 
+            if this.value == "":
+                log.debug("The slot is empty. Ignoring")
+                return
+
             if attributes.get("entity_type", None) == "D":
                 self._modify(this, multi_word_idx=1)
 

@@ -99,11 +99,6 @@ class EntityNameResolver(NLGPipelineComponent):
             log.debug("Resolved entity name adding {} new slot(s)".format(added_slots))
 
             this.attributes['entity_type'] = entity_type
-            # If the entity shouldn't be realized, remove the case marking to prevent Omorfi from getting confused
-            # ToDo: Make sure this has been done in the realizer
-            #if not surface_form:
-            #    this.attributes.pop('case')
-
             previous_entities[entity_type] = entity
 
             return added_slots, encountered, previous_entities
