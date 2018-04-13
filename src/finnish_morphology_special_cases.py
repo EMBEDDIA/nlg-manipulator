@@ -13,5 +13,7 @@ special_cases = {
     "Jokioinen": {
         "genitive": "Jokioisten",
     },
-    
+    "törkeä": {
+        'partitive': "törkeää",
+    },
 }
