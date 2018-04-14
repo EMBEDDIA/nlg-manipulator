@@ -156,6 +156,10 @@ class ImporterC:
             df[ranked_col_name] = grouped.rank(ascending=False, method="dense")
             df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense")
 
+            # set year ranks to zero
+            df.loc[df['when_type'] == 'year', ranked_col_name] = np.nan
+            df.loc[df['when_type'] == 'year', reverse_ranked_col_name] = np.nan
+
         # Last ranking:
         #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
         raw_numbers_columns = [x for x in ranked_columns if 'normalized' not in x]
@@ -226,6 +230,7 @@ class ImporterC:
 
             outlierness_ct_column_name = "{}_grouped_by_crime_place_year_outlierness".format(column_name)
             df[outlierness_ct_column_name] = df.groupby(["where", "where_type", "year", "when_type"])[column_name].apply(group_outlierness)
+            df.loc[df['when_type'] == 'year', outlierness_ct_column_name] = np.nan
 
         # Last outlierness:
         #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
