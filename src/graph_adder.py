@@ -58,7 +58,7 @@ class GraphAdder():
 
 	def _get_graph(self, labels, datasets):
 		return """
-			<div style="max-width: 500px; max-height: 500px; margin-left: auto; margin-right: auto;">
+			<div style="max-width: 500px; max-height: 500px; float:left; clear:right;">
 				<canvas id="chart" width="500" height="500"></canvas>
 				<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
 				<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
