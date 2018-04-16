@@ -22,6 +22,7 @@ from crime_importance_allocator import CrimeImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 from locations import LocationHierarchy
 from locator_map_adder import LocatorMapAdder
+from graph_adder import GraphAdder
 
 
 class CrimeNlgService(object):
@@ -38,6 +39,7 @@ class CrimeNlgService(object):
         # New registry and result importer
         self.registry = Registry()
         self.locator_map_adder = LocatorMapAdder()
+        self.graph_adder = GraphAdder()
 
         crime_data = [
             ('../data/bc_crime_pyn_comp_ranks_outliers.csv', '../data/bc_crime_comp.cache', 'crime-bc-comp-data'),
@@ -163,6 +165,10 @@ class CrimeNlgService(object):
             log.error("%s", ex)
 
         body = self.locator_map_adder.add(body, where)
+
+        if where_type == 'M':
+            body = self.graph_adder.add(self.registry, body, where)
+
         return headline, body
 
     def _set_seed(self, seed_val=None):
