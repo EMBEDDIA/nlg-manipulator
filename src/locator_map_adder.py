@@ -77,7 +77,7 @@ class LocatorMapAdder():
 		
 	def _get_coords(self, location):
 		if location not in self.CACHE:
-			url = "https://api.digitransit.fi/geocoding/v1/search?text={}&size=1".format(urllib.parse.quote(location))
+			url = "https://api.digitransit.fi/geocoding/v1/search?text={}&layers=localAdmin&size=1".format(urllib.parse.quote(location))
 			response = urllib.request.urlopen(url).read()
 			data = json.loads(response.decode('utf-8'))
 			self.CACHE[location] = data['features'][0]['geometry']['coordinates'][1], data['features'][0]['geometry']['coordinates'][0]
