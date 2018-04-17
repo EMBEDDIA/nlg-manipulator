@@ -46,7 +46,7 @@ class FinnishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
-        content = CRIME_TYPES.get('sg').get(unit, unit)
+        content = CRIME_TYPES.get(unit, {}).get('sg', unit)
         try:
             unit, non_case_idx = content
             words = unit.split()
@@ -80,7 +80,7 @@ class FinnishRealizer():
         if slot.attributes.get('form') == 'short':
             return added_slots
         # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='elative')
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='elative')
         idx += added
         added_slots += added
         return added_slots
@@ -100,7 +100,7 @@ class FinnishRealizer():
         # Move the pointer to the value slot
         idx -= 1
         # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
-        added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='genitive')
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='genitive')
         idx += added
         added_slots += added
 
@@ -183,21 +183,17 @@ class FinnishRealizer():
                 prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
                 if 'case' not in prev_slot.attributes.keys():
                     prev_slot.attributes['case'] = 'translative'
-        if rank == '_rank':
+        if rank in ['_rank', '_increase_rank', '_decrease_rank']:
             slot.value = lambda x: "eniten"
         elif rank == '_rank_reverse':
             slot.value = lambda x: "vähiten"
-        elif rank == '_increase_rank':
-            slot.value = "eniten???"
-        elif rank == '_decrease_rank':
-            slot.value = "eniten???"
         else:
             raise Exception("This is impossible. The regex accepts only the above options for this group.")
         idx += 1
         # If talking about changes, we will do the rest in the change handler
         if change:
             return added_slots
-        added = self._add_slots(template, idx, CRIME_TYPES.get('pl').get(unit, unit), case='partitive')
+        added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='partitive')
         idx += added
         added_slots += added
         return added_slots
