@@ -27,7 +27,6 @@ class Aggregator(NLGPipelineComponent):
     def _aggregate_sequence(self, registry, language, this):
         log.debug("Visiting {}".format(this))
 
-        previous_was_combined = True
         num_children = len(this.children)
         new_children = []
         for idx in range(0, num_children):
@@ -39,14 +38,12 @@ class Aggregator(NLGPipelineComponent):
 
             log.debug("t0={}, t1={}".format(t0, t1))
 
-            if self._same_prefix(t0, t1) and not previous_was_combined:
-                previous_was_combined = True
+            if self._same_prefix(t0, t1) and not t0.prevent_aggregation:
                 log.debug("Combining")
                 new_children[-1] = self._combine(registry, language, new_children[-1], t1)
                 log.debug("Combined, New Children: {}".format(new_children))
 
             else:
-                previous_was_combined = False
                 new_children.append(t1)
                 log.debug("Did not combine. New Children: {}".format(new_children))
 
@@ -99,6 +96,7 @@ class Aggregator(NLGPipelineComponent):
         log.debug("Combined thing is {}".format([c.value for c in combined]))
         new_message = Message(facts=first.facts + [fact for fact in second.facts if fact not in first.facts], importance_coefficient=first.importance_coefficient)
         new_message.template = Template(combined)
+        new_message.prevent_aggregation = True
         return new_message
 
     def _elaborate(self, registry, language, first, second):
@@ -126,6 +124,7 @@ class Aggregator(NLGPipelineComponent):
             return self._combine(registry, language, first, second)
         new_message = Message(facts=first.facts + [fact for fact in second.facts if fact not in first.facts], importance_coefficient=first.importance_coefficient)
         new_message.template = Template(result)
+        new_message.prevent_aggregation = first.prevent_aggregation or second.prevent_aggregation
         return new_message
 
     def _are_same(self, c1, c2):

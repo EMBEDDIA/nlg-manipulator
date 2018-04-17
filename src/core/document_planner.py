@@ -245,10 +245,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return modified
 
     def _add_satellite(self, satellite, messages):
-        # ToDo: Decide how to deal with the nuclei. Can they be elaborated by something else? Can they be used to
-        # elaborate less important message? At the moment they cannot be either part of an elaborate relation.
         for idx, msg in enumerate(messages):
-            if type(msg) is DocumentPlan or msg.prevent_aggregation:
+            if type(msg) is DocumentPlan:
                 continue
             rel = self._check_relation(msg, satellite)
             if rel != Relation.SEQUENCE:
