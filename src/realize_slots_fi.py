@@ -4,6 +4,7 @@ from core.template import LiteralSlot
 from dictionary_fi import CRIME_TYPES, MONTHS, SMALL_CARDINALS, SMALL_ORDINALS
 log = logging.getLogger('root')
 
+
 class FinnishRealizer():
 
     value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
@@ -35,9 +36,9 @@ class FinnishRealizer():
 
     def _unit_set_value(self, slot, new_value):
         slot.value = lambda x: new_value
-        # If case hasn't been defined, assume accusative
-        if slot.attributes.get('case', 'accusative') == 'accusative':
-            self._unit_set_accusative(slot)
+        case = slot.attributes.get('case', 'nominative')
+        # This will try to make necessary case adjustments depending on the value associated with the unit
+        self._unit_set_case(slot, case)
         return 0
 
     def _unit_base(self, slot):
@@ -55,8 +56,8 @@ class FinnishRealizer():
         if len(words) == 1:
             added = self._unit_set_value(slot, words[0])
         else:
-            case = slot.attributes.get('case', 'partitive')
-            self._update_slot_value(slot, "")
+            self._unit_set_value(slot, "")
+            case = slot.attributes.get('case', 'nominative')
             added = self._add_slots(template, idx, content, case)
         added_slots += added
         idx += added + 1
@@ -66,8 +67,8 @@ class FinnishRealizer():
             idx += 1
         return added_slots
 
-
     def _unit_percentage(self, slot):
+        # Todo: check this, especially cases
         match = self.value_type_re.fullmatch(slot.value)
         unit, normalized, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
@@ -77,7 +78,6 @@ class FinnishRealizer():
         idx += 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
         added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='elative')
         idx += added
         added_slots += added
@@ -88,7 +88,7 @@ class FinnishRealizer():
         unit, normalized, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
-        # Check whether the following slot contains the value
+        # Check whether the preceding slot contains the value
         if template.components[idx - 1].slot_type == 'what':
             what_slot = template.components[idx - 1]
         else:
@@ -97,7 +97,6 @@ class FinnishRealizer():
         added_slots = 0
         # Move the pointer to the value slot
         idx -= 1
-        # new_slot = LiteralSlot(CRIME_TYPES.get(unit, {}).get('pl', unit))
         added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='genitive')
         idx += added
         added_slots += added
@@ -130,13 +129,14 @@ class FinnishRealizer():
             new_slots = self._unit_rank(slot)
             added_slots += new_slots
         elif percentage:
-            # rikosten määrä kasvoi viisi prosenttiyksikköä
+            # rikosten määrä kasvoi viidellä prosenttiyksiköllä
+            slot.attributes['case'] = 'adessive'
+            what_slot.attributes['case'] = 'adessive'
             new_slots = self._unit_set_value(slot, "prosenttiyksikkö")
             added_slots += new_slots
         else:
             # rikosten määrä kasvoi viidellä
-            prev_slot = template.components[idx - 1]
-            prev_slot.attributes['case'] = 'adessive'
+            what_slot.attributes['case'] = 'adessive'
             slot.value = lambda x: ""
         idx += 1
 
@@ -227,11 +227,34 @@ class FinnishRealizer():
                 added_slots += 1
         return added_slots
 
+    def _unit_set_case(self, slot, case):
+        if case == 'nominative':
+            self._unit_set_nominative(slot)
+        elif case == 'accusative':
+            self._unit_set_accusative(slot)
+        else:
+            slot.attributes['case'] = case
+
+    def _unit_set_nominative(self, slot):
+        """
+        Set the case for the unit slot to the proper case for a nominative form.
+        This is nominative when the value corresponding to the unit is 1, and partitive otherwise.
+        :param slot:
+        :return:
+        """
+        prev_slot = slot.parent.components[slot.parent.components.index(slot) - 1]
+        # "yksi/-1 rikos"
+        if abs(slot.fact.what) == 1:
+            slot.attributes['case'] = 'nominative'
+        # "nolla/kaksi/1,25 rikosta"
+        else:
+            slot.attributes['case'] = 'partitive'
+
     def _unit_set_accusative(self, slot):
         """
         Set the cases for the slot (and the previous slot, if it contains a value) to the proper case for accusative.
-        This is genitive for both when the value is 1, and nominative for the numeral and partitive tor the unit in
-        other cases.
+        This is genitive for both when the value is 1, and nominative for the numeral and partitive for the unit
+        otherwise.
         :param slot:
         :return:
         """
