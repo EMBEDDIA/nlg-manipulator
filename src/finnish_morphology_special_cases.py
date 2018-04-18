@@ -12,6 +12,12 @@ special_cases = {
     },
     "Jokioinen": {
         "genitive": "Jokioisten",
+        "inessive": "Jokioisissa",
+        "elative": "Jokioisista",
+        "illative": "Jokioisiin",
+        "adessive": "Jokioisilla",
+        "ablative": "Jokioisilta",
+        "allative": "Jokioisille",
     },
     "törkeä": {
         'partitive': "törkeää",
