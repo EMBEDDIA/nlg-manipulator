@@ -54,14 +54,12 @@ class FinnishRealizer():
             words = content.split()
         if len(words) == 1:
             added = self._unit_set_value(slot, words[0])
-            added_slots += added
-            idx += added
         else:
             case = slot.attributes.get('case', 'partitive')
             self._update_slot_value(slot, "")
             added = self._add_slots(template, idx, content, case)
-            added_slots += added
-            idx += added + 1
+        added_slots += added
+        idx += added + 1
         if normalized:
             template.add_component(idx, LiteralSlot("tuhatta asukasta kohti"))
             added_slots += 1
