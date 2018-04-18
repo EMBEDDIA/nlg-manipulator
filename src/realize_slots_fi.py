@@ -221,7 +221,7 @@ class FinnishRealizer():
             words = content.split()
             for word in words:
                 new_slot = LiteralSlot(word)
-                if case :
+                if case:
                     new_slot.attributes['case'] = case
                 template.add_component(idx + added_slots, new_slot)
                 added_slots += 1
@@ -297,21 +297,29 @@ class FinnishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        if 'case' in slot.attributes.keys():
-            new_slot = LiteralSlot("vuosi")
-            new_slot.attributes['case'] = slot.attributes['case']
-            slot.attributes['case'] = 'nominative'
+        # The latter condition makes the system realize the full year roughly once in five sentences even if the year hasn't changed.
+        if (slot.attributes['name_type'] in ['full', 'short']) or (
+                slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            if 'case' in slot.attributes.keys():
+                new_slot = LiteralSlot("vuosi")
+                new_slot.attributes['case'] = slot.attributes['case']
+                slot.attributes['case'] = 'nominative'
+            else:
+                new_slot = LiteralSlot("vuonna")
+            template.add_component(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            if year is None:
+                slot.value = lambda x: 'x'
+            elif type(year) is not str:
+                slot.value = lambda x: self._cardinal(year)
+            else:
+                self._update_slot_value(slot, year)
+        elif slot.attributes['name_type'] == 'pronoun':
+            reference_options = ["samana vuonna", "tuolloin myös", "myös"]
+            self._update_slot_value(slot, random.choice(reference_options))
         else:
-            new_slot = LiteralSlot("vuonna")
-        template.add_component(idx, new_slot)
-        added_slots += 1
-        idx += 1
-        if year is None:
-            slot.value = lambda x: 'x'
-        elif type(year) is not str:
-            slot.value = lambda x: self._cardinal(year)
-        else:
-            self._update_slot_value(slot, year)
+            raise Exception("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         return added_slots
 
     def _time_month(self, random, slot):
@@ -322,12 +330,19 @@ class FinnishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        new_slot = LiteralSlot(MONTHS[month])
-        new_slot.attributes['case'] = 'inessive'
-        template.add_component(idx, new_slot)
-        added_slots += 1
-        idx += 1
-        slot.value = lambda x: year
+        if (slot.attributes['name_type'] in ['full', 'short']) or (
+                slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            new_slot = LiteralSlot(MONTHS[month])
+            new_slot.attributes['case'] = 'inessive'
+            template.add_component(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            slot.value = lambda x: year
+        elif slot.attributes['name_type'] == 'pronoun':
+            reference_options = ["samassa kuussa", "tuolloin myös", "myös", "samaan aikaan"]
+            self._update_slot_value(slot, random.choice(reference_options))
+        else:
+            raise Exception("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         return added_slots
 
     def _time_change_year(self, random, slot):
