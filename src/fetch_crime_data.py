@@ -9,11 +9,10 @@ import columns as cls
 
 def run():
     # Download list of available PX files
-    
     all_px = list_available_px()
-    
+
     # Find Crime stats and Population stats
-    wanted_px = [px for px in all_px if ('statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_003.px' in str(px)) and px.language == 'fi']
+    wanted_px = [px for px in all_px if ('statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_002.px' in str(px)) and px.language == 'fi']
 
     # Download the data
     download_px(wanted_px, target_dir=os.path.join(os.path.dirname(__file__), '..'))
@@ -22,17 +21,18 @@ def run():
     os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
 
     # Store and store population data
-    df = Px(os.path.join(os.path.dirname(__file__), '../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_003.px'), language='en').pd_dataframe()
+    df = Px(os.path.join(os.path.dirname(__file__), '../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_002.px'), language='en').pd_dataframe()
     df = flatten(df)
     df = pythonify_column_names(df)
     df.rename(columns={
-        'level_0': 'when', 
-        'level_1': 'where', 
-        'both_sexes_age_groups_total_premilinary_population': 'population'}
+        'level_0': 'where',
+        'level_1': 'when',
+        'preliminary_population': 'population'}
         , inplace=True)
     df = df[['when', 'where', 'population']]
     df.replace(['"-"', '".."'], 0, inplace=True)
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv'))
+    df.sort_values(['when', 'where'], ascending=[1, 1], inplace=True)
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv'), index=False, encoding='iso-8859-1')
 
     # flatten and store crime statistics
     df = Px(os.path.join(os.path.dirname(__file__), "../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px"), language='en').pd_dataframe().transpose()
