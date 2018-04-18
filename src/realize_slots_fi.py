@@ -168,10 +168,18 @@ class FinnishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-        if not change and grouped_by == '_time_place':
-            template.add_component(idx - 1, LiteralSlot("kaikista rikoksista"))
+        if not change:
+            if grouped_by == '_time_place':
+                template.add_component(idx - 1, LiteralSlot("kaikista rikoksista"))
+            elif grouped_by == '_crime_time':
+                template.add_component(idx - 1, LiteralSlot("muihin kuntiin verrattuna"))
+            elif grouped_by == '_crime_place_year':
+                template.add_component(idx - 1, LiteralSlot("vuoden muihin kuukausiin verrattuna"))
+            else:
+                raise Exception("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
             idx += 1
+
         if prev_slot.slot_type == 'what':
             # If the rank is first, the actual numeral isn't realized at all
             if slot.fact.what == 1:
