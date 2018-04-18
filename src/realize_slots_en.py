@@ -1,5 +1,6 @@
 import re
 import logging
+from dictionary_en import CRIME_TYPES
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
@@ -72,9 +73,11 @@ class EnglishRealizer():
         match = self.value_type_re.fullmatch(slot.value)
         unit = match.group(1)
         if abs(slot.fact.what) == 1:
-            new_value = self.UNITS.get(unit, {}).get('sg', unit)
+            # new_value = CRIME_TYPES.get(unit, {}).get('sg', unit)
+            new_value = CRIME_TYPES.get(unit, unit)
         else:
-            new_value = self.UNITS.get(unit, {}).get('pl', unit)
+            # new_value = CRIME_TYPES.get(unit, {}).get('pl', unit)
+            new_value = CRIME_TYPES.get(unit, unit)
         return self._update_slot_value(slot, new_value)
 
     def _unit_percentage_points(self, slot):
@@ -101,7 +104,8 @@ class EnglishRealizer():
         idx += added_slots + 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        template.add_component(idx, LiteralSlot("of the " + self.UNITS.get(unit, {}).get('pl', unit)))
+        # template.add_component(idx, LiteralSlot("of the " + CRIME_TYPES.get(unit, {}).get('pl', unit)))
+        template.add_component(idx, LiteralSlot("of the " + CRIME_TYPES.get(unit, unit)))
         added_slots += 1
         idx += 1
         return added_slots
@@ -115,7 +119,6 @@ class EnglishRealizer():
         unit = match.group(1)
         template = slot.parent
         idx = template.components.index(slot)
-        what_slot = None
         # Check whether the following slot contains the value
         if template.components[idx + 1].slot_type == 'what':
             what_slot = template.components[idx + 1]
@@ -123,7 +126,8 @@ class EnglishRealizer():
             log.error("The English change template should have a value slot following a unit slot!")
             return 0
         added_slots = 0
-        self._update_slot_value(slot, self.UNITS.get(unit, {}).get('pl', unit))
+        # self._update_slot_value(slot, CRIME_TYPES.get(unit, {}).get('pl', unit))
+        self._update_slot_value(slot, CRIME_TYPES.get(unit, unit))
         idx += 1
         if slot.fact.what == 0:
             self._update_slot_value(what_slot, "stayed the same")

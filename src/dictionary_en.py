@@ -63,7 +63,7 @@ CRIME_TYPES = {
     'traffic_aggravated_endangerment_total': "aggravated endangerment of traffic",
     'traffic_drunken_driving_total': "drinking and driving",
     'traffic_aggravated_drunken_driving_total': "aggravated drinking and driving",
-    'traffic_waterway_air_rail_traffic_drunkness_total': "waterway, air or rail traffic intoxication",
+    'traffic_waterway_air_rail_traffic_drunkenness_total': "waterway, air or rail traffic intoxication",
     'traffic_relinquishing_vehicle_drunken_person_total': "relinquishing a vehicle to a intoxicated person",
     'traffic_drunken_driving_unpowered_vehicle_total': "non-motor powered traffic intoxication",
     'traffic_unlawful_driving_vehicle_total': "unlawful driving of a vehicle",
@@ -108,5 +108,4 @@ CRIME_TYPES = {
     'other_violation_industrial_safety_act_total': "violation of the Industrial Safety Act",
     'other_public_order_violation_total': "public order violation",
     'other_offences_against_other_acts_decrees_total': "offences against other Acts and Decrees",
-
 }
