@@ -65,14 +65,18 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # Drop messages with rank or rank_reverse values of more than 4 and messages with comparisons between
         # municipalities using the reported values instead of normalized or percentage values
         scored_messages = [msg for msg in scored_messages
-                           # drop the message if it is about a rank or rank_reverse of more than 4 ...
-                           if not ((self.value_type_re.fullmatch(msg.fact.what_type).group(6) and msg.fact.what > 4)
-                                   # ... or if the message is not normalized ...
-                                   or (not (self.value_type_re.fullmatch(msg.fact.what_type).group(2)
-                                            # ... or percentage ...
-                                            or self.value_type_re.fullmatch(msg.fact.what_type).group(3))
-                                       # ... and is comparing different municipalities
-                                       and self.value_type_re.fullmatch(msg.fact.what_type).group(5) == '_crime_time'))]
+                           if not
+                             # drop the message if it is about a rank or rank_reverse of more than 4 ...
+                             (('_rank' in msg.fact.what_type and msg.fact.what > 4)
+                              # ... or if the message is not normalized ...
+                              or (not ('_normalized' in msg.fact.what_type
+                                       # ... or percentage ...
+                                       or '_percentage' in msg.fact.what_type)
+                                  # ... and is comparing different municipalities
+                                  and '_grouped_by_crime_time' in msg.fact.what_type)
+                              # ... or the message is telling about one of the crimes that was done the least (aka zero times)
+                              or ('_rank_reverse' in msg.fact.what_type and msg.fact.what == 1)
+                              )]
 
         # In the first paragraph, don't ever use a message that's been added during expansion
         # These are recognisable by having a <1 importance coefficient
