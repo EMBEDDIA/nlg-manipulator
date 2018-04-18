@@ -67,6 +67,12 @@ class EntityNameResolver(NLGPipelineComponent):
                 if slots_added:
                     idx += slots_added
                 idx += 1
+            try:
+                if this.relation == Relation.SEQUENCE:
+                    previous_entities = defaultdict(lambda: None)
+                    encountered = set()
+            except AttributeError:
+                pass
             return slots_added, encountered, previous_entities
         except AttributeError as ex:
             # Had no children, must be a leaf node
