@@ -106,7 +106,12 @@ class FinnishRealizer():
         idx += 1
 
         if normalized:
-            template.add_component(idx, LiteralSlot("suhteessa asukaslukuun"))
+            if rank or percentage:
+                # with rank or percentage values we don't need to specify the exact normalizing factor
+                template.add_component(idx, LiteralSlot("suhteessa asukaslukuun"))
+            else:
+                # absolute normalized values don't make sense without this information
+                template.add_component(idx, LiteralSlot("tuhatta asukasta kohden"))
             added_slots += 1
             idx += 1
 
