@@ -71,7 +71,7 @@ class SlotRealizer(NLGPipelineComponent):
             if 'rank' in what_type:
                 slot.attributes['num_type'] = 'ordinal'
                 num_type = 'ordinal'
-            elif what_type not in ['party', 'election_result', 'is_councillor', 'is_mep', 'is_mp']:
+            else:
                 slot.attributes['num_type'] = 'cardinal'
                 num_type = 'cardinal'
             value = slot.value
