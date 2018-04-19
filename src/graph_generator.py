@@ -8,14 +8,14 @@ from math import cos, sqrt
 log = logging.getLogger('root')
 
 
-class GraphAdder():
+class GraphGenerator():
 
-    def add(self, registry, html, location):
+    def generate(self, registry, location):
         if location in ['Suomi', 'Finland']:
-            return html
+            return None
 
         labels, datasets = self._get_data(location, registry)
-        return html + self._get_graph(labels, datasets)
+        return self._get_graph(labels, datasets)
 
     def _get_data(self, location, registry):
         datastore = registry.get('crime-bc-data')
@@ -60,27 +60,25 @@ class GraphAdder():
 
     def _get_graph(self, labels, datasets):
         return """
-            <div style="max-width: 500px; max-height: 500px; float:left; clear:right;">
-                <canvas id="chart" width="500" height="500"></canvas>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-                <script>
-                    var chart = new Chart(
-                        document.getElementById('chart'), 
-                        {{
-                            type: 'line',
-                            data: {{
-                                labels: {labels},
-                                datasets: {datasets}
-                            }},
-                            options: {{
-                                title: {{
-                                    display: true,
-                                    text: 'Rikoksia tuhatta asukasta kohden'
-                                }}
+            <canvas id="chart" width="500" height="500"></canvas>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+            <script>
+                var chart = new Chart(
+                    document.getElementById('chart'), 
+                    {{
+                        type: 'line',
+                        data: {{
+                            labels: {labels},
+                            datasets: {datasets}
+                        }},
+                        options: {{
+                            title: {{
+                                display: true,
+                                text: 'Rikoksia tuhatta asukasta kohden'
                             }}
                         }}
-                    )
-                </script>
-            </div>
+                    }}
+                )
+            </script>
         """.format(labels=labels, datasets=datasets)

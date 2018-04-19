@@ -6,7 +6,7 @@ from math import cos, sqrt
 
 log = logging.getLogger('root')
 
-class LocatorMapAdder():
+class LocatorMapGenerator():
     REFERENCES = [
 		{"latitude":60.170, "longitude":24.940, "name":"Helsinki"},
 		{"latitude":60.210, "longitude":24.660, "name":"Espoo"},
@@ -28,16 +28,16 @@ class LocatorMapAdder():
 	]
     CACHE = {}
 
-    def add(self, html, location):
+    def generate(self, location):
         # For reference points themselves, show map of whole country
         for reference in self.REFERENCES:
             if location == reference['name']:
-                return self._get_map_country(reference['latitude'], reference['longitude']) + html
+                return self._get_map_country(reference['latitude'], reference['longitude'])
 
         # For other locations, show map zoomed to self and nearest reference
         location_lat, location_lng = self._get_coords(location)
         reference_lat, reference_lng = self._get_nearest_reference_coords(location_lat, location_lng)
-        return self._get_map(location_lat, location_lng, reference_lat, reference_lng) + html
+        return self._get_map(location_lat, location_lng, reference_lat, reference_lng)
 
     def _distance(self, lat1, lng1, lat2, lng2):
         x = (lng1 - lng2) * cos((lat1 + lat2) / 2)
@@ -66,7 +66,7 @@ class LocatorMapAdder():
 
     def _get_map_country(self, location_lat, location_lng):
         return """
-            <div style="float:right; width:300px; height:400px; margin:15px;" id="map"></div>
+            <div style="width:300px; height:400px" id="map"></div>
             <script>
             function createMap() {{
                 // Create map
@@ -95,7 +95,7 @@ class LocatorMapAdder():
 
     def _get_map(self, location_lat, location_lng, reference_lat, reference_lng):
         return """
-            <div style="float:right; width:300px; height:400px; margin:15px;" id="map"></div>
+            <div style="width:300px; height:400px;" id="map"></div>
             <script>
             function createMap() {{
                 // Create map

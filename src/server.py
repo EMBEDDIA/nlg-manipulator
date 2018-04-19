@@ -100,13 +100,15 @@ def news_html():
         where_type = 'C'
         where = 'fi'
 
-    header, body = get_article(language, where, where_type)
+    header, body, locator_map, graph = get_article(language, where, where_type)
     return dict({
         "where": where,
         "where_type": where_type,
         "language": language,
         "header": header,
         "body": body,
+        "locator_map": locator_map,
+        "graph": graph
     })
 
 
@@ -125,25 +127,29 @@ def news_api():
         where_type = 'C'
         where = 'fi'
 
-    header, body = get_article(language, where, where_type)
+    header, body, locator_map, graph = get_article(language, where, where_type)
     return dict({
         "where": where,
         "where_type": where_type,
         "language": language,
         "header": header,
         "body": body,
+        "locator_map": locator_map,
+        "graph": graph,
     })
 
 def random_news():
     language = request.query.language or "fi"
 
-    header, body = get_article(language, "Akaa", "M")
+    header, body, locator_map, graph = get_article(language, "Akaa", "M")
     return dict({
         "where": "Akaa",
         "where_type": "M",
         "language": language,
         "header": header,
         "body": body,
+        "locator_map": locator_map,
+        "graph": graph,
     })
 
 @app.route('/random')
