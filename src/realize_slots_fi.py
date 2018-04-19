@@ -110,10 +110,10 @@ class FinnishRealizer():
             added_slots += 1
             idx += 1
 
-        if slot.fact.what > 0:
-            template.add_component(idx, LiteralSlot("kasvoi"))
-        elif slot.fact.what < 0:
+        if slot.fact.what < 0 or (rank and '_decrease' in rank):
             template.add_component(idx, LiteralSlot("laski"))
+        elif slot.fact.what > 0:
+            template.add_component(idx, LiteralSlot("kasvoi"))
         else:
             self._update_slot_value(slot, "säilyi ennallaan")
             # Clear the value slot
