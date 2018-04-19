@@ -109,7 +109,7 @@ new_columns = {
 
     'other_offences_total_category': [
         'other_misclassified_offences_total',
-        'other_restraining_order_matter',
+        'other_restraining_order_matter_total',
         'other_persons_drowned_total',
         'other_persons_custody_intoxication_total',
         'other_violation_privacy_peace_honour_total',
@@ -212,7 +212,7 @@ rename_columns = {
     'investigation_to_issuing_a_business_prohibition_all_offences': 'investigation_investigation_issuing_business_prohibition_total',
     'investigation_of_extradition_proceedings_of_an_offender_all_offences': 'investigation_investigation_extradition_proceedings_of_offender_total',
     'report_on_an_offence_evidently_not_to_be_included_in_the_statistics_as_an_offence_all_offences': 'other_misclassified_offences_total',
-    'restraining_order_matter_all_offences': 'other_restraining_order_matter',
+    'restraining_order_matter_all_offences': 'other_restraining_order_matter_total',
     'persons_drowned_all_offences': 'other_persons_drowned_total',
     'persons_taken_into_custody_due_to_intoxication_all_offences': 'other_persons_custody_intoxication_total',
     'violation_of_privacy_peace_and_honour_2434a_all_offences': 'other_violation_privacy_peace_honour_total',
