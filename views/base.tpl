@@ -22,7 +22,25 @@
 
         </script>
 
-        <style>
+        <style type="text/css">
+          @media only screen and (min-width: 0) {
+            html {
+              font-size: 12px;
+            }
+          }
+
+          @media only screen and (min-width: 992px) {
+            html {
+              font-size: 12px;
+            }
+          }
+
+          @media only screen and (min-width: 1200px) {
+            html {
+              font-size: 12px;
+            }
+          }
+
           body {
             display: flex;
             min-height: 100vh;
@@ -31,6 +49,26 @@
 
           main {
             flex: 1 0 auto;
+          }
+
+          #map-card {
+            float: none;
+            min-width: 350px;
+          }
+
+          #graph-card {
+            float: none;
+          }
+
+          @media only screen and (min-width: 700px) {
+            #map-card {
+              float: right;
+            }
+
+            #graph-card {
+              float: left;
+              clear: right;
+            }
           }
         </style>
     </head>

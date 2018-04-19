@@ -66,7 +66,7 @@ class LocatorMapGenerator():
 
     def _get_map_country(self, location_lat, location_lng):
         return """
-            <div style="width:300px; height:400px" id="map"></div>
+            <div style="width:100%; height:400px" id="map"></div>
             <script>
             function createMap() {{
                 // Create map
@@ -95,13 +95,13 @@ class LocatorMapGenerator():
 
     def _get_map(self, location_lat, location_lng, reference_lat, reference_lng):
         return """
-            <div style="width:300px; height:400px;" id="map"></div>
+            <div style="width:100%; height:400px;" id="map"></div>
             <script>
             function createMap() {{
                 // Create map
                 var mapOptions= {{
                     center: new google.maps.LatLng({location_lat}, {location_lng}),
-                    zoom:9,
+                    zoom:12,
                 }};
                 var map = new google.maps.Map(document.getElementById('map'), mapOptions);
 

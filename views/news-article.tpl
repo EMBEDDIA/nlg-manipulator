@@ -6,7 +6,7 @@
     <br>
     <h1 class="header center blue-text">{{header}}</h1>
     <div class="row flow-text">
-      <div class="card" style="float: right;">
+      <div id="map-card" class="card">
         <div class="card-content">
           <span class="card-title">{{where}}</span>
           {{!locator_map}}
@@ -15,7 +15,7 @@
 
       {{!body}}
 
-      <div class="card" style="float: left; clear: right;">
+      <div d="graph-card" class="card">
         <div class="card-content">
           {{!graph}}
         </div>
