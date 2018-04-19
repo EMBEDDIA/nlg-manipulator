@@ -95,6 +95,28 @@ class FinnishRealizer():
             log.error("The Finnish change template should have a value slot preceding a unit slot!")
             return 0
         added_slots = 0
+        if slot.attributes.get('form', '') == 'short':
+            if slot.fact.what == 0:
+                self._update_slot_value(what_slot, "")
+                self._update_slot_value(slot, "ei muutosta")
+                try:
+                    slot.attributes.pop('case')
+                except KeyError:
+                    pass
+            else:
+                self._update_slot_value(slot, "tapaus")
+                idx += 1
+                if slot.fact.what < 0:
+                    template.add_component(idx, LiteralSlot("vähemmän"))
+                else:
+                    template.add_component(idx, LiteralSlot("enemmän"))
+                idx += 1
+                added_slots += 1
+                if normalized:
+                    template.add_component(idx, LiteralSlot("1000 asukasta kohden"))
+                    idx += 1
+                    added_slots += 1
+            return added_slots
         # Move the pointer to the value slot
         idx -= 1
         added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='genitive')
