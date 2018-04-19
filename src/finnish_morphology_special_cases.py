@@ -19,6 +19,9 @@ special_cases = {
         "ablative": "Jokioisilta",
         "allative": "Jokioisille",
     },
+    "luvattomat": {
+      'genitive': "luvattomien",
+    },
     "törkeä": {
         'partitive': "törkeää",
     },
