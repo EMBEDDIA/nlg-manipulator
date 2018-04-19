@@ -171,7 +171,7 @@ class Aggregator(NLGPipelineComponent):
     def _message_positive(self, message):
         fact = message.template.slots[0].fact
         try:
-            return ("_rank_reverse" not in fact.what_type) and fact.what >= 0
-        # This will happen, if the fact is non-numeric
+            return fact.what <= 0 or '_decrease_rank' in fact.what_type
+        # This will happen if the fact is non-numeric
         except TypeError:
             return True
