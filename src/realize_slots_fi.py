@@ -459,6 +459,8 @@ class FinnishRealizer():
         if place_type in ["C", "D", "M", "P"]:
             if slot.attributes['name_type'] == 'full':
                 self._update_slot_value(slot, place)
-            else:
+            elif random.rand() < 0.5:
                 self._update_slot_value(slot, "paikkakunta")
+            else:
+                self._update_slot_value(slot, "")
         return 0
