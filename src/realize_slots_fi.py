@@ -62,7 +62,7 @@ class FinnishRealizer():
         added_slots += added
         idx += added + 1
         if normalized:
-            template.add_slot(idx, LiteralSlot("tuhatta asukasta kohti"))
+            template.add_slot(idx, LiteralSlot("1000 asukasta kohti"))
             added_slots += 1
             idx += 1
         return added_slots
@@ -133,7 +133,7 @@ class FinnishRealizer():
                 template.add_slot(idx, LiteralSlot("suhteessa asukaslukuun"))
             else:
                 # absolute normalized values don't make sense without this information
-                template.add_slot(idx, LiteralSlot("tuhatta asukasta kohden"))
+                template.add_slot(idx, LiteralSlot("1000 asukasta kohden"))
             added_slots += 1
             idx += 1
 
