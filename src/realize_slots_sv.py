@@ -79,7 +79,7 @@ class SwedishRealizer():
         idx += 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        template.add_component(idx, LiteralSlot("av " + self.UNITS[match.group(2)]['pldef']))
+        template.add_slot(idx, LiteralSlot("av " + self.UNITS[match.group(2)]['pldef']))
         added_slots += 1
         idx += 1
         return added_slots
@@ -99,15 +99,15 @@ class SwedishRealizer():
         if slot.attributes.get('form') == 'short':
             return added_slots
         if slot.fact.what < 0:
-            template.add_component(idx, LiteralSlot("färre"))
+            template.add_slot(idx, LiteralSlot("färre"))
         else:
-            template.add_component(idx, LiteralSlot("fler"))
+            template.add_slot(idx, LiteralSlot("fler"))
         added_slots += 1
         idx += 1
         # For the percentage values we also need to realize the original unit
         if match.group(1) == 'percentage_':
             new_slot = LiteralSlot(self.UNITS[match.group(2)]['pl'])
-            template.add_component(idx, new_slot)
+            template.add_slot(idx, new_slot)
             added_slots += 1
             idx += 1
         return added_slots

@@ -62,7 +62,7 @@ class FinnishRealizer():
         added_slots += added
         idx += added + 1
         if normalized:
-            template.add_component(idx, LiteralSlot("tuhatta asukasta kohti"))
+            template.add_slot(idx, LiteralSlot("tuhatta asukasta kohti"))
             added_slots += 1
             idx += 1
         return added_slots
@@ -107,13 +107,13 @@ class FinnishRealizer():
                 self._update_slot_value(slot, "tapaus")
                 idx += 1
                 if slot.fact.what < 0:
-                    template.add_component(idx, LiteralSlot("vähemmän"))
+                    template.add_slot(idx, LiteralSlot("vähemmän"))
                 else:
-                    template.add_component(idx, LiteralSlot("enemmän"))
+                    template.add_slot(idx, LiteralSlot("enemmän"))
                 idx += 1
                 added_slots += 1
                 if normalized:
-                    template.add_component(idx, LiteralSlot("1000 asukasta kohden"))
+                    template.add_slot(idx, LiteralSlot("1000 asukasta kohden"))
                     idx += 1
                     added_slots += 1
             return added_slots
@@ -123,24 +123,24 @@ class FinnishRealizer():
         idx += added
         added_slots += added
 
-        template.add_component(idx, LiteralSlot("määrä"))
+        template.add_slot(idx, LiteralSlot("määrä"))
         added_slots += 1
         idx += 1
 
         if normalized:
             if rank or percentage:
                 # with rank or percentage values we don't need to specify the exact normalizing factor
-                template.add_component(idx, LiteralSlot("suhteessa asukaslukuun"))
+                template.add_slot(idx, LiteralSlot("suhteessa asukaslukuun"))
             else:
                 # absolute normalized values don't make sense without this information
-                template.add_component(idx, LiteralSlot("tuhatta asukasta kohden"))
+                template.add_slot(idx, LiteralSlot("tuhatta asukasta kohden"))
             added_slots += 1
             idx += 1
 
         if slot.fact.what < 0 or (rank and '_decrease' in rank):
-            template.add_component(idx, LiteralSlot("laski"))
+            template.add_slot(idx, LiteralSlot("laski"))
         elif slot.fact.what > 0:
-            template.add_component(idx, LiteralSlot("kasvoi"))
+            template.add_slot(idx, LiteralSlot("kasvoi"))
         else:
             self._update_slot_value(slot, "säilyi ennallaan")
             # Clear the value slot
@@ -169,19 +169,19 @@ class FinnishRealizer():
 
         # The end comparison
         if grouped_by:
-            template.add_component(idx, LiteralSlot("muihin"))
+            template.add_slot(idx, LiteralSlot("muihin"))
             added_slots += 1
             idx += 1
             if grouped_by == '_time_place':
-                template.add_component(idx, LiteralSlot("rikostyyppeihin verrattuna"))
+                template.add_slot(idx, LiteralSlot("rikostyyppeihin verrattuna"))
                 added_slots += 1
                 idx += 1
             elif grouped_by == '_crime_time':
-                template.add_component(idx, LiteralSlot("alueisiin verrattuna"))
+                template.add_slot(idx, LiteralSlot("alueisiin verrattuna"))
                 added_slots += 1
                 idx += 1
             elif grouped_by == 'crime_place_year':
-                template.add_component(idx, LiteralSlot("kuukausiin verrattuna"))
+                template.add_slot(idx, LiteralSlot("kuukausiin verrattuna"))
                 added_slots += 1
                 idx += 1
             else:
@@ -197,11 +197,11 @@ class FinnishRealizer():
         prev_slot = template.components[idx - 1]
         if not change:
             if grouped_by == '_time_place':
-                template.add_component(idx - 1, LiteralSlot("kaikista rikoksista"))
+                template.add_slot(idx - 1, LiteralSlot("kaikista rikoksista"))
             elif grouped_by == '_crime_time':
-                template.add_component(idx - 1, LiteralSlot("muihin kuntiin verrattuna"))
+                template.add_slot(idx - 1, LiteralSlot("muihin kuntiin verrattuna"))
             elif grouped_by == '_crime_place_year':
-                template.add_component(idx - 1, LiteralSlot("vuoden muihin kuukausiin verrattuna"))
+                template.add_slot(idx - 1, LiteralSlot("vuoden muihin kuukausiin verrattuna"))
             else:
                 raise Exception("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
@@ -241,7 +241,7 @@ class FinnishRealizer():
                 new_slot = LiteralSlot(word)
                 if case and content_idx not in non_case_idx:
                     new_slot.attributes['case'] = case
-                template.add_component(idx + added_slots, new_slot)
+                template.add_slot(idx + added_slots, new_slot)
                 added_slots += 1
         # If the content doesn't contain a list of indexes, assume that all words in it should be inflected:
         except ValueError:
@@ -250,7 +250,7 @@ class FinnishRealizer():
                 new_slot = LiteralSlot(word)
                 if case:
                     new_slot.attributes['case'] = case
-                template.add_component(idx + added_slots, new_slot)
+                template.add_slot(idx + added_slots, new_slot)
                 added_slots += 1
         return added_slots
 
@@ -333,7 +333,7 @@ class FinnishRealizer():
                 slot.attributes['case'] = 'nominative'
             else:
                 new_slot = LiteralSlot("vuonna")
-            template.add_component(idx, new_slot)
+            template.add_slot(idx, new_slot)
             added_slots += 1
             idx += 1
             if year is None:
@@ -361,7 +361,7 @@ class FinnishRealizer():
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
             new_slot = LiteralSlot(MONTHS[month])
             new_slot.attributes['case'] = 'inessive'
-            template.add_component(idx, new_slot)
+            template.add_slot(idx, new_slot)
             added_slots += 1
             idx += 1
             slot.value = lambda x: year
@@ -382,7 +382,7 @@ class FinnishRealizer():
             if 'case' in slot.attributes.keys():
                 new_slot = LiteralSlot("aikaväli")
                 new_slot.attributes['case'] = slot.attributes['case']
-                template.add_component(idx, new_slot)
+                template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
                 self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
@@ -390,15 +390,15 @@ class FinnishRealizer():
             else:
                 new_slot = LiteralSlot("vuosi")
                 new_slot.attributes['case'] = 'elative'
-                template.add_component(idx, new_slot)
+                template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
-                template.add_component(idx, LiteralSlot(match.group(1)))
+                template.add_slot(idx, LiteralSlot(match.group(1)))
                 added_slots += 1
                 idx += 1
                 new_slot = LiteralSlot("vuosi")
                 new_slot.attributes['case'] = 'illative'
-                template.add_component(idx, new_slot)
+                template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
                 self._update_slot_value(slot, match.group(2))
@@ -421,7 +421,7 @@ class FinnishRealizer():
             if 'case' in slot.attributes.keys():
                 new_slot = LiteralSlot("aikaväli")
                 new_slot.attributes['case'] = slot.attributes['case']
-                template.add_component(idx, new_slot)
+                template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
                 self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
@@ -429,18 +429,18 @@ class FinnishRealizer():
             else:
                 new_slot = LiteralSlot(MONTHS[month1])
                 new_slot.attributes['case'] = 'elative'
-                template.add_component(idx, new_slot)
+                template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
-                template.add_component(idx, LiteralSlot(year1))
+                template.add_slot(idx, LiteralSlot(year1))
                 added_slots += 1
                 idx += 1
                 new_slot = LiteralSlot(MONTHS[month2])
                 new_slot.attributes['case'] = 'illative'
-                template.add_component(idx, new_slot)
+                template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
-                template.add_component(idx, LiteralSlot(year2))
+                template.add_slot(idx, LiteralSlot(year2))
                 added_slots += 1
                 idx += 1
         elif slot.attributes['name_type'] == 'short':

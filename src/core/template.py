@@ -43,7 +43,7 @@ class Template(DocumentPlan):
             raise KeyError
         return self._slot_map[slot_type]
 
-    def add_component(self, idx, slot):
+    def add_slot(self, idx, slot):
         if len(self._components) > idx:
             self._components.insert(idx, slot)
         else:

@@ -104,8 +104,8 @@ class EnglishRealizer():
         idx += added_slots + 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        # template.add_component(idx, LiteralSlot("of the " + CRIME_TYPES.get(unit, {}).get('pl', unit)))
-        template.add_component(idx, LiteralSlot("of the " + CRIME_TYPES.get(unit, unit)))
+        # template.add_slot(idx, LiteralSlot("of the " + CRIME_TYPES.get(unit, {}).get('pl', unit)))
+        template.add_slot(idx, LiteralSlot("of the " + CRIME_TYPES.get(unit, unit)))
         added_slots += 1
         idx += 1
         return added_slots
@@ -134,29 +134,29 @@ class EnglishRealizer():
             # In the case of no change, we're done
             return added_slots
         elif slot.fact.what < 0:
-            template.add_component(idx, LiteralSlot("decreased"))
+            template.add_slot(idx, LiteralSlot("decreased"))
         else:
-            template.add_component(idx, LiteralSlot("increased"))
+            template.add_slot(idx, LiteralSlot("increased"))
         idx += 1
         # If we are talking about a rank value
         if match.group(6):
             if what_slot.value == 1:
                 self._update_slot_value(what_slot, "")
-            template.add_component(idx, LiteralSlot("the"))
+            template.add_slot(idx, LiteralSlot("the"))
             added_slots += 1
             # Skip over the what_slot
             idx += 2
             if match.group(6) == "_rank":
-                template.add_component(idx, LiteralSlot("most"))
+                template.add_slot(idx, LiteralSlot("most"))
             elif match.group(6) == "_rank_reverse":
-                template.add_component(idx, LiteralSlot("least"))
+                template.add_slot(idx, LiteralSlot("least"))
             else:
                 raise Exception("This is impossible. The regex accepts only the two options above for group 6.")
             idx += 1
             added_slots += 1
             return added_slots
         else:
-            template.add_component(idx, LiteralSlot("by"))
+            template.add_slot(idx, LiteralSlot("by"))
             added_slots += 1
             # Skip the value slot
             idx += 2
@@ -166,7 +166,7 @@ class EnglishRealizer():
                     current_value = what_slot.value
                     what_slot.value = lambda x: current_value + "%"
                 else:
-                    template.add_component(idx, LiteralSlot("percent"))
+                    template.add_slot(idx, LiteralSlot("percent"))
                     added_slots += 1
                     idx += 1
         return added_slots
@@ -227,7 +227,7 @@ class EnglishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         new_slot = LiteralSlot("in")
-        template.add_component(idx, new_slot)
+        template.add_slot(idx, new_slot)
         added_slots += 1
         idx += 1
         if type(year) is not str:
