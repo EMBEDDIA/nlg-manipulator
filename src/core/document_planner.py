@@ -300,23 +300,24 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # An elaboration can't have the same fact type in both facts.
         if fact1.what_type == fact2.what_type:
             return False
-        # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match_1 = self.value_type_re.fullmatch(fact1.what_type)
         match_2 = self.value_type_re.fullmatch(fact2.what_type)
+        unit_1, normalized_1, percentage_1, change_1, grouped_by_1, rank_1 = match_1.groups()
+        unit_2, normalized_2, percentage_2, change_2, grouped_by_2, rank_2 = match_2.groups()
         # If the facts have different base unit, they can't have an elaboration relation
-        if match_1.group(1) != match_2.group(1):
+        if unit_1 != unit_2:
+            return False
+        # Rank values cannot be elaborations
+        elif rank_2:
             return False
         # rank and rank_reverse are elaborated by the base values
-        elif match_1.group(6):
-            return match_1.group(2, 3, 4) == match_2.group(2, 3, 4)
-        # Rank and rank_reverse cannot be elaborations
-        elif match_2.group(6):
-            return False
+        elif rank_1:
+            return (normalized_1, percentage_1, change_1, None) == (normalized_2, percentage_2, change_2, grouped_by_2)
         # Change is an elaboration of the result value
-        elif match_2.group(4) and match_1.group(2, 3) == match_2.group(2, 3):
+        elif change_2 and (normalized_1, percentage_1) == (normalized_2, percentage_2):
             return True
         # total value is an elaboration of a percentage value
-        elif match_1.group(4) == match_2.group(4) == None and match_1.group(2):
+        elif change_1 == change_2 == None and percentage_1:
             return True
         else:
             return False
