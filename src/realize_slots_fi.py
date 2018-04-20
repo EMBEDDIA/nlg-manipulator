@@ -338,9 +338,9 @@ class FinnishRealizer():
                 added_slots += 1
                 idx += 1
             if year is None:
-                slot.value = lambda x: 'x'
+                self._update_slot_value(slot, 'x')
             elif type(year) is not str:
-                slot.value = lambda x: self._cardinal(year)
+                self._update_slot_value(slot, self._cardinal(year))
             else:
                 self._update_slot_value(slot, year)
         elif slot.attributes['name_type'] == 'pronoun':
@@ -365,7 +365,7 @@ class FinnishRealizer():
             template.add_slot(idx, new_slot)
             added_slots += 1
             idx += 1
-            slot.value = lambda x: year
+            self._update_slot_value(slot, year)
         elif slot.attributes['name_type'] == 'pronoun':
             reference_options = ["samassa kuussa", "tuolloin myös", "myös", "samaan aikaan"]
             self._update_slot_value(slot, random.choice(reference_options))
