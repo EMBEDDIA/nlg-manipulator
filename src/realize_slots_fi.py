@@ -456,11 +456,17 @@ class FinnishRealizer():
         place_type, place = place_matcher.match(entity_code).groups()
         if place_type == 'C' and place == 'fi':
             place = "Suomi"
-        if place_type in ["C", "D", "M", "P"]:
+        if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
                 self._update_slot_value(slot, place)
             elif random.rand() < 0.5:
-                self._update_slot_value(slot, "paikkakunta")
+                if place_type == 'M':
+                    self._update_slot_value(slot, "paikkakunta")
+                elif place_type == 'C':
+                    self._update_slot_value(slot, "maa")
+                else:
+                    raise Exception(
+                        "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
             else:
                 self._update_slot_value(slot, "")
         return 0
