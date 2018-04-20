@@ -74,7 +74,7 @@ class EntityNameResolver(NLGPipelineComponent):
                     encountered = set()
             except AttributeError:
                 pass
-            return slots_added, encountered, previous_entities
+            return 0, encountered, previous_entities
         except AttributeError as ex:
             # Had no children, must be a leaf node
 
