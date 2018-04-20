@@ -327,15 +327,16 @@ class FinnishRealizer():
         # The latter condition makes the system realize the full year roughly once in five sentences even if the year hasn't changed.
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
-            if 'case' in slot.attributes.keys():
-                new_slot = LiteralSlot("vuosi")
-                new_slot.attributes['case'] = slot.attributes['case']
-                slot.attributes['case'] = 'nominative'
-            else:
-                new_slot = LiteralSlot("vuonna")
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
+            if slot.attributes['name_type'] == 'full':
+                if 'case' in slot.attributes.keys():
+                    new_slot = LiteralSlot("vuosi")
+                    new_slot.attributes['case'] = slot.attributes['case']
+                    slot.attributes['case'] = 'nominative'
+                else:
+                    new_slot = LiteralSlot("vuonna")
+                template.add_slot(idx, new_slot)
+                added_slots += 1
+                idx += 1
             if year is None:
                 slot.value = lambda x: 'x'
             elif type(year) is not str:
