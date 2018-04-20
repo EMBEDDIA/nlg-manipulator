@@ -51,6 +51,11 @@ class Template(DocumentPlan):
         slot.parent = self
         self.slots.append(slot)
 
+    def move_slot(self, from_idx, to_idx):
+        if from_idx >= to_idx:
+            self.components.insert(to_idx, self.components.pop(from_idx))
+        else:
+            self.components.insert(to_idx - 1, self.components.pop(from_idx))
 
     @property
     def components(self):
