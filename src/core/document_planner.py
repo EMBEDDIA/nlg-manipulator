@@ -312,7 +312,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             return False
         # rank and rank_reverse are elaborated by the base values
         elif rank_1:
-            return (normalized_1, percentage_1, change_1, None) == (normalized_2, percentage_2, change_2, grouped_by_2)
+            return (change_1, None) == (change_2, grouped_by_2)
         # Change is an elaboration of the result value
         elif change_2 and (normalized_1, percentage_1) == (normalized_2, percentage_2):
             return True
