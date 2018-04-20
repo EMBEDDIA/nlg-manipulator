@@ -324,7 +324,12 @@ class FinnishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        # The latter condition makes the system realize the full year roughly once in five sentences even if the year hasn't changed.
+        # The latter condition makes the system realize the full year roughly once in five sentences even
+        # if the year hasn't changed.
+        if template.components[0].value == "":
+            template.move_slot(idx, idx - 1)
+            idx -= 1
+            slot.attributes['name_type'] = 'short'
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
             if slot.attributes['name_type'] == 'full':
@@ -358,6 +363,10 @@ class FinnishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
+        if template.components[0].value == "":
+            template.move_slot(idx, idx - 1)
+            idx -= 1
+            slot.attributes['name_type'] = 'short'
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
             new_slot = LiteralSlot(MONTHS[month])
