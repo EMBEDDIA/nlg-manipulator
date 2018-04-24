@@ -183,12 +183,12 @@ class FinnishRealizer():
             elif grouped_by == 'crime_place_year':
                 if slot.fact.when_type == 'month':
                     template.add_slot(idx, LiteralSlot("kuukausiin verrattuna"))
-                elif slot.fact.when_type == 'year':
-                    template.add_slot(idx, LiteralSlot("vuosiin verrattuna"))
+                else:
+                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
                 added_slots += 1
                 idx += 1
             else:
-                raise Exception("This is impossible. The regex accepts only the above options for this group.")
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
         return added_slots
 
     def _unit_rank(self, slot):
@@ -205,12 +205,11 @@ class FinnishRealizer():
                 template.add_slot(idx - 1, LiteralSlot("muihin kuntiin verrattuna"))
             elif grouped_by == '_crime_place_year':
                 if slot.fact.when_type == 'month':
-                    template.add_slot(idx, LiteralSlot("muihin kuukausiin verrattuna"))
-                elif slot.fact.when_type == 'year':
-                    template.add_slot(idx, LiteralSlot("muihin vuosiin verrattuna"))
-                template.add_slot(idx - 1, LiteralSlot(""))
+                    template.add_slot(idx - 1, LiteralSlot("vuoden muihin kuukausiin verrattuna"))
+                else:
+                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
             else:
-                raise Exception("This is impossible. The regex accepts only the above options for this group.")
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
             idx += 1
 
@@ -228,7 +227,7 @@ class FinnishRealizer():
         elif rank == '_rank_reverse':
             slot.value = lambda x: "vähiten"
         else:
-            raise Exception("This is impossible. The regex accepts only the above options for this group.")
+            raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
         idx += 1
         # If talking about changes, we will do the rest in the change handler
         if change:
@@ -359,7 +358,7 @@ class FinnishRealizer():
             reference_options = ["samana vuonna", "tuolloin myös", "myös"]
             self._update_slot_value(slot, random.choice(reference_options))
         else:
-            raise Exception("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+            raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         return added_slots
 
     def _time_month(self, random, slot):
@@ -386,7 +385,7 @@ class FinnishRealizer():
             reference_options = ["samassa kuussa", "tuolloin myös", "myös", "samaan aikaan"]
             self._update_slot_value(slot, random.choice(reference_options))
         else:
-            raise Exception("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+            raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         return added_slots
 
     def _time_change_year(self, random, slot):
