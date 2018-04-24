@@ -276,8 +276,8 @@ CRIME_TYPES = {
         'pl': ("liikenneturvallisuuden vaarantamiset ja liikennepaot", [0, 2])
     },
     'traffic_infractions_total': {
-        'sg': "muu liikennerikkomus",
-        'pl': "muut liikennerikkomukset"
+        'sg': "liikennerikkomus",
+        'pl': "liikennerikkomukset"
     },
     'narcotic_offences_total_category': {
         'sg': "huumausainerikos",
