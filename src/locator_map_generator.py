@@ -29,15 +29,18 @@ class LocatorMapGenerator():
     CACHE = {}
 
     def generate(self, location):
-        # For reference points themselves, show map of whole country
-        for reference in self.REFERENCES:
-            if location == reference['name']:
-                return self._get_map_country(reference['latitude'], reference['longitude'])
+        try:
+            # For reference points themselves, show map of whole country
+            for reference in self.REFERENCES:
+                if location == reference['name']:
+                    return self._get_map_country(reference['latitude'], reference['longitude'])
 
-        # For other locations, show map zoomed to self and nearest reference
-        location_lat, location_lng = self._get_coords(location)
-        reference_lat, reference_lng = self._get_nearest_reference_coords(location_lat, location_lng)
-        return self._get_map(location_lat, location_lng, reference_lat, reference_lng)
+            # For other locations, show map zoomed to self and nearest reference
+            location_lat, location_lng = self._get_coords(location)
+            reference_lat, reference_lng = self._get_nearest_reference_coords(location_lat, location_lng)
+            return self._get_map(location_lat, location_lng, reference_lat, reference_lng)
+        except Exception:
+            return ''
 
     def _distance(self, lat1, lng1, lat2, lng2):
         x = (lng1 - lng2) * cos((lat1 + lat2) / 2)
