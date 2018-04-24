@@ -6,6 +6,8 @@ from math import sqrt
 import math
 import os.path
 import columns as cls
+import paramconfig as prmcnf
+from operator import itemgetter
 
 def run():
     # Download list of available PX files
@@ -49,6 +51,9 @@ def run():
 
     print('Importer')
     ImporterC()
+
+    print('Trend Finder')
+    TrendFinder()
 
 class ImporterC:
 
@@ -696,6 +701,104 @@ class ConverterC:
 
         return pd.DataFrame(data=change_data, columns=comparison_columns)
 
+
+class TrendFinder:
+
+    def __init__(self):
+        self.mk_limits = {
+            5: 10,
+            6: 13,
+            7: 15,
+            8: 18,
+            9: 20,
+            10: 23
+        }
+        self.bcdf = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/bc_crime_pyn.csv'))
+        self.trend_df = self._find_trends()
+        self.trend_df.to_csv(os.path.join(os.path.dirname(__file__), '../data/bc_crime_trends.csv'), index=False)
+
+    def _linear_trend(self, data, order=1):
+        coeffs = np.polyfit(range(len(list(data))), list(data), order)
+        slope = coeffs[-2]
+        return float(slope)
+
+
+    #Mann-Kendall
+    def _mk_trend(self, d, c, e, m):
+        d = list(d)
+        pos = 0
+        neg = 0
+        if len(d) < 5:
+            return [np.nan, np.nan]
+        for i in range(len(d)-1):
+            for j in range(i+1, len(d)):
+                s = d[j] - d[i]
+                if s >= 0:
+                    pos += 1
+                if s <= 0:
+                    neg += 1
+        sdif = abs(pos - neg)
+        limit = self.mk_limits[len(d)]
+        # Score trend
+        # Crime type weight
+        score = int(prmcnf.category_scores.get(c.split("_")[0], 3))
+        # Trend violations
+        score = score * max(pos, neg) / (pos + neg)
+        # How long trend has been going on
+        score = score * len(d)
+        # How recent the trend is
+        score = score / (m - e + 1)
+        # How strong is the change
+        if min(d[0], d[-1]) != 0:
+            score = score * max(d[0], d[-1]) / min(d[0], d[-1])
+        elif max(d[0], d[-1]) != 0:
+            score = score * max(d[0], d[-1])
+        else:
+            score = score
+        if sdif >= limit:
+            if pos > neg:
+                return [1, score]
+            return [-1, score]
+        return [0, 0]
+
+
+    def _find_trends(self):
+        df = self.bcdf
+        df = df[df['when_type'] == "year"]
+        numbers_cols = [x for x in df.columns if "_normalized" in x]
+        id_cols = cls.carryover_columns
+        df = df[id_cols + numbers_cols]
+        df.dropna(axis=0, how="any", inplace=True)
+        years = sorted(df['year'].unique())
+        municipalities = sorted(df['where'].unique())
+        df["when"] = df['when'].apply(pd.to_numeric)
+        trend_cols = []
+        for numcol in numbers_cols:
+            trend_cols.append(numcol+"_linear_trend")
+            trend_cols.append(numcol + "_mk_trend")
+            trend_cols.append(numcol+"_mk_score")
+        all_columns = ['where', 'where_type', 'when1', 'when2', 'when_type'] + trend_cols
+        data = []
+
+        for m in municipalities:
+            for start in years:
+                for end in years:
+                    if end <= start:
+                        continue
+                    trends = []
+                    for c in numbers_cols:
+                        values = df[(df["where"] == m) & (df["when"] >= start) & (df["when"] <= end)][c]
+                        ltr = self._linear_trend(values)
+                        my = int(years[-1])
+                        mkres = self._mk_trend(values, c, end, my)
+                        trends.append(ltr)
+                        trends.append(mkres[0])
+                        trends.append(mkres[1])
+                    mt = df[(df["where"] == m) & (df["when"] == start)].iloc[0]["where_type"]
+                    row = [m, mt, start, end, "year"] + trends
+                    data.append(row)
+        trend_df = pd.DataFrame(data, columns=all_columns)
+        return trend_df
 
 def drop_columns(df, keepcols):
     return df[keepcols]
