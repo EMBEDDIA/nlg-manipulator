@@ -15,7 +15,7 @@
 
       {{!body}}
 
-      <div d="graph-card" class="card">
+      <div id="graph-card" class="card">
         <div class="card-content">
           {{!graph}}
         </div>
