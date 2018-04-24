@@ -146,7 +146,7 @@ def random_news():
 
     header, body, locator_map, graph = get_article(language, m, "M")
     return dict({
-        "where": "Akaa",
+        "where": m,
         "where_type": "M",
         "language": language,
         "header": header,
