@@ -140,8 +140,11 @@ def news_api():
 
 def random_news():
     language = request.query.language or "fi"
+    geodata = service.registry.get('geodata-lookup')
+    options = list(geodata.get(language, geodata["fi"])["M"].keys())
+    m = random.choice(options)
 
-    header, body, locator_map, graph = get_article(language, "Akaa", "M")
+    header, body, locator_map, graph = get_article(language, m, "M")
     return dict({
         "where": "Akaa",
         "where_type": "M",
