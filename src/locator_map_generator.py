@@ -45,7 +45,7 @@ class LocatorMapGenerator():
     def _distance(self, lat1, lng1, lat2, lng2):
         x = (lng1 - lng2) * cos((lat1 + lat2) / 2)
         y = (lat1 - lat2)
-        return sqrt(x ** 2 + y ** 2) * 6371000
+        return sqrt((lat1 - lat2)**2 + (lng1 - lng2)**2)
 
     def _get_nearest_reference_coords(self, lat, lng):
         closest_reference = self.REFERENCES[0]
