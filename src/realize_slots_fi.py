@@ -181,7 +181,10 @@ class FinnishRealizer():
                 added_slots += 1
                 idx += 1
             elif grouped_by == 'crime_place_year':
-                template.add_slot(idx, LiteralSlot("kuukausiin verrattuna"))
+                if slot.fact.when_type == 'month':
+                    template.add_slot(idx, LiteralSlot("kuukausiin verrattuna"))
+                elif slot.fact.when_type == 'year':
+                    template.add_slot(idx, LiteralSlot("vuosiin verrattuna"))
                 added_slots += 1
                 idx += 1
             else:
@@ -201,7 +204,11 @@ class FinnishRealizer():
             elif grouped_by == '_crime_time':
                 template.add_slot(idx - 1, LiteralSlot("muihin kuntiin verrattuna"))
             elif grouped_by == '_crime_place_year':
-                template.add_slot(idx - 1, LiteralSlot("vuoden muihin kuukausiin verrattuna"))
+                if slot.fact.when_type == 'month':
+                    template.add_slot(idx, LiteralSlot("muihin kuukausiin verrattuna"))
+                elif slot.fact.when_type == 'year':
+                    template.add_slot(idx, LiteralSlot("muihin vuosiin verrattuna"))
+                template.add_slot(idx - 1, LiteralSlot(""))
             else:
                 raise Exception("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
@@ -366,7 +373,7 @@ class FinnishRealizer():
         if template.components[0].value == "":
             template.move_slot(idx, idx - 1)
             idx -= 1
-            slot.attributes['name_type'] = 'short'
+            slot.attributes['name_type'] = 'full'
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
             new_slot = LiteralSlot(MONTHS[month])
