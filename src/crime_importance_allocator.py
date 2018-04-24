@@ -40,6 +40,8 @@ class CrimeImportanceSelector(NLGPipelineComponent):
             what_type_score *= pfg.rank_reverse_weight
         elif '_rank' in fact.what_type:
             what_type_score *= pfg.rank_weight
+        elif not '_change' in fact.what_type and fact.what == 0:
+            return 0
 
         # importance of value
         what_score = what_type_score * outlier_score
