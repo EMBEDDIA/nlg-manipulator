@@ -42,7 +42,7 @@ class Aggregator(NLGPipelineComponent):
 
             log.debug("t0={}, t1={}".format(t0, t1))
 
-            if self._same_prefix(t0, t1) and not t0.prevent_aggregation:
+            if self._same_prefix(t0, t1) and not (t0.prevent_aggregation or t1.prevent_aggregation):
                 log.debug("Combining")
                 new_children[-1] = self._combine(registry, language, new_children[-1], t1)
                 log.debug("Combined, New Children: {}".format(new_children))
@@ -74,6 +74,45 @@ class Aggregator(NLGPipelineComponent):
         this.children.clear()
         this.children.extend(new_children)
         return this
+
+    def _aggregate_list(self, registry, language, this):
+        log.debug("Visiting {}".format(this))
+        first_msg = this.children[0]
+        template = first_msg.template
+        for idx, slot in enumerate(template.components):
+            if slot.slot_type == 'what':
+                what_idx = idx
+            elif slot.slot_type == 'what_type':
+                what_type_idx = idx
+        if what_idx < what_type_idx:
+            start_idx = what_idx
+            end_idx = what_type_idx + 1
+        else:
+            start_idx = what_type_idx
+            end_idx = what_idx + 1
+        start_slots = template.components[:start_idx]
+        end_slots = template.components[end_idx:]
+        combined_facts = []
+        inner_components = []
+        for msg in this.children:
+            inner_slots = [slot.copy() for slot in template.components[start_idx:end_idx]]
+            for slot in inner_slots:
+                slot.fact = msg.fact
+            inner_components.append(inner_slots)
+            combined_facts.append(msg.fact)
+        combined_slots = start_slots
+        for i in range(len(inner_components) - 2):
+            combined_slots.extend(inner_components[i])
+            combined_slots.append(Literal(","))
+        if len(inner_components) > 1:
+            combined_slots.extend(inner_components[-2])
+            combined_slots.append(Literal(registry.get('vocabulary').get(language, {}).get('default_combiner', "MISSING-COMBINER")))
+        combined_slots.extend(inner_components[-1])
+        combined_slots.extend(end_slots)
+        new_message = Message(facts=combined_facts, importance_coefficient=first_msg.importance_coefficient)
+        new_message.template = Template(combined_slots)
+        new_message.prevent_aggregation = True
+        return new_message
 
     def _same_prefix(self, first, second):
         try:
@@ -173,7 +212,8 @@ class Aggregator(NLGPipelineComponent):
 
         if relation == Relation.ELABORATION:
             return self._aggregate_elaboration(registry, language, this)
-
+        elif relation == Relation.LIST:
+            return self._aggregate_list(registry, language, this)
         return self._aggregate_sequence(registry, language, this)
 
     def _message_positive(self, message):

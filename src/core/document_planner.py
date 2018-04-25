@@ -251,19 +251,25 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     def _add_satellite(self, satellite, messages):
         for idx, msg in enumerate(messages):
             if type(msg) is DocumentPlan:
+                if msg.relation == Relation.LIST and self._is_same_stat_type(msg.children[-1], satellite):
+                    msg.add_message(satellite)
+                    return
                 continue
             rel = self._check_relation(msg, satellite)
             if rel != Relation.SEQUENCE:
                 children = [msg, satellite]
                 messages[idx] = DocumentPlan(children, rel)
-                break
+                return
             rel = self._check_relation(satellite, msg)
             if rel != Relation.SEQUENCE:
                 children = [satellite, msg]
                 messages[idx] = DocumentPlan(children, rel)
-                break
-        else:
-            messages.append(satellite)
+                return
+            if self._is_same_stat_type(msg, satellite):
+                children = [msg, satellite]
+                messages[idx] = DocumentPlan(children, Relation.LIST)
+                return
+        messages.append(satellite)
 
     def _check_relation(self, msg_1, msg_2):
         """
@@ -331,3 +337,9 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         :return:
         """
         return False
+
+    def _is_same_stat_type(self, msg1, msg2):
+        match_1 = self.value_type_re.fullmatch(msg1.fact.what_type)
+        match_2 = self.value_type_re.fullmatch(msg2.fact.what_type)
+        # true if everything except the crime itself is the same
+        return match_1.groups()[1:] == match_2.groups()[1:]
