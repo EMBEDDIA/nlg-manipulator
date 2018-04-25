@@ -2,7 +2,7 @@ import logging
 import urllib.request
 import urllib.parse
 import json
-from math import cos, sqrt
+from math import radians, cos, sin, asin, sqrt
 
 log = logging.getLogger('root')
 
@@ -43,7 +43,8 @@ class LocatorMapGenerator():
             return ''
 
     def _distance(self, lat1, lng1, lat2, lng2):
-        return sqrt((lat1 - lat2)**2 + (lng1 - lng2)**2)
+        lat1, lng1, lat2, lng2 = map(radians, [lat1, lng1, lat2, lng2])
+        return 12742 * asin(sqrt(sin((lat2-lat1)/2)**2 + cos(lat1) * cos(lat2) * sin((lng2-lng1)/2)**2))
 
     def _get_nearest_reference_coords(self, lat, lng):
         closest_reference = self.REFERENCES[0]
