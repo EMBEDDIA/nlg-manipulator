@@ -43,6 +43,9 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         elif not '_change' in fact.what_type and fact.what == 0:
             return 0
 
+        if '_trend' in fact.what_type:
+            what_type_score *= 500
+
         # importance of value
         what_score = what_type_score * outlier_score
 
