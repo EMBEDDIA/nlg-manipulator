@@ -14,6 +14,7 @@ class Relation(Enum):
     EXEMPLIFICATION = 2
     CONTRAST = 3
     SEQUENCE = 4
+    LIST = 5
 
 
 class DocumentPlan(object):
@@ -37,6 +38,9 @@ class DocumentPlan(object):
     @property
     def relation(self):
         return self._relation
+
+    def add_message(self, msg):
+        self._children.append(msg)
 
     def __str__(self):
         return self.relation.name
