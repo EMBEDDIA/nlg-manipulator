@@ -747,18 +747,18 @@ class TrendFinder:
         # How long trend has been going on
         score = score * len(d)
         # How recent the trend is
-        score = score / (m - e + 1)
+        #score = score / (m - e + 1)
         # How strong is the change
-        if min(d[0], d[-1]) != 0:
-            score = score * max(d[0], d[-1]) / min(d[0], d[-1])
-        elif max(d[0], d[-1]) != 0:
-            score = score * max(d[0], d[-1])
-        else:
-            score = score
+        #if min(d[0], d[-1]) != 0:
+        #    score = score * max(d[0], d[-1]) / min(d[0], d[-1])
+        #elif max(d[0], d[-1]) != 0:
+        #    score = score * max(d[0], d[-1])
+        #else:
+        #    score = score
         if sdif >= limit:
             if pos > neg:
                 return [1, score]
-            return [-1, score]
+            return [-1, -1 * score]
         return [0, 0]
 
 
