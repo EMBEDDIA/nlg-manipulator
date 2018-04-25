@@ -341,5 +341,5 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     def _is_same_stat_type(self, msg1, msg2):
         match_1 = self.value_type_re.fullmatch(msg1.fact.what_type)
         match_2 = self.value_type_re.fullmatch(msg2.fact.what_type)
-        # true if everything except the crime itself is the same
-        return match_1.groups()[1:] == match_2.groups()[1:]
+        # true if everything except the crime itself is the same and the what values have the same sign
+        return match_1.groups()[1:] == match_2.groups()[1:] and msg1.fact.what * msg2.fact.what > 0
