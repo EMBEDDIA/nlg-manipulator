@@ -28,6 +28,8 @@ class LocatorMapGenerator():
 	]
     CACHE = {}
 
+    MAP_MARGIN = 0.075
+
     def generate(self, location):
         try:
             # For reference points themselves, show map of whole country
@@ -115,11 +117,23 @@ class LocatorMapGenerator():
 
                 // Set zoom
                 var bounds = new google.maps.LatLngBounds()
-                bounds.extend(location_marker.position)
-                bounds.extend(new google.maps.LatLng({reference_lat}, {reference_lng}))
+                bounds.extend(new google.maps.LatLng({location_margin1_lat}, {location_margin1_lng}))
+                bounds.extend(new google.maps.LatLng({location_margin2_lat}, {location_margin2_lng}))
+                bounds.extend(new google.maps.LatLng({reference_margin1_lat}, {reference_margin1_lng}))
+                bounds.extend(new google.maps.LatLng({reference_margin2_lat}, {reference_margin2_lng}))
                 map.fitBounds(bounds);
             }}
             </script>
             <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7A_wqRiWrVXFAxqyzUY09oDNTxMJl9ZA&callback=createMap"></script>
-        """.format(location_lat=location_lat, location_lng=location_lng, reference_lat=reference_lat,
-                   reference_lng=reference_lng)
+        """.format(
+            location_lat=location_lat, 
+            location_lng=location_lng, 
+            location_margin1_lat=location_lat + self.MAP_MARGIN, 
+            location_margin1_lng=location_lng + self.MAP_MARGIN, 
+            location_margin2_lat=location_lat - self.MAP_MARGIN, 
+            location_margin2_lng=location_lng - self.MAP_MARGIN, 
+            reference_margin1_lat=reference_lat + self.MAP_MARGIN, 
+            reference_margin1_lng=reference_lng + self.MAP_MARGIN, 
+            reference_margin2_lat=reference_lat - self.MAP_MARGIN, 
+            reference_margin2_lng=reference_lng - self.MAP_MARGIN
+        )
