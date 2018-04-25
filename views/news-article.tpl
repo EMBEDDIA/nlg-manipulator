@@ -14,17 +14,12 @@
       </div>
 
       {{!body}}
-
+      
       <div id="graph-card" class="card">
         <div class="card-content">
           {{!graph}}
         </div>
       </div>
     </div>
-    <div class="row center">
-      <a class="btn-large waves-effect waves-light-blue blue" href="/random">Uusi satunnainen uutinen</a>
-    </div>
-    <br>
-    <br>
   </div>
 </div>

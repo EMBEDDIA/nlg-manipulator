@@ -95,7 +95,8 @@
               </div>
             </div>
             <div class="row">
-              <div class="col s12">               
+              <div class="col s12">
+                <a class="btn waves-effect waves-light-blue blue" href="/random">Satunnainen uutinen</a>
                 <button class="right btn waves-effect waves-light-blue blue" type="submit" name="action">
                   Lue
                   <i class="material-icons right">send</i>
