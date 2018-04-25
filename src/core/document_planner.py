@@ -294,7 +294,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         :param fact2:
         :return: True, if fact2 is an elaboration of fact1, False otherwise
         """
-        same_context = (fact1.where, fact1.when_1, fact1.when_2) == (fact2.where, fact1.when_1, fact2.when_2)
+        same_context = (fact1.where, fact1.when_1, fact1.when_2) == (fact2.where, fact2.when_1, fact2.when_2)
         if not same_context:
             return False
         # An elaboration can't have the same fact type in both facts.
