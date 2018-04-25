@@ -127,7 +127,7 @@ class FinnishRealizer():
         added_slots += 1
         idx += 1
 
-        if normalized:
+        if normalized and 'no_normalization' not in slot.attributes.keys():
             if rank or percentage:
                 # with rank or percentage values we don't need to specify the exact normalizing factor
                 template.add_slot(idx, LiteralSlot("suhteessa asukaslukuun"))
@@ -137,18 +137,20 @@ class FinnishRealizer():
             added_slots += 1
             idx += 1
 
-        if slot.fact.what < 0 or (rank and '_decrease' in rank):
-            template.add_slot(idx, LiteralSlot("laski"))
-        elif slot.fact.what > 0:
-            template.add_slot(idx, LiteralSlot("kasvoi"))
-        else:
-            self._update_slot_value(slot, "säilyi ennallaan")
-            # Clear the value slot
-            self._update_slot_value(what_slot, "")
-            return added_slots
-        added_slots += 1
+        if 'no_normalization' not in slot.attributes.keys():
+            if slot.fact.what < 0 or (rank and '_decrease' in rank):
+                template.add_slot(idx, LiteralSlot("laski"))
+            elif slot.fact.what > 0:
+                template.add_slot(idx, LiteralSlot("kasvoi"))
+            else:
+                self._update_slot_value(slot, "säilyi ennallaan")
+                # Clear the value slot
+                self._update_slot_value(what_slot, "")
+                return added_slots
+            added_slots += 1
+            idx += 1
         # Jump over the what_slot
-        idx += 2
+        idx += 1
 
         # The base unit
         if rank:
@@ -168,7 +170,7 @@ class FinnishRealizer():
         idx += 1
 
         # The end comparison
-        if grouped_by:
+        if grouped_by and 'no_grouping' not in slot.attributes.keys():
             template.add_slot(idx, LiteralSlot("muihin"))
             added_slots += 1
             idx += 1

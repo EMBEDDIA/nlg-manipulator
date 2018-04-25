@@ -94,10 +94,14 @@ class Aggregator(NLGPipelineComponent):
         end_slots = template.components[end_idx:]
         combined_facts = []
         inner_components = []
-        for msg in this.children:
+        for idx, msg in enumerate(this.children):
             inner_slots = [slot.copy() for slot in template.components[start_idx:end_idx]]
             for slot in inner_slots:
                 slot.fact = msg.fact
+                if idx > 0 and slot.slot_type == 'what_type':
+                    slot.attributes['no_normalization'] = True
+                if idx < len(this.children) - 1 and slot.slot_type == 'what_type':
+                    slot.attributes['no_grouping'] = True
             inner_components.append(inner_slots)
             combined_facts.append(msg.fact)
         combined_slots = start_slots
