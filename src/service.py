@@ -44,6 +44,7 @@ class CrimeNlgService(object):
         crime_data = [
             ('../data/bc_crime_pyn_comp_ranks_outliers.csv', '../data/bc_crime_comp.cache', 'crime-bc-comp-data'),
             ('../data/bc_crime_pyn_ranks_outliers.csv', '../data/bc_crime.cache', 'crime-bc-data'),
+            ('../data/bc_crime_trends.csv', '../data/bc_crime_trends.cache', 'crime-bc-trend-data'),
             ('../data/crime_pyn_comp_ranks_outliers.csv', '../data/crime_comp.cache', 'crime-comp-data'),
             ('../data/crime_pyn_ranks_outliers.csv', '../data/crime.cache', 'crime-data'),
         ]
