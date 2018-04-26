@@ -10,9 +10,8 @@ log = logging.getLogger('root')
 
 
 class Aggregator(NLGPipelineComponent):
-
     value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def run(self, registry, random, language, document_plan):
         if log.isEnabledFor(logging.DEBUG):
@@ -154,8 +153,8 @@ class Aggregator(NLGPipelineComponent):
             second_type = second.facts[0].what_type
             match_1 = self.value_type_re.fullmatch(first_type)
             match_2 = self.value_type_re.fullmatch(second_type)
-            unit_1, normalized_1, percentage_1, change_1, grouped_by_1, rank_1 = match_1.groups()
-            unit_2, normalized_2, percentage_2, change_2, grouped_by_2, rank_2 = match_2.groups()
+            unit_1, normalized_1, trend_1, percentage_1, change_1, grouped_by_1, rank_1 = match_1.groups()
+            unit_2, normalized_2, trend_2, percentage_2, change_2, grouped_by_2, rank_2 = match_2.groups()
             if (unit_1, normalized_1, percentage_1) == (unit_2, normalized_2, percentage_2) and not change_1 and change_2:
                 result.append(Literal(
                     registry.get('vocabulary').get(language, {}).get('subord_clause_start', "MISSING-COMBINER")))

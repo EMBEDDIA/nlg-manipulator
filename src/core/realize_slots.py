@@ -85,14 +85,15 @@ class SlotRealizer(NLGPipelineComponent):
 
     def _realize_unit(self, slot):
         value_type_re = re.compile(
-            r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+            r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
         match = value_type_re.fullmatch(slot.value)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         try:
-            if match.group(4):
+            if change:
                 new_slots = self._realizer.units.get('change', self._default_unit)(slot)
-            elif match.group(6):
+            elif rank:
                 new_slots = self._realizer.units.get('rank', self._default_unit)(slot)
-            elif match.group(3):
+            elif percentage:
                 new_slots = self._realizer.units.get('percentage', self._default_unit)(slot)
             else:
                 new_slots = self._realizer.units.get('base', self._default_unit)(slot)

@@ -38,7 +38,7 @@ class SwedishRealizer():
     }
 
     value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def __init__(self):
 
@@ -63,7 +63,7 @@ class SwedishRealizer():
 
     def _unit_base(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(2)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         if abs(slot.fact.what) == 1:
             new_value = self.UNITS[unit]['sg']
         else:
@@ -72,6 +72,7 @@ class SwedishRealizer():
 
     def _unit_percentage(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -79,17 +80,17 @@ class SwedishRealizer():
         idx += 1
         if slot.attributes.get('form') == 'short':
             return added_slots
-        template.add_slot(idx, LiteralSlot("av " + self.UNITS[match.group(2)]['pldef']))
+        template.add_slot(idx, LiteralSlot("av " + self.UNITS[unit]['pldef']))
         added_slots += 1
         idx += 1
         return added_slots
 
     def _unit_change(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
-        # If the value_type starts with percentage_ or total_
-        if match.group(1) and match.group(1) == 'percentage_':
+        if percentage:
             added_slots = self._update_slot_value(slot, "procentenheter")
             idx += 1
         else:
@@ -105,8 +106,8 @@ class SwedishRealizer():
         added_slots += 1
         idx += 1
         # For the percentage values we also need to realize the original unit
-        if match.group(1) == 'percentage_':
-            new_slot = LiteralSlot(self.UNITS[match.group(2)]['pl'])
+        if percentage:
+            new_slot = LiteralSlot(self.UNITS[unit]['pl'])
             template.add_slot(idx, new_slot)
             added_slots += 1
             idx += 1

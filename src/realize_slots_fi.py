@@ -7,7 +7,7 @@ log = logging.getLogger('root')
 
 class FinnishRealizer():
 
-    value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+    value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def __init__(self):
 
@@ -43,7 +43,7 @@ class FinnishRealizer():
 
     def _unit_base(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
-        unit, normalized, percentage, change, grouped_by, rank = match.groups()
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -70,7 +70,7 @@ class FinnishRealizer():
     def _unit_percentage(self, slot):
         # Todo: check this, especially cases
         match = self.value_type_re.fullmatch(slot.value)
-        unit, normalized, percentage, change, grouped_by, rank = match.groups()
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
@@ -85,7 +85,7 @@ class FinnishRealizer():
 
     def _unit_change(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
-        unit, normalized, percentage, change, grouped_by, rank = match.groups()
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         # Check whether the preceding slot contains the value
@@ -195,7 +195,7 @@ class FinnishRealizer():
 
     def _unit_rank(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
-        unit, normalized, percentage, change, grouped_by, rank = match.groups()
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0

@@ -47,7 +47,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     """
 
     # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-    value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+    value_type_re = re.compile(
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def run(self, registry, random, language, scored_messages):
         """
@@ -179,8 +180,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         return (dp, all_messages)
 
     def _is_effectively_repetition(self, candidate, messages):
-        unit, normalized, percentage, change, grouped_by, rank = self.value_type_re.fullmatch(candidate.fact.what_type).groups()
-        
+        unit, normalized, trend, percentage, change, grouped_by, rank = self.value_type_re.fullmatch(candidate.fact.what_type).groups()
+
         flat_messages = self._flatten(messages)
         if not flat_messages:
             return False
@@ -190,7 +191,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 # Not repetition if we are not even talking about the same location
                 continue
             other_groups = self.value_type_re.fullmatch(other.fact.what_type).groups()
-            (existing_unit, existing_normalized, existing_percentage, existing_change, existing_grouped_by, existing_rank) = other_groups
+            (existing_unit, existing_normalized, existing_trend, existing_percentage, existing_change, existing_grouped_by, existing_rank) = other_groups
             if (
                 unit == existing_unit 
                 and percentage == existing_percentage 
@@ -308,8 +309,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             return False
         match_1 = self.value_type_re.fullmatch(fact1.what_type)
         match_2 = self.value_type_re.fullmatch(fact2.what_type)
-        unit_1, normalized_1, percentage_1, change_1, grouped_by_1, rank_1 = match_1.groups()
-        unit_2, normalized_2, percentage_2, change_2, grouped_by_2, rank_2 = match_2.groups()
+        unit_1, normalized_1, trend_1, percentage_1, change_1, grouped_by_1, rank_1 = match_1.groups()
+        unit_2, normalized_2, trend_2, percentage_2, change_2, grouped_by_2, rank_2 = match_2.groups()
         # If the facts have different base unit, they can't have an elaboration relation
         if unit_1 != unit_2:
             return False

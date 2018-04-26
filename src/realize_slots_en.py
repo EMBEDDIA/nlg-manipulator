@@ -48,7 +48,7 @@ class EnglishRealizer():
     }
 
     value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?')
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def __init__(self):
 
@@ -71,7 +71,7 @@ class EnglishRealizer():
 
     def _unit_base(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         if abs(slot.fact.what) == 1:
             # new_value = CRIME_TYPES.get(unit, {}).get('sg', unit)
             new_value = CRIME_TYPES.get(unit, unit)
@@ -97,7 +97,7 @@ class EnglishRealizer():
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = self._unit_percentage_points(slot)
@@ -116,7 +116,7 @@ class EnglishRealizer():
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
-        unit = match.group(1)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         # Check whether the following slot contains the value
@@ -139,7 +139,7 @@ class EnglishRealizer():
             template.add_slot(idx, LiteralSlot("increased"))
         idx += 1
         # If we are talking about a rank value
-        if match.group(6):
+        if rank:
             if what_slot.value == 1:
                 self._update_slot_value(what_slot, "")
             template.add_slot(idx, LiteralSlot("the"))
@@ -175,7 +175,7 @@ class EnglishRealizer():
         # The capture groups are:
         # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
-        grouped_by = match.group(5)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
