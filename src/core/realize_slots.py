@@ -56,6 +56,7 @@ class SlotRealizer(NLGPipelineComponent):
             if slot_type == 'what':
                 added_slots = self._realize_value(this)
                 return added_slots
+            # Note that {time} slots aren't handled until at the NER, because they won't be realized every time.
             elif slot_type[:-2] == 'when':
                 added_slots = self._realize_time(this)
                 return added_slots

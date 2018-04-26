@@ -48,6 +48,8 @@ class FinnishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
+
+        # Realise the crime type
         content = CRIME_TYPES.get(unit, {}).get('sg', unit)
         try:
             unit, non_case_idx = content
@@ -62,6 +64,8 @@ class FinnishRealizer():
             added = self._add_slots(template, idx, content, case)
         added_slots += added
         idx += added + 1
+
+        # If we are talking about a normalized value, realise the information about that.
         if normalized:
             template.add_slot(idx, LiteralSlot("1000 asukasta kohti"))
             added_slots += 1
@@ -96,7 +100,9 @@ class FinnishRealizer():
             log.error("The Finnish change template should have a value slot preceding a unit slot!")
             return 0
         added_slots = 0
+        # The short form is used within brackets as an elaboration
         if slot.attributes.get('form', '') == 'short':
+            # A special case for when the change is zero
             if slot.fact.what == 0:
                 self._update_slot_value(what_slot, "")
                 self._update_slot_value(slot, "ei muutosta")
@@ -118,7 +124,9 @@ class FinnishRealizer():
                     idx += 1
                     added_slots += 1
             return added_slots
-        # Move the pointer to the value slot
+
+        # The beginning of the full form realisation
+        # Move the idx pointer back to add slots before the numerical value
         idx -= 1
         added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='genitive')
         idx += added
@@ -128,6 +136,7 @@ class FinnishRealizer():
         added_slots += 1
         idx += 1
 
+        # Specify the normalisation if needed
         if normalized and 'no_normalization' not in slot.attributes.keys():
             if rank or percentage:
                 # with rank or percentage values we don't need to specify the exact normalizing factor
@@ -138,6 +147,7 @@ class FinnishRealizer():
             added_slots += 1
             idx += 1
 
+        # Specify the predicate
         if 'no_normalization' not in slot.attributes.keys():
             if slot.fact.what < 0 or (rank and '_decrease' in rank):
                 template.add_slot(idx, LiteralSlot("laski"))
@@ -150,6 +160,7 @@ class FinnishRealizer():
                 return added_slots
             added_slots += 1
             idx += 1
+
         # Jump over the what_slot
         idx += 1
 
