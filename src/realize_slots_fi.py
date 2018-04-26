@@ -21,6 +21,7 @@ class FinnishRealizer():
             'percentage': self._unit_percentage,
             'change': self._unit_change,
             'rank': self._unit_rank,
+            'trend': self._unit_trend,
         }
 
         self.time = {
@@ -237,6 +238,45 @@ class FinnishRealizer():
         added = self._add_slots(template, idx, CRIME_TYPES.get(unit, {}).get('pl', unit), case='partitive')
         idx += added
         added_slots += added
+        return added_slots
+
+    def _unit_trend(self, slot):
+        match = self.value_type_re.fullmatch(slot.value)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
+        what_slot = template.components[idx - 1]
+        if what_slot.slot_type != 'what':
+            raise AttributeError("The slot before a trend what_type should be the what slot!")
+
+        # Realise the unit of the trend
+        content = CRIME_TYPES.get(unit, {}).get('pl', unit)
+        try:
+            unit, non_case_idx = content
+            words = unit.split()
+        except ValueError:
+            words = content.split()
+        if len(words) == 1:
+            added = self._unit_set_value(slot, words[0])
+            slot.attributes['case'] = 'genitive'
+            template.move_slot(idx, 0)
+            template.add_slot(1, LiteralSlot("määrä"))
+        else:
+            self._unit_set_value(slot, "")
+            added = self._add_slots(template, 0, content, 'genitive')
+            template.add_slot(added, LiteralSlot("määrä"))
+        added_slots += added + 1
+        idx += added + 1
+
+        # Realise the direction of the trend
+        if what_slot.fact.what < 0:
+            self._update_slot_value(what_slot, "laski")
+        elif what_slot.fact.what > 0:
+            self._update_slot_value(what_slot, "kasvoi")
+        else:
+            self._update_slot_value(what_slot, "pysyi ennallaan")
+
         return added_slots
 
     def _add_slots(self, template, idx, content, case=None):

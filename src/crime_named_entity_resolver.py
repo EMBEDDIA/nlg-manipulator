@@ -44,7 +44,7 @@ class CrimeEntityNameResolver(EntityNameResolver):
         elif entity_type == 'TIME':
             match = self.value_type_re.fullmatch(slot.fact.what_type)
             unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
-            if change:
+            if change or trend:
                 return self._realizers[language].time.get(slot.fact.when_type + '_change')(random, slot)
             else:
                 return self._realizers[language].time.get(slot.fact.when_type)(random, slot)
