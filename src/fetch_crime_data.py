@@ -34,7 +34,7 @@ def run():
     df = df[['when', 'where', 'population']]
     df.replace(['"-"', '".."'], 0, inplace=True)
     df.sort_values(['when', 'where'], ascending=[1, 1], inplace=True)
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv'), index=False, encoding='iso-8859-1')
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv',), index=False)
 
     # flatten and store crime statistics
     df = Px(os.path.join(os.path.dirname(__file__), "../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px"), language='en').pd_dataframe().transpose()
