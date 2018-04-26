@@ -89,7 +89,9 @@ class SlotRealizer(NLGPipelineComponent):
         match = value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         try:
-            if change:
+            if trend:
+                new_slots = self._realizer.units.get('trend', self._default_unit)(slot)
+            elif change:
                 new_slots = self._realizer.units.get('change', self._default_unit)(slot)
             elif rank:
                 new_slots = self._realizer.units.get('rank', self._default_unit)(slot)
