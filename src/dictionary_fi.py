@@ -1,4 +1,8 @@
 CRIME_TYPES = {
+    'all_total': {
+        'sg': ("rikosten kokonaismäärä", [0]),
+        'pl': "kaikki rikokset"
+    },
     'property_offences_total_category': {
         'sg': "omaisuusrikos",
         'pl': "omaisuusrikokset"

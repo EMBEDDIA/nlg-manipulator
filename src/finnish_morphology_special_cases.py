@@ -25,4 +25,7 @@ special_cases = {
     "törkeä": {
         'partitive': "törkeää",
     },
+    "kaikki": {
+        'genitive': "kaikkien",
+    },
 }
