@@ -327,7 +327,7 @@ CRIME_TYPES = {
         'sg': "lievä alkoholirikos",
         'pl': "lievät alkoholirikokset"
     },
-    'investigation_total_category': {
+    'investigations_total_category': {
         'sg': "tutkinta",
         'pl': "tutkinnat"
     },
