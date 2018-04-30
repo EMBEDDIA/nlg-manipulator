@@ -13,22 +13,22 @@ Configuration file containing 'importance' constants for crime facts
 # dictionary of parameters
 
 category_scores = {
-    'property': 3,
-    'life': 5,
-    'health': 4,
-    'sexual': 4,
-    'authority': 3,
-    'traffic': 2,
-    'narcotic': 4,
-    'alcohol': 3,
-    'investigations': 1,
-    'other': 3,
+    'life':      10,
+    'health':    10,
+    'sexual':    10,
+    'narcotic':  7,
+    'property':  7,
+    'authority': 5,
+    'alcohol':   3,
+    'traffic':   2,
+    'other':     0.001,
+    'investigations': 0.001,
 }
 
 rank_reverse_weight = 1
 rank_weight = 2
 
-comparison_change = 4
+comparison_change = 3
 # I am making the assumption that the comparison_change is more important in crime data than the comparison_empty,
 # unlike the election data?
 comparison_empty = 2
