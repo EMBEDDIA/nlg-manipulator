@@ -149,7 +149,7 @@ class FinnishRealizer():
 
         # Specify the predicate
         if 'no_normalization' not in slot.attributes.keys():
-            if slot.fact.what < 0 or (rank and '_decrease' in rank or '_reverse' in rank):
+            if slot.fact.what < 0 or (rank and ('_decrease' in rank or '_reverse' in rank)):
                 template.add_slot(idx, LiteralSlot("laski"))
             elif slot.fact.what > 0:
                 template.add_slot(idx, LiteralSlot("kasvoi"))
