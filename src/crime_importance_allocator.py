@@ -36,6 +36,11 @@ class CrimeImportanceSelector(NLGPipelineComponent):
         # Early stop
         if not '2017' in str(fact.when_2):
             return 0
+
+        # Certain crimes haunt the data
+        if 'life_killing_total' in fact.what_type or 'life_infanticide_total' in fact.what_type:
+            return 0
+
         # importance of fact
         category = fact.what_type.split('_')[0]
         what_type_score = pfg.category_scores.get(category, 1)
