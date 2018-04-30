@@ -149,7 +149,7 @@ class FinnishRealizer():
 
         # Specify the predicate
         if 'no_normalization' not in slot.attributes.keys():
-            if slot.fact.what < 0 or (rank and '_decrease' in rank):
+            if slot.fact.what < 0 or (rank and '_decrease' in rank or '_reverse' in rank):
                 template.add_slot(idx, LiteralSlot("laski"))
             elif slot.fact.what > 0:
                 template.add_slot(idx, LiteralSlot("kasvoi"))
@@ -167,7 +167,7 @@ class FinnishRealizer():
         # The base unit
         if rank:
             # rikosten määrä kasvoi viidenneksi eniten
-            new_slots = self._unit_rank(slot)
+            new_slots = self._unit_rank(slot, comp='no_normalization' not in slot.attributes.keys())
             added_slots += new_slots
         elif percentage:
             # rikosten määrä kasvoi viidellä prosenttiyksiköllä
@@ -183,20 +183,17 @@ class FinnishRealizer():
 
         # The end comparison
         if grouped_by and 'no_grouping' not in slot.attributes.keys():
-            template.add_slot(idx, LiteralSlot("muihin"))
-            added_slots += 1
-            idx += 1
             if grouped_by == '_time_place':
-                template.add_slot(idx, LiteralSlot("rikostyyppeihin verrattuna"))
+                template.add_slot(idx, LiteralSlot("muihin rikostyyppeihin verrattuna"))
                 added_slots += 1
                 idx += 1
             elif grouped_by == '_crime_time':
-                template.add_slot(idx, LiteralSlot("alueisiin verrattuna"))
+                template.add_slot(idx, LiteralSlot("kaikista Suomen kunnista"))
                 added_slots += 1
                 idx += 1
             elif grouped_by == 'crime_place_year':
                 if slot.fact.when_type == 'month':
-                    template.add_slot(idx, LiteralSlot("kuukausiin verrattuna"))
+                    template.add_slot(idx, LiteralSlot("muihin kuukausiin verrattuna"))
                 else:
                     raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
                 added_slots += 1
@@ -205,7 +202,7 @@ class FinnishRealizer():
                 raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
         return added_slots
 
-    def _unit_rank(self, slot):
+    def _unit_rank(self, slot, comp=False):
         match = self.value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
@@ -216,7 +213,7 @@ class FinnishRealizer():
             if grouped_by == '_time_place':
                 template.add_slot(idx - 1, LiteralSlot("kaikista rikoksista"))
             elif grouped_by == '_crime_time':
-                template.add_slot(idx - 1, LiteralSlot("muihin kuntiin verrattuna"))
+                template.add_slot(idx - 1, LiteralSlot("kaikista Suomen kunnista"))
             elif grouped_by == '_crime_place_year':
                 if slot.fact.when_type == 'month':
                     template.add_slot(idx - 1, LiteralSlot("vuoden muihin kuukausiin verrattuna"))
@@ -236,7 +233,7 @@ class FinnishRealizer():
                 prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
                 if 'case' not in prev_slot.attributes.keys():
                     prev_slot.attributes['case'] = 'translative'
-        if rank in ['_rank', '_increase_rank', '_decrease_rank']:
+        if rank in ['_rank', '_increase_rank', '_decrease_rank'] or comp:
             slot.value = lambda x: "eniten"
         elif rank == '_rank_reverse':
             slot.value = lambda x: "vähiten"
