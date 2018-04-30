@@ -21,8 +21,8 @@ from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from crime_importance_allocator import CrimeImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 from locations import LocationHierarchy
-from locator_map_generator import LocatorMapGenerator
-from graph_generator import GraphGenerator
+from locator_map_data_generator import LocatorMapDataGenerator
+from graph_data_generator import GraphDataGenerator
 
 
 class CrimeNlgService(object):
@@ -38,8 +38,8 @@ class CrimeNlgService(object):
 
         # New registry and result importer
         self.registry = Registry()
-        self.locator_map_generator = LocatorMapGenerator()
-        self.graph_generator = GraphGenerator()
+        self.locator_map_data_generator = LocatorMapDataGenerator()
+        self.graph_data_generator = GraphDataGenerator()
 
         crime_data = [
             ('../data/bc_crime_pyn_comp_ranks_outliers.csv', '../data/bc_crime_comp.cache', 'crime-bc-comp-data'),
@@ -165,10 +165,10 @@ class CrimeNlgService(object):
             headline = where
             log.error("%s", ex)
 
-        locator_map = self.locator_map_generator.generate(where) if where_type == 'M' else ''
-        graph = self.graph_generator.generate(self.registry, where) if where_type == 'M' else ''
+        locator_map_data = self.locator_map_data_generator.generate(where) if where_type == 'M' else ''
+        graph_data = self.graph_data_generator.generate(self.registry, where) if where_type == 'M' else ''
 
-        return headline, body, locator_map, graph
+        return headline, body, locator_map_data, graph_data
 
     def _set_seed(self, seed_val=None):
         log.info("Selecting seed for NLG pipeline")

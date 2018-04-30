@@ -8,16 +8,12 @@ from math import cos, sqrt
 log = logging.getLogger('root')
 
 
-class GraphGenerator():
+class GraphDataGenerator():
 
     def generate(self, registry, location):
         if location in ['Suomi', 'Finland']:
             return None
 
-        labels, datasets = self._get_data(location, registry)
-        return self._get_graph(labels, datasets)
-
-    def _get_data(self, location, registry):
         datastore = registry.get('crime-bc-data')
         cols = [c for c in datastore.all() if c in ['where', 'when', 'all_total_normalized']]
 
@@ -56,7 +52,10 @@ class GraphGenerator():
             }
         ]
 
-        return json.dumps(labels), json.dumps(datasets)
+        return json.dumps({
+            'labels': labels,
+            'datasets': datasets
+        });
 
     def _get_graph(self, labels, datasets):
         return """
