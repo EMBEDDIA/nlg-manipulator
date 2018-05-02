@@ -31,7 +31,6 @@ class LocatorMapDataGenerator():
     MAP_MARGIN = 0.075
 
     def generate(self, location):
-        print('LAFFO')
         try:
             # For reference points themselves, show map of whole country
             for reference in self.REFERENCES:
