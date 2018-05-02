@@ -199,7 +199,7 @@ CRIME_TYPES = {
         'sg': ("muu henkeen ja terveyteen kohdistunut rikos", [1, 2, 3]),
         'pl': ("muut henkeen ja terveyteen kohdistuneet rikokset", [1, 2, 3])
     },
-    'sexual_crimes_total_category': {
+    'sexual_offences_total_category': {
         'sg': "seksuaalirikos",
         'pl': "seksuaalirikokset"
     },
@@ -215,7 +215,7 @@ CRIME_TYPES = {
         'sg': "muu seksuaalirikos",
         'pl': "muut seksuaalirikokset"
     },
-    'authority_related_offences_total_category': {
+    'authority_offences_total_category': {
         'sg': ("oikeudenkäyttöä, viranomaisia ja yleistä järjestystä vastaan tehty rikos", [0, 1, 2, 3, 4, 5]),
         'pl': ("oikeudenkäyttöä, viranomaisia ja yleistä järjestystä vastaan tehdyt rikokset", [0, 1, 2, 3, 4, 5])
     },
@@ -283,7 +283,7 @@ CRIME_TYPES = {
         'sg': "liikennerikkomus",
         'pl': "liikennerikkomukset"
     },
-    'narcotic_offences_total_category': {
+    'narcotics_offences_total_category': {
         'sg': "huumausainerikos",
         'pl': "huumausainerikokset"
     },
@@ -327,7 +327,7 @@ CRIME_TYPES = {
         'sg': "lievä alkoholirikos",
         'pl': "lievät alkoholirikokset"
     },
-    'investigations_total_category': {
+    'investigation_offences_total_category': {
         'sg': "tutkinta",
         'pl': "tutkinnat"
     },

@@ -54,13 +54,13 @@ new_columns = {
         'health_other_offences_total'
     ],
 
-    'sexual_crimes_total_category': [
+    'sexual_offences_total_category': [
         'sexual_abuse_child_total',
         'sexual_rape_total',
         'sexual_other_offences_total'
     ],
 
-    'authority_related_offences_total_category': [
+    'authority_offences_total_category': [
         'authority_violent_resisting_official_total',
         'authority_impeding_official_total',
         'authority_perjury_total',
@@ -81,7 +81,7 @@ new_columns = {
         'traffic_infractions_total'
     ],
 
-    'narcotic_offences_total_category': [
+    'narcotics_offences_total_category': [
         'narcotics_offences_total',
         'narcotics_aggravated_offences_total',
         'narcotics_preparation_offence_total',
@@ -96,7 +96,7 @@ new_columns = {
         'alcohol_petty_offence_total'
     ],
 
-    'investigations_total_category': [
+    'investigation_offences_total_category': [
         'investigation_suicide_investigation_total',
         'investigation_inquest_total',
         'investigation_missing_persons_total',
