@@ -41,4 +41,5 @@ en-head: in {where}, the variable {what_type} has value {what} between {when_1}
 | where_type = [MC], what_type = .*change.*, when_1 != when_2
 
 fi: {where, case=ssa} {what} {what_type} {time}
+fi-head: {where, case=ssa} {what} {what_type} {time}
 | where_type = [MC], what_type = .*_mk_.*, when_1 != when_2
