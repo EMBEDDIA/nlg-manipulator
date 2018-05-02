@@ -93,6 +93,8 @@ class FinnishRealizer():
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
+        if rank and '_reverse' in rank:
+            log.error("_rank_reverse values found in combination with change. These shouldn't exist, because we can't know whether the top ranking cases mean the largest decrease or the smallest increase")
         # Check whether the preceding slot contains the value
         if template.components[idx - 1].slot_type == 'what':
             what_slot = template.components[idx - 1]
@@ -149,7 +151,7 @@ class FinnishRealizer():
 
         # Specify the predicate
         if 'no_normalization' not in slot.attributes.keys():
-            if slot.fact.what < 0 or (rank and ('_decrease' in rank or '_reverse' in rank)):
+            if slot.fact.what < 0 or (rank and '_decrease' in rank):
                 template.add_slot(idx, LiteralSlot("laski"))
             elif slot.fact.what > 0:
                 template.add_slot(idx, LiteralSlot("kasvoi"))
@@ -167,7 +169,7 @@ class FinnishRealizer():
         # The base unit
         if rank:
             # rikosten määrä kasvoi viidenneksi eniten
-            new_slots = self._unit_rank(slot, comp='no_normalization' not in slot.attributes.keys())
+            new_slots = self._unit_rank(slot)
             added_slots += new_slots
         elif percentage:
             # rikosten määrä kasvoi viidellä prosenttiyksiköllä
@@ -202,7 +204,7 @@ class FinnishRealizer():
                 raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
         return added_slots
 
-    def _unit_rank(self, slot, comp=False):
+    def _unit_rank(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
@@ -233,7 +235,7 @@ class FinnishRealizer():
                 prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
                 if 'case' not in prev_slot.attributes.keys():
                     prev_slot.attributes['case'] = 'translative'
-        if rank in ['_rank', '_increase_rank', '_decrease_rank'] or comp:
+        if rank in ['_rank', '_increase_rank', '_decrease_rank']:
             slot.value = lambda x: "eniten"
         elif rank == '_rank_reverse':
             slot.value = lambda x: "vähiten"
