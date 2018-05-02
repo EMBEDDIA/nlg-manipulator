@@ -172,10 +172,10 @@ class FinnishRealizer():
             new_slots = self._unit_rank(slot)
             added_slots += new_slots
         elif percentage:
-            # rikosten määrä kasvoi viidellä prosenttiyksiköllä
+            # rikosten määrä kasvoi viidellä prosentilla
             slot.attributes['case'] = 'adessive'
             what_slot.attributes['case'] = 'adessive'
-            new_slots = self._unit_set_value(slot, "prosenttiyksikkö")
+            new_slots = self._unit_set_value(slot, "prosentti")
             added_slots += new_slots
         else:
             # rikosten määrä kasvoi viidellä
