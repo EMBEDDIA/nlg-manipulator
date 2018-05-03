@@ -16,7 +16,7 @@ category_scores = {
     'life':      10,
     'health':    10,
     'sexual':    10,
-    'narcotic':  7,
+    'narcotics':  7,
     'property':  7,
     'authority': 5,
     'alcohol':   3,
