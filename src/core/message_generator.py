@@ -81,10 +81,6 @@ class MessageGenerator(NLGPipelineComponent):
         when_type = row['when_type']
 
         for col_name in col_names:
-            # change type data should only have increase_rank and decrease_rank values, so let's drop the rank and
-            # rank_reverse values in case they should appear in the data
-            if '_change' in col_name and ('rank_reverse' in col_name or col_name[-4:] == 'rank'):
-                continue
             what_type = col_name
             what = row[col_name]
             # When value need to be reset for each loop because they may be changed within the loop
@@ -108,8 +104,6 @@ class MessageGenerator(NLGPipelineComponent):
                 # 'what' is effectively undefined, do not REALLY generate the message.
                 continue
 
-            if '_change' in col_name and ('rank_reverse' in col_name or col_name[-4:] == 'rank'):
-                log.error("Invalid col_name: {}".format(col_name))
             if callable(importance_coefficient):
                 # Allow the importance coefficient to be a function that computes the weight from the field vals
                 raise NotImplementedError("Not implemented")
