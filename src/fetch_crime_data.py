@@ -9,6 +9,7 @@ import columns as cls
 import paramconfig as prmcnf
 from operator import itemgetter
 
+
 def run():
     # Download list of available PX files
     all_px = list_available_px()
@@ -55,6 +56,7 @@ def run():
     print('Trend Finder')
     TrendFinder()
 
+
 class ImporterC:
 
     def __init__(self, fake=False):
@@ -66,7 +68,7 @@ class ImporterC:
 
         self._load_data(prefix)
 
-        #''' Crime data
+        # Crime data
         self.cd = self._add_ranks_to_crime_data(self.cd, self.cd_interesting_columns)
         self.cd = self._add_outlierness_to_crime_data(self.cd, self.cd_interesting_columns, self.cd_id_columns)
         self.cd = self._sort_columns(self.cd, self.cd_id_columns)
@@ -80,9 +82,8 @@ class ImporterC:
         self.bccd.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "bc_crime_pyn_ranks_outliers.csv"), index=False)
 
         print("Crime data ready")
-        #'''
 
-        #''' Comparison data
+        # Comparison data
         self.cdc = self._add_ranks_to_comparison_data(self.cdc, self.cdc_interesting_columns)
         self.cdc = self._add_outlierness_to_comparison_data(self.cdc, self.cdc_interesting_columns, self.cdc_id_columns)
         self.cdc = self._sort_columns(self.cdc, self.cdc_id_columns)
@@ -96,7 +97,6 @@ class ImporterC:
         self.bccdc.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "bc_crime_pyn_comp_ranks_outliers.csv"), index=False)
 
         print("Comp data ready")
-        #'''
 
     def _load_data(self, prefix):
 
@@ -147,7 +147,6 @@ class ImporterC:
             #   fixed crime and time (where specific crime was committed most, second most, ... during a specific times)
             ranked_col_name = "{}_grouped_by_crime_time_rank".format(col_name)
             reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
-            #grouped = df.groupby(["when", "when_type"])[col_name]
             grouped = grouped_crime_time[col_name]
             df[ranked_col_name] = grouped.rank(ascending=False, method="dense")
             df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense")
@@ -156,12 +155,11 @@ class ImporterC:
             #   during some interval)
             ranked_col_name = "{}_grouped_by_crime_place_year_rank".format(col_name)
             reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
-            #grouped = df.groupby(["where", "where_type", "year", "when_type"])[col_name]
             grouped = grouped_crime_place[col_name]
             df[ranked_col_name] = grouped.rank(ascending=False, method="dense")
             df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense")
 
-            # set year ranks to zero
+            # Set ranks for monthly comparisons to zero for the rows containing yearly totals
             df.loc[df['when_type'] == 'year', ranked_col_name] = np.nan
             df.loc[df['when_type'] == 'year', reverse_ranked_col_name] = np.nan
 
@@ -276,7 +274,7 @@ class ImporterC:
 
         for col_name in ranked_columns:
             # Different rankings:
-            #   fixed crime and time (where specific crime was committed most, second most, ... during a specific times)
+            #   fixed crime and time (where specific crime was committed most, second most, ... during a specific time)
             ranked_col_name = "{}_grouped_by_crime_time_rank".format(col_name)
             reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
             grouped = df.groupby(["when1", "when2", "when_type"])[col_name]
@@ -487,6 +485,7 @@ class ImporterC:
 
         return df
 
+
 class ConverterC:
 
     def __init__(self):
@@ -494,7 +493,6 @@ class ConverterC:
         # Assume files are available
         self.crime_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "crime.csv"))
         self.population_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "population.csv"))
-        #, sep=';'encoding="ISO-8859-1",
 
         # Remove and rename
         self.crime_data = drop_columns(self.crime_data, cls.keep_columns)
@@ -547,7 +545,6 @@ class ConverterC:
     Rename some columns and values for convenience.
     '''
     def _rename_entries_and_columns(self):
-        #self.population_data.columns = ["when", "where", "population"]
         self.crime_data['where'].replace(to_replace='Total', value='fi', inplace=True)
         self.population_data['where'].replace(to_replace='WHOLE COUNTRY', value='fi', inplace=True)
         self.population_data['population'].replace(to_replace='..', value=np.nan, inplace=True)
@@ -722,8 +719,7 @@ class TrendFinder:
         slope = coeffs[-2]
         return float(slope)
 
-
-    #Mann-Kendall
+    # Mann-Kendall
     def _mk_trend(self, d, c, e, m):
         d = list(d)
         pos = 0
@@ -747,20 +743,19 @@ class TrendFinder:
         # How long trend has been going on
         score = score * len(d)
         # How recent the trend is
-        #score = score / (m - e + 1)
+        # score = score / (m - e + 1)
         # How strong is the change
-        #if min(d[0], d[-1]) != 0:
+        # if min(d[0], d[-1]) != 0:
         #    score = score * max(d[0], d[-1]) / min(d[0], d[-1])
-        #elif max(d[0], d[-1]) != 0:
+        # elif max(d[0], d[-1]) != 0:
         #    score = score * max(d[0], d[-1])
-        #else:
+        # else:
         #    score = score
         if sdif >= limit:
             if pos > neg:
                 return [1, score]
             return [-1, -1 * score]
         return [0, 0]
-
 
     def _find_trends(self):
         df = self.bcdf
@@ -799,6 +794,7 @@ class TrendFinder:
                     data.append(row)
         trend_df = pd.DataFrame(data, columns=all_columns)
         return trend_df
+
 
 def drop_columns(df, keepcols):
     return df[keepcols]
