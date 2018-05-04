@@ -151,6 +151,10 @@ class ImporterC:
             df[ranked_col_name] = grouped.rank(ascending=False, method="dense")
             df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense")
 
+            # Saying that a place with zero crimes has the most crimes doesn't really make much sense, so we're dropping
+            # those
+            df.loc[df[col_name] == 0, ranked_col_name] = np.nan
+
             #   fixed crime and place (when specific crime was committed most, second most, ... in specific place,
             #   during some interval)
             ranked_col_name = "{}_grouped_by_crime_place_year_rank".format(col_name)
@@ -158,6 +162,10 @@ class ImporterC:
             grouped = grouped_crime_place[col_name]
             df[ranked_col_name] = grouped.rank(ascending=False, method="dense")
             df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense")
+
+            # Saying that a place with zero crimes has the most crimes doesn't really make much sense, so we're dropping
+            # those
+            df.loc[df[col_name] == 0, ranked_col_name] = np.nan
 
             # Set ranks for monthly comparisons to zero for the rows containing yearly totals
             df.loc[df['when_type'] == 'year', ranked_col_name] = np.nan
@@ -275,56 +283,6 @@ class ImporterC:
         for col_name in ranked_columns:
             # Different rankings:
             #   fixed crime and time (where specific crime was committed most, second most, ... during a specific time)
-            ranked_col_name = "{}_grouped_by_crime_time_rank".format(col_name)
-            reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
-            grouped = df.groupby(["when1", "when2", "when_type"])[col_name]
-            df[ranked_col_name] = grouped.rank(ascending=False, method="dense")
-            df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense")
-
-        # Last ranking:
-        #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
-        raw_change_columns = [x for x in ranked_columns if 'normalized' not in x and 'percentage' not in x]
-        normalized_change_columns = [x for x in ranked_columns if 'normalized' in x and 'percentage' not in x]
-        percentage_change_columns = [x for x in ranked_columns if 'normalized' not in x and 'percentage' in x]
-        normalized_percentage_change_columns = [x for x in ranked_columns if 'normalized' in x and 'percentage' in x]
-
-        raw_change_ranked_desc = df[raw_change_columns].rank(ascending=False, method="dense", axis=1)
-        normalized_change_desc = df[normalized_change_columns].rank(ascending=False, method="dense", axis=1)
-        percentage_change_ranked_desc = df[percentage_change_columns].rank(ascending=False, method="dense", axis=1)
-        normalized_percentage_change_desc = df[normalized_percentage_change_columns].rank(ascending=False,
-                                                                                          method="dense", axis=1)
-
-        raw_change_ranked_asc = df[raw_change_columns].rank(ascending=True, method="dense", axis=1)
-        normalized_change_asc = df[normalized_change_columns].rank(ascending=True, method="dense", axis=1)
-        percentage_change_ranked_asc = df[percentage_change_columns].rank(ascending=True, method="dense", axis=1)
-        normalized_percentage_change_asc = df[normalized_percentage_change_columns].rank(ascending=True,
-                                                                                         method="dense", axis=1)
-
-        raw_change_ranked_desc = raw_change_ranked_desc.add_suffix("_grouped_by_time_place_rank")
-        normalized_change_desc = normalized_change_desc.add_suffix("_grouped_by_time_place_rank")
-        percentage_change_ranked_desc = percentage_change_ranked_desc.add_suffix("_grouped_by_time_place_rank")
-        normalized_percentage_change_desc = normalized_percentage_change_desc.add_suffix("_grouped_by_time_place_rank")
-
-        raw_change_ranked_asc = raw_change_ranked_asc.add_suffix("_grouped_by_time_place_rank_reverse")
-        normalized_change_asc = normalized_change_asc.add_suffix("_grouped_by_time_place_rank_reverse")
-        percentage_change_ranked_asc = percentage_change_ranked_asc.add_suffix("_grouped_by_time_place_rank_reverse")
-        normalized_percentage_change_asc = normalized_percentage_change_asc.add_suffix("_grouped_by_time_place_rank_reverse")
-
-        df = pd.concat([df, raw_change_ranked_desc], axis=1)
-        df = pd.concat([df, normalized_change_desc], axis=1)
-        df = pd.concat([df, percentage_change_ranked_desc], axis=1)
-        df = pd.concat([df, normalized_percentage_change_desc], axis=1)
-        df = pd.concat([df, raw_change_ranked_asc], axis=1)
-        df = pd.concat([df, normalized_change_asc], axis=1)
-        df = pd.concat([df, percentage_change_ranked_asc], axis=1)
-        df = pd.concat([df, normalized_percentage_change_asc], axis=1)
-
-        '''
-        newstuff
-        '''
-        for col_name in ranked_columns:
-            # Different rankings:
-            #   fixed crime and time (where specific crime was committed most, second most, ... during a specific time)
             pos_ranked_col_name = "{}_grouped_by_crime_time_increase_rank".format(col_name)
             neg_ranked_col_name = "{}_grouped_by_crime_time_decrease_rank".format(col_name)
             pos_grouped = df.copy()
@@ -338,6 +296,10 @@ class ImporterC:
 
         # Last ranking:
         #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
+        raw_change_columns = [x for x in ranked_columns if 'normalized' not in x and 'percentage' not in x]
+        normalized_change_columns = [x for x in ranked_columns if 'normalized' in x and 'percentage' not in x]
+        percentage_change_columns = [x for x in ranked_columns if 'normalized' not in x and 'percentage' in x]
+        normalized_percentage_change_columns = [x for x in ranked_columns if 'normalized' in x and 'percentage' in x]
         raw = df[raw_change_columns].copy()
         norm = df[normalized_change_columns].copy()
         per = df[percentage_change_columns].copy()
