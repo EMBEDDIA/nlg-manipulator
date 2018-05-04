@@ -280,19 +280,22 @@ class ImporterC:
 
     def _add_ranks_to_comparison_data(self, df, ranked_columns):
 
+        pos_values = df.copy()
+        neg_values = df.copy()
+        pos_grouped = pos_values.groupby(["when1", "when2", "when_type"])
+        neg_grouped = neg_values.groupby(["when1", "when2", "when_type"])
         for col_name in ranked_columns:
             # Different rankings:
             #   fixed crime and time (where specific crime was committed most, second most, ... during a specific time)
             pos_ranked_col_name = "{}_grouped_by_crime_time_increase_rank".format(col_name)
             neg_ranked_col_name = "{}_grouped_by_crime_time_decrease_rank".format(col_name)
-            pos_grouped = df.copy()
-            neg_grouped = df.copy()
-            pos_grouped.loc[pos_grouped[col_name] <= 0, col_name] = np.nan
-            neg_grouped.loc[neg_grouped[col_name] >= 0, col_name] = np.nan
-            pos_grouped = pos_grouped.groupby(["when1", "when2", "when_type"])[col_name]
-            neg_grouped = neg_grouped.groupby(["when1", "when2", "when_type"])[col_name]
-            df[pos_ranked_col_name] = pos_grouped.rank(ascending=False, method="dense", na_option='keep')
-            df[neg_ranked_col_name] = neg_grouped.rank(ascending=True, method="dense", na_option='keep')
+            # For each col_name, we first set the values we don't want to consider for the two cases to nan
+            pos_values.loc[pos_values[col_name] <= 0, col_name] = np.nan
+            neg_values.loc[neg_values[col_name] >= 0, col_name] = np.nan
+            # And then we generate the rank values. Note that setting the values in pos_values, and using
+            # pos_grouped for the ranking is intentional
+            df[pos_ranked_col_name] = pos_grouped[col_name].rank(ascending=False, method="dense", na_option='keep')
+            df[neg_ranked_col_name] = neg_grouped[col_name].rank(ascending=True, method="dense", na_option='keep')
 
         # Last ranking:
         #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
@@ -300,20 +303,16 @@ class ImporterC:
         normalized_change_columns = [x for x in ranked_columns if 'normalized' in x and 'percentage' not in x]
         percentage_change_columns = [x for x in ranked_columns if 'normalized' not in x and 'percentage' in x]
         normalized_percentage_change_columns = [x for x in ranked_columns if 'normalized' in x and 'percentage' in x]
-        raw = df[raw_change_columns].copy()
-        norm = df[normalized_change_columns].copy()
-        per = df[percentage_change_columns].copy()
-        nope = df[normalized_percentage_change_columns].copy()
 
-        pos_raw = raw.copy()
-        pos_norm = norm.copy()
-        pos_per = per.copy()
-        pos_nope = nope.copy()
+        pos_raw = df[raw_change_columns].copy()
+        pos_norm = df[normalized_change_columns].copy()
+        pos_per = df[percentage_change_columns].copy()
+        pos_nope = df[normalized_percentage_change_columns].copy()
 
-        neg_raw = raw.copy()
-        neg_norm = norm.copy()
-        neg_per = per.copy()
-        neg_nope = nope.copy()
+        neg_raw = pos_raw.copy()
+        neg_norm = pos_norm.copy()
+        neg_per = pos_per.copy()
+        neg_nope = pos_nope.copy()
 
         pos_raw[pos_raw <= 0] = np.nan
         pos_norm[pos_norm <= 0] = np.nan
@@ -325,25 +324,15 @@ class ImporterC:
         neg_per[neg_per >= 0] = np.nan
         neg_nope[neg_nope >= 0] = np.nan
 
-        raw_change_ranked_desc = pos_raw[raw_change_columns].rank(ascending=False, method="dense", axis=1,
-                                                                  na_option='keep')
-        normalized_change_desc = pos_norm[normalized_change_columns].rank(ascending=False, method="dense", axis=1,
-                                                                          na_option='keep')
-        percentage_change_ranked_desc = pos_per[percentage_change_columns].rank(ascending=False, method="dense", axis=1,
-                                                                                na_option='keep')
-        normalized_percentage_change_desc = pos_nope[normalized_percentage_change_columns].rank(ascending=False,
-                                                                                                method="dense", axis=1,
-                                                                                                na_option='keep')
+        raw_change_ranked_desc = pos_raw.rank(ascending=False, method="dense", axis=1, na_option='keep')
+        normalized_change_desc = pos_norm.rank(ascending=False, method="dense", axis=1, na_option='keep')
+        percentage_change_ranked_desc = pos_per.rank(ascending=False, method="dense", axis=1, na_option='keep')
+        normalized_percentage_change_desc = pos_nope.rank(ascending=False, method="dense", axis=1, na_option='keep')
 
-        raw_change_ranked_asc = neg_raw[raw_change_columns].rank(ascending=True, method="dense", axis=1,
-                                                                 na_option='keep')
-        normalized_change_asc = neg_norm[normalized_change_columns].rank(ascending=True, method="dense", axis=1,
-                                                                         na_option='keep')
-        percentage_change_ranked_asc = neg_per[percentage_change_columns].rank(ascending=True, method="dense", axis=1,
-                                                                               na_option='keep')
-        normalized_percentage_change_asc = neg_nope[normalized_percentage_change_columns].rank(ascending=True,
-                                                                                               method="dense", axis=1,
-                                                                                               na_option='keep')
+        raw_change_ranked_asc = neg_raw.rank(ascending=True, method="dense", axis=1, na_option='keep')
+        normalized_change_asc = neg_norm.rank(ascending=True, method="dense", axis=1, na_option='keep')
+        percentage_change_ranked_asc = neg_per.rank(ascending=True, method="dense", axis=1, na_option='keep')
+        normalized_percentage_change_asc = neg_nope.rank(ascending=True, method="dense", axis=1, na_option='keep')
 
         raw_change_ranked_desc = raw_change_ranked_desc.add_suffix("_grouped_by_time_place_increase_rank")
         normalized_change_desc = normalized_change_desc.add_suffix("_grouped_by_time_place_increase_rank")
