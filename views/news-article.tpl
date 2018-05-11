@@ -1,5 +1,4 @@
 % rebase('base.tpl', title='Vaalibotti Valtteri - Random', **locals())
-
 <div class="section">
   <div class="container">
     <br>
@@ -43,20 +42,145 @@
             }
             locator_map_data = {{!locator_map}}
             createMap = constructor(
-                locator_map_data.location_lat, 
-                locator_map_data.location_lng, 
-                locator_map_data.reference_lat, 
+                locator_map_data.location_lat,
+                locator_map_data.location_lng,
+                locator_map_data.reference_lat,
                 locator_map_data.reference_lng
             )
             </script>
             <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD7A_wqRiWrVXFAxqyzUY09oDNTxMJl9ZA&callback=createMap"></script>
         </div>
       </div>
-      
+
       {{!body}}
-      
+
       <div id="graph-card" class="card">
         <div class="card-content">
+            <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"       type="text/javascript"></script>
+            <script src="https://code.highcharts.com/highcharts.js"></script>
+            <script src="https://code.highcharts.com/modules/exporting.js"></script>
+            <script src="https://code.highcharts.com/modules/export-data.js"></script>
+            <script>
+                  $(function () {
+                    var chart = new Highcharts.Chart({
+                        chart: {
+                        type: 'area',
+                        spacingBottom: 40,
+                				renderTo:'visualization'
+                      },
+                      title: {
+                        text: 'City name'
+                      },
+                      subtitle: {
+                        text: 'note about the graph goes here',
+                        floating: true,
+                        align: 'right',
+                        verticalAlign: 'bottom',
+                        y: 15
+                      },
+                      legend: {
+                        layout: 'vertical',
+                        align: 'left',
+                        verticalAlign: 'top',
+                        x: 150,
+                        y: 100,
+                        floating: true,
+                        borderWidth: 2,
+                        backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+                      },
+                      xAxis: {
+                        categories: ['1M2017', '2M2017', '3M2017', '4M2017', '5M2017', '6M2017', '7M2017', '8M2017']
+                      },
+                      yAxis: {
+                        title: {
+                          text: 'Crimes (per 1000 inhabitant)'
+                        },
+                        labels: {
+                          formatter: function () {
+                            return this.value;
+                          }
+                        }
+                      },
+                        tooltip: {
+                            useHTML: true,
+                            formatter: function() {
+                                setTimeout( function() {
+                                    $("#hc-tooltip").highcharts({
+                                        chart: {
+                                          type: 'column',
+                              height:250,
+                              width:250
+                                        },
+                                        title: {
+                                          text: 'crime in month compared to prev yrs'
+                                        },
+                                        subtitle: {
+                                          text: 'subtitle'
+                                        },
+                                        xAxis: {
+                                          categories: [
+                                            '2014',
+                                            '2015',
+                                            '2016',
+                                            '2017',
+                                            '2018',
+                                            '2019 prediction?'
+                                          ],
+                                          crosshair: true
+                                        },
+                                        yAxis: {
+                                          min: 0,
+                                          title: {
+                                            text: 'crimes (per 1000 inhabitants)'
+                                          }
+                                        },
+                                        plotOptions: {
+                                          column: {
+                                            pointPadding: 0.2,
+                                            borderWidth: 0
+                                          }
+                                        },
+                                        series: [{
+                                          name: 'for month ()',
+                                          data: [49, 71, 106, 129, 144, 176]
+
+                                        }]
+                                      });
+                                    }, 10)
+
+                                return '<div id="hc-tooltip" width="200px" height="200px"></div>';
+                            }
+                        },
+                       plotOptions: {
+                      area: {
+                        fillOpacity: 0,
+                        connectNulls: true,
+                      }
+                    },
+                    credits: {
+                      enabled: true
+                    },
+                    //in case there are missing values we can put null
+                    //to add another series add , then provide name and data for the new one
+                    series: [{
+                      name: 'Average crimes',
+                      //color: '#003399',
+                      data: [0, 1, 4, 4, 5, null, 3, 7]
+                    },{
+                      name: 'Average ',
+                      //color: '#3366BB',
+                      data: [12, 12, 12, 4, 5, 1, {
+                        y: 26.5,
+                        marker: { // can add a marker to the highest point of interest
+                          symbol: 'url(https://www.highcharts.com/samples/graphics/sun.png)'
+                        }
+                      }, 7]
+                    }]
+                    });
+                });
+
+            </script>
+            <div id="visualization" style="min-width: 310px; height: 600px; margin: 0 auto" class="card"></div>
             <canvas id="chart" width="500" height="500"></canvas>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>

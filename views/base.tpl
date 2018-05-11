@@ -21,7 +21,6 @@
           ga('send', 'pageview');
 
         </script>
-
         <style type="text/css">
           @media only screen and (min-width: 0) {
             html {
@@ -71,9 +70,10 @@
             }
           }
         </style>
+
     </head>
     <body>
-    
+
       <nav class="light-blue lighten-1" role="navigation">
         <div class="nav-wrapper container">
           <a id="logo-container" href="/" class="brand-logo">Valtteri</a>
@@ -124,7 +124,7 @@
         </div>
       </div>
 
-     
+
 
       {{!base}}
       </main>
@@ -136,7 +136,7 @@
               <p class="grey-text text-lighten-4">Vaalibotti Valtteri on tietokoneohjelma joka kirjoittaa vaaliuutisia vuoden 2017 kuntavaaleista Oikeusministeriön vaalitulosdatan pohjalta.</p>
               <p class="grey-text text-lighten-4">Valtterin taustalla on <a class="grey-text text-lighten-4" style="font-weight:bold" href="https://www.immersiveautomation.com">Immersive Automation</a> -konsortioprojekti.</p>
             </div>
-            
+
             <div class="col l4 offset-l2 s12">
               <p class="grey-text text-lighten-4">
                 <a class="grey-text text-lighten-4" style="font-weight:bold" href="tietosuoja">Tietosuojaseloste</a>
@@ -160,7 +160,7 @@
       % setdefault('where_type', 'C')
       % setdefault('language', 'FI')
       <script type="text/javascript">
-        $(document).ready(function() {  
+        $(document).ready(function() {
 
             function rec_add(geo_autocomplete, data, str) {
                 str = str + " > " + data.name;
@@ -189,7 +189,7 @@
                     closeAfterSelect: true,
                 })[0].selectize;
             });
-                
+
             var locationSelectize;
             $.getJSON('api/geodata?language={{language}}', function(rawdata) {
                 data = rawdata.data;
@@ -214,5 +214,5 @@
   </body>
 
 
-        
+
 </html>
