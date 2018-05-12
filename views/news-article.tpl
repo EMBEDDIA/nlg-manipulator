@@ -61,6 +61,7 @@
             <script src="https://code.highcharts.com/modules/exporting.js"></script>
             <script src="https://code.highcharts.com/modules/export-data.js"></script>
             <script>
+                  graph_data = {{!graph}}
                   $(function () {
                     var chart = new Highcharts.Chart({
                         chart: {
@@ -69,10 +70,10 @@
                 				renderTo:'visualization'
                       },
                       title: {
-                        text: 'City name'
+                        text: 'Rikoksia tuhatta asukasta kohden'
                       },
                       subtitle: {
-                        text: 'note about the graph goes here',
+                        text: 'Rikoksia tuhatta asukasta kohden',
                         floating: true,
                         align: 'right',
                         verticalAlign: 'bottom',
@@ -89,7 +90,7 @@
                         backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
                       },
                       xAxis: {
-                        categories: ['1M2017', '2M2017', '3M2017', '4M2017', '5M2017', '6M2017', '7M2017', '8M2017']
+                        categories: graph_data.labels//['1M2017', '2M2017', '3M2017', '4M2017', '5M2017', '6M2017', '7M2017', '8M2017']
                       },
                       yAxis: {
                         title: {
@@ -105,11 +106,12 @@
                             useHTML: true,
                             formatter: function() {
                                 setTimeout( function() {
-                                    $("#hc-tooltip").highcharts({
+                                    var TooltipChart = new Highcharts.Chart({
                                         chart: {
                                           type: 'column',
-                              height:250,
-                              width:250
+                                          height:250,
+                                          width:250,
+                                  				renderTo:'hc-tooltip'
                                         },
                                         title: {
                                           text: 'crime in month compared to prev yrs'
@@ -163,22 +165,20 @@
                     //in case there are missing values we can put null
                     //to add another series add , then provide name and data for the new one
                     series: [{
-                      name: 'Average crimes',
+                      name: graph_data.datasets[0].label,
                       //color: '#003399',
-                      data: [0, 1, 4, 4, 5, null, 3, 7]
+                      data: graph_data.datasets[0].data
                     },{
-                      name: 'Average ',
+                      name: graph_data.datasets[1].label,
                       //color: '#3366BB',
-                      data: [12, 12, 12, 4, 5, 1, {
-                        y: 26.5,
-                        marker: { // can add a marker to the highest point of interest
-                          symbol: 'url(https://www.highcharts.com/samples/graphics/sun.png)'
-                        }
-                      }, 7]
+                      data: graph_data.datasets[1].data
                     }]
                     });
                 });
 
+                //generate_chart(graph_data.labels, graph_data.datasets);
+                console.log(graph_data.labels);
+                console.log(graph_data.datasets);
             </script>
             <div id="visualization" style="min-width: 310px; height: 600px; margin: 0 auto" class="card"></div>
             <canvas id="chart" width="500" height="500"></canvas>
