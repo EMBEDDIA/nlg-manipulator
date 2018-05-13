@@ -176,9 +176,6 @@
                     });
                 });
 
-                //generate_chart(graph_data.labels, graph_data.datasets);
-                console.log(graph_data.labels);
-                console.log(graph_data.datasets);
             </script>
             <div id="visualization" style="min-width: 310px; height: 600px; margin: 0 auto" class="card"></div>
             <canvas id="chart" width="500" height="500"></canvas>
