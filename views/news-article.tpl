@@ -54,8 +54,8 @@
 
       {{!body}}
 
-      <div id="graph-card" class="card">
-        <div class="card-content">
+      <div id="graph-card" class="card" >
+        <div id="visualization" class="card-content">
             <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"       type="text/javascript"></script>
             <script src="https://code.highcharts.com/highcharts.js"></script>
             <script src="https://code.highcharts.com/modules/exporting.js"></script>
@@ -177,29 +177,7 @@
                 });
 
             </script>
-            <div id="visualization" style="min-width: 310px; height: 600px; margin: 0 auto" class="card"></div>
-            <canvas id="chart" width="500" height="500"></canvas>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
-            <script>
-                function generate_chart(labels, datasets) {
-                    new Chart(document.getElementById('chart'), {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: datasets
-                        },
-                        options: {
-                            title: {
-                                display: true,
-                                text: 'Rikoksia tuhatta asukasta kohden'
-                            }
-                        }
-                    });
-                }
-                graph_data = {{!graph}}
-                generate_chart(graph_data.labels, graph_data.datasets);
-            </script>
+            
         </div>
       </div>
     </div>
