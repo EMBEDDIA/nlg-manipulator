@@ -4,7 +4,7 @@ $(document).ready(function() {
         geo_autocomplete.push({
             text: str,
             value: data.type + data.id,
-        })
+        });
         for (var id in data.children) {
             rec_add(geo_autocomplete, data.children[id], str);
         }

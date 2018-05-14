@@ -169,7 +169,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                         break
 
                 else:
-                    log.warn('I wanted to express {}, but had no template for it'.format(satellite.fact))
+                    log.warning('I wanted to express {}, but had no template for it'.format(satellite.fact))
 
             dp.children.append(
                 DocumentPlan(children=messages, relation=Relation.SEQUENCE)
@@ -324,7 +324,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         elif change_2 and (normalized_1, percentage_1) == (normalized_2, percentage_2):
             return True
         # total value is an elaboration of a percentage value
-        elif change_1 == change_2 == None and percentage_1:
+        elif change_1 is None and change_2 is None and percentage_1:
             return True
         else:
             return False

@@ -18,7 +18,9 @@ class GraphDataGetter:
 
 
     def inc_dec_crimes(self, place, year, comp=1, context=5, broad_categories=True, percentage=True,
-                       normalized=True, mplot=False, category_names=[]):
+                       normalized=True, mplot=False, category_names=None):
+        if category_names is None:
+            category_names = []
         if broad_categories:
             compdata = self.bc_comparison_data
             data = self.bc_crime_data
@@ -108,7 +110,9 @@ class GraphDataGetter:
         #print(jd)
         return jd
 
-    def numbers(self, place, year, broad_categories=True, category_names=[]):
+    def numbers(self, place, year, broad_categories=True, category_names=None):
+        if category_names is None:
+            category_names = []
         if broad_categories:
             data = self.bc_crime_data
             used_columns = list(data.columns.values)

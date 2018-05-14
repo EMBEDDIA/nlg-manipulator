@@ -11,7 +11,8 @@ class Template(DocumentPlan):
     using the template.
     """
 
-    def __init__(self, components, rules=[], slot_map=None):
+    def __init__(self, components, rules=None, slot_map=None):
+        self._rules = rules if rules is not None else []
         self._rules = rules
         self._facts = []
         self._slot_map = slot_map
