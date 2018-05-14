@@ -169,7 +169,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                         break
 
                 else:
-                    log.warn('I wanted to express {}, but had no template for it'.format(satellite.fact))
+                    log.warning('I wanted to express {}, but had no template for it'.format(satellite.fact))
 
             dp.children.append(
                 DocumentPlan(children=messages, relation=Relation.SEQUENCE)
