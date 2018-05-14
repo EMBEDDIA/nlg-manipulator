@@ -53,9 +53,13 @@
       </div>
 
       {{!body}}
-
+      <style>
+      .highcharts-container, svg:not(:root) {
+          overflow: visible !important;
+      }
+      </style>
       <div id="graph-card" class="card" >
-        <div id="visualization" class="card-content">
+        <div id="visualization" class="card-content"></div></div>
             <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"       type="text/javascript"></script>
             <script src="https://code.highcharts.com/highcharts.js"></script>
             <script src="https://code.highcharts.com/modules/exporting.js"></script>
@@ -80,11 +84,11 @@
                         y: 15
                       },
                       legend: {
-                        layout: 'vertical',
+                        layout: 'horizontal',
                         align: 'left',
                         verticalAlign: 'top',
                         x: 150,
-                        y: 100,
+                        y: 20,
                         floating: true,
                         borderWidth: 2,
                         backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
@@ -175,9 +179,7 @@
                     }]
                     });
                 });
-
             </script>
-            
         </div>
       </div>
     </div>
