@@ -3,6 +3,7 @@ from .datastore import *
 from .document_plan import *
 from .document_planner import *
 from .entity_name_resolver import *
+from .landmark_generator import *
 from .message_generator import *
 from .realize_slots import *
 from .pipeline import *

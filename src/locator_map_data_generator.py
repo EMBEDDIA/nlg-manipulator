@@ -3,6 +3,7 @@ import urllib.request
 import urllib.parse
 import json
 from math import radians, cos, sin, asin, sqrt
+from core import LandmarkGenerator
 
 log = logging.getLogger('root')
 
@@ -30,6 +31,10 @@ class LocatorMapDataGenerator():
     CACHE = {}
 
     MAP_MARGIN = 0.075
+
+    def __init__(self):
+        landmark_gen = LandmarkGenerator()
+        self.REFERENCES = landmark_gen.generate(100, n_landmarks=17)
 
     def generate(self, location):
         try:
