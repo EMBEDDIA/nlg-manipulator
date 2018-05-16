@@ -6,26 +6,27 @@ from math import radians, cos, sin, asin, sqrt
 
 log = logging.getLogger('root')
 
+
 class LocatorMapDataGenerator():
     REFERENCES = [
-		{"latitude":60.170, "longitude":24.940, "name":"Helsinki"},
-		{"latitude":60.210, "longitude":24.660, "name":"Espoo"},
-		{"latitude":61.520, "longitude":23.760, "name":"Tampere"},
-		{"latitude":60.450, "longitude":22.250, "name":"Turku"},
-		{"latitude":65.020, "longitude":25.470, "name":"Oulu"},
-		{"latitude":60.990, "longitude":25.660, "name":"Lahti"},
-		{"latitude":62.900, "longitude":27.700, "name":"Kuopio"},
-		{"latitude":62.260, "longitude":25.750, "name":"Jyväskylä"},
-		{"latitude":61.490, "longitude":21.770, "name":"Pori"},
-		{"latitude":61.060, "longitude":28.180, "name":"Lappeenranta"},
-		{"latitude":63.100, "longitude":21.610, "name":"Vaasa"},
-		{"latitude":62.610, "longitude":29.780, "name":"Joensuu"},
-		{"latitude":61.700, "longitude":27.260, "name":"Mikkeli"},
-		{"latitude":66.490, "longitude":25.700, "name":"Rovaniemi"},
-		{"latitude":60.880, "longitude":26.700, "name":"Kouvola"},
-		{"latitude":60.740, "longitude":24.790, "name":"Riihimäki"},
-		{"latitude":65.760, "longitude":24.550, "name":"Kemi"},
-	]
+        {"latitude":60.170, "longitude":24.940, "name":"Helsinki"},
+        {"latitude":60.210, "longitude":24.660, "name":"Espoo"},
+        {"latitude":61.520, "longitude":23.760, "name":"Tampere"},
+        {"latitude":60.450, "longitude":22.250, "name":"Turku"},
+        {"latitude":65.020, "longitude":25.470, "name":"Oulu"},
+        {"latitude":60.990, "longitude":25.660, "name":"Lahti"},
+        {"latitude":62.900, "longitude":27.700, "name":"Kuopio"},
+        {"latitude":62.260, "longitude":25.750, "name":"Jyväskylä"},
+        {"latitude":61.490, "longitude":21.770, "name":"Pori"},
+        {"latitude":61.060, "longitude":28.180, "name":"Lappeenranta"},
+        {"latitude":63.100, "longitude":21.610, "name":"Vaasa"},
+        {"latitude":62.610, "longitude":29.780, "name":"Joensuu"},
+        {"latitude":61.700, "longitude":27.260, "name":"Mikkeli"},
+        {"latitude":66.490, "longitude":25.700, "name":"Rovaniemi"},
+        {"latitude":60.880, "longitude":26.700, "name":"Kouvola"},
+        {"latitude":60.740, "longitude":24.790, "name":"Riihimäki"},
+        {"latitude":65.760, "longitude":24.550, "name":"Kemi"},
+    ]
     CACHE = {}
 
     MAP_MARGIN = 0.075
