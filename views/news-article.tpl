@@ -65,6 +65,9 @@
             <script src="https://code.highcharts.com/modules/exporting.js"></script>
             <script src="https://code.highcharts.com/modules/export-data.js"></script>
             <script>
+                  //months enum
+                  const MonthsEnumEn = {"01":"January", "02":"February", "03":"March", "04":"April", "05":"May", "06":"June", "07":"July", "08":"August", "09":"September", "10":"October", "11":"November", "12":"December"};
+                  const MonthsEnumFi = {"01":"tammikuu", "02":"helmikuu", "03":"maaliskuu", "04":"huhtikuu", "05":"toukokuu", "06":"kesäkuu", "07":"heinäkuu", "08":"elokuu", "09":"syyskuu", "10":"lokakuu", "11":"marraskuu", "12":"joulukuu"};
                   graph_data = {{!graph}}
                   $(function () {
                     var chart = new Highcharts.Chart({
@@ -109,6 +112,17 @@
                         tooltip: {
                             useHTML: true,
                             formatter: function() {
+                                var currentSelection = this.x;
+                                //get the month
+                                month = currentSelection.slice(-2);
+                                var language = '{{!language}}';
+                                switch(language) {
+                                  case "en":
+                                      SelectedMonth = MonthsEnumEn[month];
+                                      break;
+                                  case "fi":
+                                      SelectedMonth = MonthsEnumFi[month];
+                                }
                                 setTimeout( function() {
                                     var TooltipChart = new Highcharts.Chart({
                                         chart: {
@@ -127,9 +141,6 @@
                                           categories: [
                                             '2014',
                                             '2015',
-                                            '2016',
-                                            '2017',
-                                            '2018',
                                             '2019 prediction?'
                                           ],
                                           crosshair: true
@@ -147,8 +158,8 @@
                                           }
                                         },
                                         series: [{
-                                          name: 'for month ()',
-                                          data: [49, 71, 106, 129, 144, 176]
+                                          name: SelectedMonth,
+                                          data: [49, 71, 176]
 
                                         }]
                                       });
