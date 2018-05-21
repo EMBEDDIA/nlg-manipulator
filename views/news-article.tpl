@@ -109,74 +109,74 @@
                           }
                         }
                       },
-                        tooltip: {
-                            useHTML: true,
-                            formatter: function() {
-                                var currentSelection = this.x;
-                                //get the month
-                                month = currentSelection.slice(-2);
-                                var language = '{{!language}}';
-                                switch(language) {
-                                  case "en":
-                                      SelectedMonth = MonthsEnumEn[month];
-                                      break;
-                                  case "fi":
-                                      SelectedMonth = MonthsEnumFi[month];
-                                }
-                                setTimeout( function() {
-                                    var TooltipChart = new Highcharts.Chart({
-                                        chart: {
-                                          type: 'column',
-                                          height:250,
-                                          width:250,
-                                  				renderTo:'hc-tooltip'
-                                        },
+                      tooltip: {
+                          useHTML: true,
+                          formatter: function() {
+                              var currentSelection = this.x;
+                              //get the month
+                              month = currentSelection.slice(-2);
+                              var language = '{{!language}}';
+                              switch(language) {
+                                case "en":
+                                    SelectedMonth = MonthsEnumEn[month];
+                                    break;
+                                case "fi":
+                                    SelectedMonth = MonthsEnumFi[month];
+                              }
+                              setTimeout( function() {
+                                  var TooltipChart = new Highcharts.Chart({
+                                      chart: {
+                                        type: 'column',
+                                        height:250,
+                                        width:250,
+                                        renderTo:'hc-tooltip'
+                                      },
+                                      title: {
+                                        text: 'crime in month compared to prev yrs'
+                                      },
+                                      subtitle: {
+                                        text: 'subtitle'
+                                      },
+                                      xAxis: {
+                                        categories: [
+                                          '2014',
+                                          '2015',
+                                          '2019 prediction?'
+                                        ],
+                                        crosshair: true
+                                      },
+                                      yAxis: {
+                                        min: 0,
                                         title: {
-                                          text: 'crime in month compared to prev yrs'
-                                        },
-                                        subtitle: {
-                                          text: 'subtitle'
-                                        },
-                                        xAxis: {
-                                          categories: [
-                                            '2014',
-                                            '2015',
-                                            '2019 prediction?'
-                                          ],
-                                          crosshair: true
-                                        },
-                                        yAxis: {
-                                          min: 0,
-                                          title: {
-                                            text: 'crimes (per 1000 inhabitants)'
-                                          }
-                                        },
-                                        plotOptions: {
-                                          column: {
-                                            pointPadding: 0.2,
-                                            borderWidth: 0
-                                          }
-                                        },
-                                        series: [{
-                                          name: SelectedMonth,
-                                          data: [49, 71, 176]
+                                          text: 'crimes (per 1000 inhabitants)'
+                                        }
+                                      },
+                                      plotOptions: {
+                                        column: {
+                                          pointPadding: 0.2,
+                                          borderWidth: 0
+                                        }
+                                      },
+                                      series: [{
+                                        name: SelectedMonth,
+                                        data: [49, 71, 176]
 
-                                        }]
-                                      });
-                                    }, 10)
+                                      }]
+                                    });
+                                  }, 10)
 
-                                return '<div id="hc-tooltip" width="200px" height="200px"></div>';
-                            }
-                        },
-                       plotOptions: {
-                      area: {
-                        fillOpacity: 0,
-                        connectNulls: true,
-                      }
-                    },
-                    credits: {
-                      enabled: true
-                    },
+                              return '<div id="hc-tooltip" width="200px" height="200px"></div>';
+                          }
+                      },
+                     plotOptions: {
+                    area: {
+                      fillOpacity: 0,
+                      connectNulls: true,
+                    }
+                  },
+                  credits: {
+                    enabled: true
+                  },
                     //in case there are missing values we can put null
                     //to add another series add , then provide name and data for the new one
                     series: [{
