@@ -190,6 +190,7 @@
                     }]
                     });
                 });
+                console.log(graph_data.datasets[2].subgraph_data);
             </script>
         </div>
       </div>
