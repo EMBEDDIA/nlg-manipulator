@@ -13,7 +13,6 @@ log = logging.getLogger('root')
 class GraphDataGenerator():
 
     def generate(self, registry, graph_nucleus, location):
-        return None
         print("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
         fact_crime = graph_nucleus._main_fact.what_type
         # which years to show
@@ -99,9 +98,9 @@ class GraphDataGenerator():
         subgraph_similar = {}
         subgraph_all_others = {}
         for m in monthlist:
-            subgraph_location[y] = list(location_df[location_df['when'].str.endswith(m)][data_column])
-            subgraph_similar[y] = list(elsewhere_df[elsewhere_df['when'].str.endswith(m)][data_column])
-            subgraph_all_others[y] = list(similar_places_df[similar_places_df['when'].str.endswith(m)][data_column])
+            subgraph_location[m] = list(location_df[location_df['when'].str.endswith(m)][data_column])
+            subgraph_similar[m] = list(elsewhere_df[elsewhere_df['when'].str.endswith(m)][data_column])
+            subgraph_all_others[m] = list(similar_places_df[similar_places_df['when'].str.endswith(m)][data_column])
 
         # Should be same columns in both dataframes
         labels = list(location_df['when'])
