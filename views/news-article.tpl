@@ -113,7 +113,16 @@
                           useHTML: true,
                           formatter: function() {
                               var currentSelection = this.x;
-                              //get the month
+                              var currentSeries = this.series.name;
+                              var currentDataSet = 0
+                              switch(currentSeries) {
+                                  case graph_data.datasets[0].label:
+                                      currentDataSet = 0;
+                                      break;
+                                  case graph_data.datasets[1].label:
+                                      currentDataSet = 1;
+                                      break;
+                              }
                               month = currentSelection.slice(-2);
                               var language = '{{!language}}';
                               switch(language) {
@@ -123,6 +132,17 @@
                                 case "fi":
                                     SelectedMonth = MonthsEnumFi[month];
                               }
+                              //getting the labels for the years for subgraph month graphs
+                              //incorrect returns the months arrays for each selected point we need to return the years as labels
+                              /*var sub = graph_data.datasets[currentDataSet].subgraph_data[month.toString()]
+                              var subGraphkeys = Object.keys(sub);
+                              var keys = []
+                              for (let key of subGraphkeys) {
+                                keys.push(key)
+                              }
+                              console.log(keys)*/
+                              //get the month
+
                               setTimeout( function() {
                                   var TooltipChart = new Highcharts.Chart({
                                       chart: {
@@ -138,17 +158,13 @@
                                         text: 'subtitle'
                                       },
                                       xAxis: {
-                                        categories: [
-                                          '2014',
-                                          '2015',
-                                          '2019 prediction?'
-                                        ],
+                                        categories: graph_data.datasets[currentDataSet].subgraph_labels,
                                         crosshair: true
                                       },
                                       yAxis: {
                                         min: 0,
                                         title: {
-                                          text: 'crimes (per 1000 inhabitants)'
+                                          text: 'crimes total'
                                         }
                                       },
                                       plotOptions: {
@@ -159,13 +175,13 @@
                                       },
                                       series: [{
                                         name: SelectedMonth,
-                                        data: [49, 71, 176]
+                                        data: graph_data.datasets[currentDataSet].subgraph_data[month.toString()]
 
                                       }]
                                     });
                                   }, 10)
 
-                              return '<div id="hc-tooltip" width="200px" height="200px"></div>';
+                              return '<div id="hc-tooltip" width="300px" height="200px"></div>';
                           }
                       },
                      plotOptions: {
