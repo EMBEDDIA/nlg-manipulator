@@ -13,7 +13,6 @@ log = logging.getLogger('root')
 class GraphDataGenerator():
 
     def generate(self, registry, graph_nucleus, location):
-        print("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
         fact_crime = graph_nucleus._main_fact.what_type
         # which years to show
         #when1 = str(graph_nucleus._main_fact.when_1)
@@ -24,7 +23,6 @@ class GraphDataGenerator():
         monthstr = "01|02|03|04|05|06|07|08|09|10|11|12"
         years = yearstr.partition(when1)
         yearq = "(" + years[1] + years[2] + ")"
-        print(graph_nucleus._main_fact)
         # extract crime category
         fact_crime = fact_crime.partition("_total_category")
         if fact_crime[1] == "":
@@ -40,9 +38,6 @@ class GraphDataGenerator():
                 if fact_crime in crimes:
                     fact_cat = category
                     break
-        #print(fact_crime)
-        #print(fact_cat)
-        print("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM")
         data_column = 'all_total_normalized'
         data_column = fact_cat + "_normalized"
         # find finnish name for category
@@ -104,11 +99,13 @@ class GraphDataGenerator():
 
         # Should be same columns in both dataframes
         labels = list(location_df['when'])
+        sub_labels = yearstr.split("|")
         datasets = [
             {
                 'label': location,
                 'data': list(location_df[data_column]),
                 'subgraph_data': subgraph_location,
+                'subgraph_labels': sub_labels,
                 'backgroundColor': 'rgba(205, 170, 152, 0.2)',
                 'borderColor': 'rgba(205, 170, 152, 1)',
             },
@@ -116,6 +113,7 @@ class GraphDataGenerator():
                 'label': 'Muiden kuntien keskiarvo ',
                 'data': list(elsewhere_df[data_column]),
                 'subgraph_data': subgraph_all_others,
+                'subgraph_labels': sub_labels,
                 'backgroundColor': 'rgba(151, 187, 205, 0.2)',
                 'borderColor': 'rgba(151, 187, 205, 1)',
             },
@@ -123,6 +121,7 @@ class GraphDataGenerator():
                 'label': 'Samanlaisten kuntien keskiarvo ',
                 'data': list(similar_places_df[data_column]),
                 'subgraph_data': subgraph_similar,
+                'subgraph_labels': sub_labels,
                 'backgroundColor': 'rgba(156, 230, 160, 0.2)',
                 'borderColor': 'rgba(156, 230, 160, 1)',
             }
