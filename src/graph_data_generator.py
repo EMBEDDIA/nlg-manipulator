@@ -51,7 +51,7 @@ class GraphDataGenerator():
         datastore = registry.get('crime-bc-data')
         cols = [c for c in datastore.all() if c in ['where', 'when', data_column]]
 
-        # get location population and other places with same population
+        # get similar places, based on population
         pop = datastore.query('where=={!r} and when=={!r}'.format(location, when2))['population'].iloc[0]
         popmin = 0.9 * pop
         popmax = 1.1 * pop

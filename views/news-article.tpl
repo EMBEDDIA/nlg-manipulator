@@ -77,7 +77,7 @@
                 				renderTo:'visualization'
                       },
                       title: {
-                        text: 'Rikoksia tuhatta asukasta kohden'
+                        text: graph_data.title + ' tuhatta asukasta kohden',
                       },
                       subtitle: {
                         text: 'Rikoksia tuhatta asukasta kohden',
@@ -203,6 +203,10 @@
                       name: graph_data.datasets[1].label,
                       //color: '#3366BB',
                       data: graph_data.datasets[1].data
+                    },{
+                      name: graph_data.datasets[2].label,
+                      //color: '#??????',
+                      data: graph_data.datasets[2].data
                     }]
                     });
                 });
