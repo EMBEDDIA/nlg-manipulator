@@ -167,8 +167,8 @@ class EnglishRealizer():
             return token + "th"
 
     def _cardinal(self, token):
-        token = "{:n}".format(token)
-        return SMALL_CARDINALS.get(token, token)
+        token_str = "{:.2f}".format(token).rstrip("0").rstrip(".")
+        return SMALL_CARDINALS.get(token_str, token_str)
 
     def _update_slot_value(self, slot, new_value):
         slot.value = lambda x: new_value
