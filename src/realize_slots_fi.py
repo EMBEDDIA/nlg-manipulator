@@ -181,6 +181,8 @@ class FinnishRealizer():
             # rikosten määrä kasvoi viidellä
             what_slot.attributes['case'] = 'adessive'
             slot.value = lambda x: ""
+
+        # ToDo: Shouldn't the added_slots also be added to the idx???
         idx += 1
 
         # The end comparison
@@ -202,6 +204,7 @@ class FinnishRealizer():
                 idx += 1
             else:
                 raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+
         return added_slots
 
     def _unit_rank(self, slot):
