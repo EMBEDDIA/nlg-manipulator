@@ -110,3 +110,57 @@ CRIME_TYPES = {
     'other_public_order_violation_total': "public order violation",
     'other_offences_against_other_acts_decrees_total': "offences against other Acts and Decrees",
 }
+
+SMALL_ORDINALS = {
+    '1': "first",
+    '2': "second",
+    '3': "third",
+    '4': "fourth",
+    '5': "fifth",
+    '6': "sixth",
+    '7': "seventh",
+    '8': "eighth",
+    '9': "ninth",
+    '10': "tenth",
+    '11': "eleventh",
+    '12': "twelfth",
+}
+
+SMALL_CARDINALS = {
+    '1': "one",
+    '2': "two",
+    '3': "three",
+    '4': "four",
+    '5': "five",
+    '6': "six",
+    '7': "seven",
+    '8': "eight",
+    '9': "nine",
+    '10': "ten",
+}
+
+UNITS = {
+    'seats': {
+        'sg': "seat",
+        'pl': "seats"
+    },
+    'votes': {
+        'sg': "vote",
+        'pl': "votes"
+    }
+}
+
+MONTHS = {
+    '01': "January",
+    '02': "February",
+    '03': "March",
+    '04': "April",
+    '05': "May",
+    '06': "June",
+    '07': "July",
+    '08': "August",
+    '09': "September",
+    '10': "October",
+    '11': "November",
+    '12': "December",
+}

@@ -1,51 +1,12 @@
 import re
 import logging
-from dictionary_en import CRIME_TYPES
+from dictionary_en import CRIME_TYPES, MONTHS, SMALL_CARDINALS, SMALL_ORDINALS
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
 
 
 class EnglishRealizer():
-
-    SMALL_ORDINALS = {
-        '1': "first",
-        '2': "second",
-        '3': "third",
-        '4': "fourth",
-        '5': "fifth",
-        '6': "sixth",
-        '7': "seventh",
-        '8': "eighth",
-        '9': "ninth",
-        '10': "tenth",
-        '11': "eleventh",
-        '12': "twelfth",
-    }
-
-    SMALL_CARDINALS = {
-        '1': "one",
-        '2': "two",
-        '3': "three",
-        '4': "four",
-        '5': "five",
-        '6': "six",
-        '7': "seven",
-        '8': "eight",
-        '9': "nine",
-        '10': "ten",
-    }
-
-    UNITS = {
-        'seats': {
-            'sg': "seat",
-            'pl': "seats"
-        },
-        'votes': {
-            'sg': "vote",
-            'pl': "votes"
-        }
-    }
 
     value_type_re = re.compile(
         r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
@@ -126,7 +87,6 @@ class EnglishRealizer():
             log.error("The English change template should have a value slot following a unit slot!")
             return 0
         added_slots = 0
-        # self._update_slot_value(slot, CRIME_TYPES.get(unit, {}).get('pl', unit))
         self._update_slot_value(slot, CRIME_TYPES.get(unit, unit))
         idx += 1
         if slot.fact.what == 0:
@@ -194,10 +154,10 @@ class EnglishRealizer():
 
     def _ordinal(self, token):
         token = "{:n}".format(token)
-        if token in self.SMALL_ORDINALS:
+        if token in SMALL_ORDINALS:
             # Use words for numbers up to 12
             # 0 shouldn't really be needed, but use 0th if it really has to be used
-            return self.SMALL_ORDINALS[token]
+            return SMALL_ORDINALS[token]
         if len(token) > 1 and token[-2:] in ['11', '12', '13']:
             return token + "th"
         if token[-1] == '1':
@@ -211,7 +171,7 @@ class EnglishRealizer():
 
     def _cardinal(self, token):
         token = "{:n}".format(token)
-        return self.SMALL_CARDINALS.get(token, token)
+        return SMALL_CARDINALS.get(token, token)
 
     def _update_slot_value(self, slot, new_value):
         slot.value = lambda x: new_value
