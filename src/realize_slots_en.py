@@ -83,8 +83,10 @@ class EnglishRealizer():
         # Check whether the following slot contains the value
         if template.components[idx + 1].slot_type == 'what':
             what_slot = template.components[idx + 1]
+        elif template.components[idx - 1].slot_type == 'what':
+            what_slot = template.components[idx - 1]
         else:
-            log.error("The English change template should have a value slot following a unit slot!")
+            log.error("Can't find the what slot!")
             return 0
         added_slots = 0
         self._update_slot_value(slot, CRIME_TYPES.get(unit, unit))
