@@ -28,6 +28,8 @@ class EnglishRealizer():
         self.time = {
             'month': self._time_month,
             'year': self._time_year,
+            'month_change': self._time_change_month,
+            'year_change': self._time_change_year
         }
 
     def _unit_base(self, slot):
@@ -174,19 +176,149 @@ class EnglishRealizer():
         slot.value = lambda x: new_value
         return 0
 
-    def _time_month(self, slot):
-        # Not implemented yet
-        return 0
-
-    def _time_year(self, slot):
-        year = slot.value
+    def _time_month(self, random, slot):
+        if slot.slot_type[:-2] == 'when':
+            year, month = slot.value.split("M")
+        elif slot.slot_type == 'time':
+            year, month = slot.value[1:-1].split(":")[-1].split("M")
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        new_slot = LiteralSlot("in")
-        template.add_slot(idx, new_slot)
-        added_slots += 1
-        idx += 1
-        if type(year) is not str:
-            slot.value = lambda x: self._cardinal(year)
+        # If the place is not realized at all, start the sentence with time instead, using either full or short form.
+        if template.components[0].value == "":
+            template.move_slot(idx, 0)
+            idx = 0
+            if slot.attributes['name_type'] == 'pronoun':
+                slot.attributes['name_type'] = 'short'
+        if (slot.attributes['name_type'] in ['full', 'short']) or (
+                slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            new_slot = LiteralSlot("in " + MONTHS[month])
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            self._update_slot_value(slot, year)
+        elif slot.attributes['name_type'] == 'pronoun':
+            reference_options = ["during the month", "also", "at the same time"]
+            self._update_slot_value(slot, random.choice(reference_options))
+        else:
+            raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         return added_slots
+
+    def _time_year(self, random, slot):
+        if slot.slot_type[:-2] == 'when':
+            year = slot.value
+        elif slot.slot_type == 'time':
+            # If we are realizing a {time} slot, we can simply use either of the time values as the year
+            # Here we're choosing the latter one
+            year = slot.value[1:-1].split(":")[-1]
+        else:
+            log.error("Weird slot type '{}' sent to be realized as a year value. Hopefully it's valid.".format(slot.value))
+            year = slot.value
+        added_slots = 0
+        template = slot.parent
+        idx = template.components.index(slot)
+        # If the place is not realized at all, start the sentence with time instead, using either full or short form.
+        if template.components[0].value == "":
+            template.move_slot(idx, 0)
+            idx = 0
+            if slot.attributes['name_type'] == 'pronoun':
+                slot.attributes['name_type'] = 'short'
+        # The latter condition makes the system realize the full year roughly once in five sentences even
+        # if the year hasn't changed.
+        if (slot.attributes['name_type'] in ['full', 'short']) or (
+                slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            if slot.attributes['name_type'] == 'full':
+                new_slot = LiteralSlot("in the year")
+                template.add_slot(idx, new_slot)
+                added_slots += 1
+                idx += 1
+            if year is None:
+                self._update_slot_value(slot, 'x')
+            elif type(year) is not str:
+                self._update_slot_value(slot, self._cardinal(year))
+            else:
+                self._update_slot_value(slot, year)
+        elif slot.attributes['name_type'] == 'pronoun':
+            reference_options = ["in the same year", "also during the same year", "also"]
+            self._update_slot_value(slot, random.choice(reference_options))
+        else:
+            raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+        return added_slots
+
+    def _time_change_year(self, random, slot):
+        time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
+        match = time_matcher.fullmatch(slot.value)
+        added_slots = 0
+        template = slot.parent
+        idx = template.components.index(slot)
+        if slot.attributes['name_type'] == 'full':
+            new_slot = LiteralSlot("from")
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            template.add_slot(idx, LiteralSlot(match.group(1)))
+            added_slots += 1
+            idx += 1
+            new_slot = LiteralSlot("to")
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            self._update_slot_value(slot, match.group(2))
+        elif slot.attributes['name_type'] == 'short':
+            self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
+            slot.attributes['case'] = 'nominative'
+        else:
+            self._update_slot_value(slot, "")
+        return added_slots
+
+    def _time_change_month(self, random, slot):
+        time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
+        match = time_matcher.fullmatch(slot.value)
+        year1, month1 = match.group(1).split('M')
+        year2, month2 = match.group(2).split('M')
+        added_slots = 0
+        template = slot.parent
+        idx = template.components.index(slot)
+        if slot.attributes['name_type'] == 'full':
+            new_slot = LiteralSlot("from " + MONTHS[month1])
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            template.add_slot(idx, LiteralSlot(year1))
+            added_slots += 1
+            idx += 1
+            new_slot = LiteralSlot("to " + MONTHS[month2])
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            template.add_slot(idx, LiteralSlot(year2))
+            added_slots += 1
+            idx += 1
+        elif slot.attributes['name_type'] == 'short':
+            self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
+            slot.attributes['case'] = 'nominative'
+        else:
+            self._update_slot_value(slot, "")
+        return added_slots
+
+    def place(self, random, slot):
+        place_matcher = re.compile("\[PLACE:([^\]:]*):([^\]]*)\]")
+        entity_code = slot.value
+        place_type, place = place_matcher.match(entity_code).groups()
+        prep = slot.attributes.get('prep', "in") + " "
+        if place_type == 'C' and place == 'fi':
+            place = "Finland"
+        if place_type in ["C", "M"]:
+            if slot.attributes['name_type'] == 'full':
+                self._update_slot_value(slot, prep + place)
+            elif random.rand() < 0.5:
+                if place_type == 'M':
+                    self._update_slot_value(slot, prep + "the municipality")
+                elif place_type == 'C':
+                    self._update_slot_value(slot, prep + "the country")
+                else:
+                    raise Exception(
+                        "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+            else:
+                self._update_slot_value(slot, "")
+        return 0
