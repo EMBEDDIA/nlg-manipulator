@@ -1,5 +1,6 @@
 CRIME_TYPES = {
-    'property_offences_category': "offences against property",
+    'all_total': "crimes in total",
+    'property_offences_total_category': "offences against property",
     'property_thefts_total': "thefts",
     'property_aggravated_thefts_total': "aggravated thefts",
     'property_petty_thefts_total': "petty thefts",
