@@ -19,25 +19,26 @@
 
 fi: {where, case=ssa} tapahtui {time} {what} {what_type}
 fi-head: {where, case=ssa} tapahtui {what} {what_type} {time}
-en: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
-en-head: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
+en: {where, prep=in}, the variable {what_type} has value {what} {time}
+en-head: {where, prep=in}, the variable {what_type} has value {what} {time}
 | where_type = [MC], when_1 = when_2
 
 # This can be used for rankings with non-change values
 fi: {where, case=ssa} tapahtui {time} {what} {what_type}
 fi-head: {where, case=ssa} tapahtui {what} {what_type} {time}
-en: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
-en-head: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
+en: {where, prep=in}, {what_type} {what} {time}
+en-head: {where, prep=in}, {what_type} {what} {time}
 | where_type = [MC], what_type = .*(?<!_change)_grouped_by.*
 
 fi: {where, case=ssa} {what} {what_type} {time, case=lla}
 fi: {where, case=ssa} {what} {what_type} {time}
 fi-head: {where, case=ssa} {what} {what_type} {time, case=lla}
 fi-head: {where, case=ssa} {what} {what_type} {time}
-en: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
-en: in {where}, the number of {what_type} {what} {when_1, prep=from} {when_2, prep=to} compared to other {what_type, type=comparison} # In Akaa, the number of car thefts increased/decreased by five (percent)/the most from 2011 to 2013 compared to other crimes/municipalities
-en-head: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
-en-head: in {where}, the variable {what_type} has value {what} between {when_1} - {when_2}
+en: {where, prep=in}, {what_type} {what} {time}
+# In Akaa, the number of car thefts increased/decreased by five (percent)/the most from 2011 to 2013 compared to other crimes/municipalities
+en: {where, prep=in}, {what_type} {what} {time} compared to other {what_type, type=comparison}
+en-head: {where, prep=in}, {what_type} {what} {time}
+en-head: {where, prep=in}, {what_type} {what} {time}
 | where_type = [MC], what_type = .*change.*, when_1 != when_2
 
 fi: {where, case=ssa} {what} {what_type} {time}
