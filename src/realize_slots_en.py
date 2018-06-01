@@ -74,82 +74,171 @@ class EnglishRealizer():
         return added_slots
 
     def _unit_change(self, slot):
-        if slot.attributes.get('type', '') == 'comparison':
-            return self._unit_comparison(slot)
-        # The capture groups are:
-        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
         match = self.value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
+        if rank and '_reverse' in rank:
+            log.error("_rank_reverse values found in combination with change. These shouldn't exist, because we can't know whether the top ranking cases mean the largest decrease or the smallest increase")
         # Check whether the following slot contains the value
-        if template.components[idx + 1].slot_type == 'what':
-            what_slot = template.components[idx + 1]
-        elif template.components[idx - 1].slot_type == 'what':
+        # Check whether the preceding slot contains the value
+        if template.components[idx - 1].slot_type == 'what':
             what_slot = template.components[idx - 1]
         else:
-            log.error("Can't find the what slot!")
+            log.error("The Finnish change template should have a value slot preceding a unit slot!")
             return 0
         added_slots = 0
-        self._update_slot_value(slot, CRIME_TYPES.get(unit, unit))
-        idx += 1
-        if slot.fact.what == 0:
-            self._update_slot_value(what_slot, "stayed the same")
-            # In the case of no change, we're done
-            return added_slots
-        elif slot.fact.what < 0 or (rank and '_decrease' in rank):
-            template.add_slot(idx, LiteralSlot("decreased"))
-        else:
-            template.add_slot(idx, LiteralSlot("increased"))
-        idx += 1
-        # If we are talking about a rank value
-        if rank:
-            if what_slot.value == 1:
+        # The short form is used within brackets as an elaboration
+        if slot.attributes.get('form', '') == 'short':
+            # A special case for when the change is zero
+            if slot.fact.what == 0:
                 self._update_slot_value(what_slot, "")
-            template.add_slot(idx, LiteralSlot("the"))
-            added_slots += 1
-            # Skip over the what_slot
-            idx += 2
-            template.add_slot(idx, LiteralSlot("most"))
-            idx += 1
-            added_slots += 1
-            return added_slots
-        else:
-            template.add_slot(idx, LiteralSlot("by"))
-            added_slots += 1
-            # Skip the value slot
-            idx += 2
-            # If we are talking about percentages
-            if match.group(3):
-                if what_slot.fact.what > 10:
-                    current_value = what_slot.value
-                    what_slot.value = lambda x: current_value + "%"
+                self._update_slot_value(slot, "no change")
+            else:
+                unit_str = "case"
+                if what_slot.value != 1:
+                    unit_str += "s"
+                self._update_slot_value(slot, unit_str)
+                idx += 1
+                if slot.fact.what < 0:
+                    template.add_slot(idx - 1, LiteralSlot("less"))
                 else:
-                    template.add_slot(idx, LiteralSlot("percent"))
-                    added_slots += 1
+                    template.add_slot(idx - 1, LiteralSlot("more"))
+                idx += 1
+                added_slots += 1
+                if normalized:
+                    template.add_slot(idx, LiteralSlot("per 1,000 people"))
                     idx += 1
-        return added_slots
+                    added_slots += 1
+            return added_slots
 
-    def _unit_comparison(self, slot):
-        # The capture groups are:
-        # (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-        match = self.value_type_re.fullmatch(slot.value)
-        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
-        template = slot.parent
-        idx = template.components.index(slot)
-        added_slots = 0
-        # If compared to other crimes
-        if grouped_by == '_time_place':
-            self._update_slot_value(slot, "crimes")
-        elif grouped_by == '_crime_time':
-            self._update_slot_value(slot, "municipalities")
+        # The beginning of the full form realisation
+        # Move the idx pointer back to add slots before the numerical value
+        idx -= 1
+
+        template.add_slot(idx, LiteralSlot("the number of"))
+        added_slots += 1
+        idx += 1
+
+        template.add_slot(idx, LiteralSlot(CRIME_TYPES.get(unit, unit)))
+        idx += 1
+        added_slots += 1
+
+        # Specify the normalisation if needed
+        if normalized and 'no_normalization' not in slot.attributes.keys():
+            if not (rank or percentage):
+                # with rank or percentage values we don't need to specify the exact normalizing factor
+                # absolute normalized values don't make sense without this information
+                template.add_slot(idx, LiteralSlot("per 1,000 people"))
+                added_slots += 1
+                idx += 1
+
+        # Specify the predicate
+        if 'no_normalization' not in slot.attributes.keys():
+            if slot.fact.what < 0 or (rank and '_decrease' in rank):
+                template.add_slot(idx, LiteralSlot("decreased"))
+            elif slot.fact.what > 0:
+                template.add_slot(idx, LiteralSlot("increased"))
+            else:
+                self._update_slot_value(slot, "stayed the same")
+                # Clear the value slot
+                self._update_slot_value(what_slot, "")
+                return added_slots
+            added_slots += 1
+            idx += 1
+
+        # Jump over the what_slot
+        idx += 1
+
+        # The base unit
+        if rank:
+            # rikosten määrä kasvoi viidenneksi eniten
+            new_slots = self._unit_rank(slot)
         else:
-            raise Exception("This is impossible. The regex accepts only the two options above for group 5.")
+            template.add_slot(idx - 1, LiteralSlot("by"))
+            added_slots += 1
+            idx += 1
+            if percentage:
+                # the number of crimes increased by five percent
+                new_slots = self._unit_percentage_points(slot)
+            else:
+                # rikosten määrä kasvoi viidellä
+                slot.value = lambda x: ""
+                new_slots = 0
+        added_slots += new_slots
+        idx += new_slots + 1
+
+        # The end comparison
+        if grouped_by and 'no_grouping' not in slot.attributes.keys():
+            if grouped_by == '_time_place':
+                template.add_slot(idx, LiteralSlot("compared to other types of crime"))
+                added_slots += 1
+                idx += 1
+            elif grouped_by == '_crime_time':
+                template.add_slot(idx, LiteralSlot("among all municipalities in Finland"))
+                added_slots += 1
+                idx += 1
+            elif grouped_by == 'crime_place_year':
+                if slot.fact.when_type == 'month':
+                    template.add_slot(idx, LiteralSlot("compared to other months"))
+                else:
+                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
+                added_slots += 1
+                idx += 1
+            else:
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+
         return added_slots
 
     def _unit_rank(self, slot):
-        # Not implemented yet
-        return 0
+        match = self.value_type_re.fullmatch(slot.value)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
+        prev_slot = template.components[idx - 1]
+        if not change:
+            if grouped_by == '_time_place':
+                template.add_slot(idx - 1, LiteralSlot("of all types of crime"))
+            elif grouped_by == '_crime_time':
+                template.add_slot(idx - 1, LiteralSlot("of all the municipalities"))
+            elif grouped_by == '_crime_place_year':
+                if slot.fact.when_type == 'month':
+                    template.add_slot(idx - 1, LiteralSlot("compared to the other months of the year"))
+                else:
+                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
+            else:
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+            added_slots += 1
+            idx += 1
+
+        if prev_slot.slot_type == 'what':
+            # If the rank is first, the actual numeral isn't realized at all
+            if slot.fact.what == 1:
+                prev_slot.value = lambda x: ""
+            # If the numeral is realized, it needs to be an ordinal
+            else:
+                prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
+
+        # Add a definite article before the what slot
+        template.add_slot(idx - 1, LiteralSlot("the"))
+        added_slots += 1
+        idx += 1
+
+        if rank in ['_rank', '_increase_rank', '_decrease_rank']:
+            slot.value = lambda x: "most"
+        elif rank == '_rank_reverse':
+            slot.value = lambda x: "least"
+        else:
+            raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+        idx += 1
+        # If talking about changes, we will do the rest in the change handler
+        if change:
+            return added_slots
+        template.add_slot(idx, LiteralSlot(CRIME_TYPES.get(unit, unit)))
+        idx += 1
+        added_slots += 1
+        return added_slots
 
     def _ordinal(self, token):
         token = "{:n}".format(token)
