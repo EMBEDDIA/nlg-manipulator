@@ -95,7 +95,7 @@ class EnglishRealizer():
             self._update_slot_value(what_slot, "stayed the same")
             # In the case of no change, we're done
             return added_slots
-        elif slot.fact.what < 0:
+        elif slot.fact.what < 0 or (rank and '_decrease' in rank):
             template.add_slot(idx, LiteralSlot("decreased"))
         else:
             template.add_slot(idx, LiteralSlot("increased"))
@@ -108,12 +108,7 @@ class EnglishRealizer():
             added_slots += 1
             # Skip over the what_slot
             idx += 2
-            if match.group(6) == "_rank":
-                template.add_slot(idx, LiteralSlot("most"))
-            elif match.group(6) == "_rank_reverse":
-                template.add_slot(idx, LiteralSlot("least"))
-            else:
-                raise Exception("This is impossible. The regex accepts only the two options above for group 6.")
+            template.add_slot(idx, LiteralSlot("most"))
             idx += 1
             added_slots += 1
             return added_slots
