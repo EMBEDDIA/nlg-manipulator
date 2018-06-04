@@ -5,6 +5,7 @@ import json
 import numpy as np
 import columns
 import dictionary_fi
+import dictionary_en
 from math import cos, sqrt
 
 log = logging.getLogger('root')
@@ -12,7 +13,7 @@ log = logging.getLogger('root')
 
 class GraphDataGenerator():
 
-    def generate(self, registry, graph_nucleus, location):
+    def generate(self, registry, graph_nucleus, location, language):
         fact_crime = graph_nucleus._main_fact.what_type
         # which years to show
         #when1 = str(graph_nucleus._main_fact.when_1)
@@ -41,7 +42,12 @@ class GraphDataGenerator():
         data_column = 'all_total_normalized'
         data_column = fact_cat + "_normalized"
         # find finnish name for category
-        title = dictionary_fi.CRIME_TYPES[fact_cat]['pl']
+        if language == 'fi':
+            title = dictionary_fi.CRIME_TYPES[fact_cat]['pl']
+        elif language == 'en':
+            title = dictionary_en.CRIME_TYPES[fact_cat]
+        else:
+            title = ""
         if isinstance(title, tuple):
             title = title[0]
 
@@ -140,7 +146,7 @@ class GraphDataGenerator():
             <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
             <script>
                 var chart = new Chart(
-                    document.getElementById('chart'), 
+                    document.getElementById('chart'),
                     {{
                         type: 'line',
                         data: {{

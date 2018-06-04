@@ -69,6 +69,26 @@
                   const MonthsEnumEn = {"01":"January", "02":"February", "03":"March", "04":"April", "05":"May", "06":"June", "07":"July", "08":"August", "09":"September", "10":"October", "11":"November", "12":"December"};
                   const MonthsEnumFi = {"01":"tammikuu", "02":"helmikuu", "03":"maaliskuu", "04":"huhtikuu", "05":"toukokuu", "06":"kesäkuu", "07":"heinäkuu", "08":"elokuu", "09":"syyskuu", "10":"lokakuu", "11":"marraskuu", "12":"joulukuu"};
                   graph_data = {{!graph}}
+                  var language = '{{!language}}';
+                  var yAxisTitle = '';
+                  var tooltipTitle = '';
+                  var title2 = '';
+                  var title3 = '';
+                  switch(language) {
+                    case "en":
+                        yAxisTitle = 'per 1000 inhabitant';
+                        tooltipTitle = 'compared to previous years';
+                        title2 = 'average of other municipalities';
+                        title3 = 'average of similar municipalities';
+
+                        break;
+                    case "fi":
+                        yAxisTitle = 'tuhatta asukasta kohden';
+                        tooltipTitle = 'edellisiin vuosiin verrattuna';
+                        title2 = 'Muiden kuntien keskiarvo ';
+                        title3 = 'Samanlaisten kuntien keskiarvo ';
+                        break;
+                  }
                   $(function () {
                     var chart = new Highcharts.Chart({
                         chart: {
@@ -77,10 +97,10 @@
                 				renderTo:'visualization'
                       },
                       title: {
-                        text: graph_data.title + ' tuhatta asukasta kohden',
+                        text: graph_data.title,
                       },
                       subtitle: {
-                        text: 'Rikoksia tuhatta asukasta kohden',
+                        text: '',
                         floating: true,
                         align: 'right',
                         verticalAlign: 'bottom',
@@ -101,7 +121,7 @@
                       },
                       yAxis: {
                         title: {
-                          text: 'Crimes (per 1000 inhabitant)'
+                          text: yAxisTitle
                         },
                         labels: {
                           formatter: function () {
@@ -110,6 +130,8 @@
                         }
                       },
                       tooltip: {
+                          borderColor: '#000000',
+                          borderWidth: 2,
                           useHTML: true,
                           formatter: function() {
                               var currentSelection = this.x;
@@ -124,24 +146,15 @@
                                       break;
                               }
                               month = currentSelection.slice(-2);
-                              var language = '{{!language}}';
+
                               switch(language) {
                                 case "en":
                                     SelectedMonth = MonthsEnumEn[month];
                                     break;
                                 case "fi":
                                     SelectedMonth = MonthsEnumFi[month];
+                                    break;
                               }
-                              //getting the labels for the years for subgraph month graphs
-                              //incorrect returns the months arrays for each selected point we need to return the years as labels
-                              /*var sub = graph_data.datasets[currentDataSet].subgraph_data[month.toString()]
-                              var subGraphkeys = Object.keys(sub);
-                              var keys = []
-                              for (let key of subGraphkeys) {
-                                keys.push(key)
-                              }
-                              console.log(keys)*/
-                              //get the month
 
                               setTimeout( function() {
                                   var TooltipChart = new Highcharts.Chart({
@@ -152,10 +165,10 @@
                                         renderTo:'hc-tooltip'
                                       },
                                       title: {
-                                        text: 'crime in month compared to prev yrs'
+                                        text: tooltipTitle
                                       },
                                       subtitle: {
-                                        text: 'subtitle'
+                                        text: ''
                                       },
                                       xAxis: {
                                         categories: graph_data.datasets[currentDataSet].subgraph_labels,
@@ -164,7 +177,7 @@
                                       yAxis: {
                                         min: 0,
                                         title: {
-                                          text: 'crimes total'
+                                          text: yAxisTitle
                                         }
                                       },
                                       plotOptions: {
@@ -197,15 +210,12 @@
                     //to add another series add , then provide name and data for the new one
                     series: [{
                       name: graph_data.datasets[0].label,
-                      //color: '#003399',
                       data: graph_data.datasets[0].data
                     },{
-                      name: graph_data.datasets[1].label,
-                      //color: '#3366BB',
+                      name: title2, //graph_data.datasets[1].label,
                       data: graph_data.datasets[1].data
                     },{
-                      name: graph_data.datasets[2].label,
-                      //color: '#??????',
+                      name: title3, //graph_data.datasets[2].label,
                       data: graph_data.datasets[2].data
                     }]
                     });

@@ -175,7 +175,7 @@ class CrimeNlgService(object):
                 'fi',
                 prng_seed=self.registry.get('seed'),
             )[0][0]
-            graph_data = self.graph_data_generator.generate(self.registry, graph_nucleus, where)
+            graph_data = self.graph_data_generator.generate(self.registry, graph_nucleus, where, language)
         else:
             graph_data = ''
 
