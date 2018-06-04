@@ -35,13 +35,40 @@ class EnglishRealizer():
     def _unit_base(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
+
         if abs(slot.fact.what) == 1:
-            # new_value = CRIME_TYPES.get(unit, {}).get('sg', unit)
+            if slot.attributes.get('form', '') != 'short':
+                # Add the predicate _before_ the value
+                template.add_slot(idx - 1, LiteralSlot("there was "))
+                added_slots += 1
+                idx += 1
+
+            template.add_slot(idx, LiteralSlot("case of "))
+            added_slots += 1
+            idx += 1
             new_value = CRIME_TYPES.get(unit, unit)
         else:
-            # new_value = CRIME_TYPES.get(unit, {}).get('pl', unit)
+            if slot.attributes.get('form', '') != 'short':
+                # Add the predicate _before_ the value
+                template.add_slot(idx - 1, LiteralSlot("there were "))
+                added_slots += 1
+                idx += 1
+
+            template.add_slot(idx, LiteralSlot("cases of "))
+            added_slots += 1
+            idx += 1
             new_value = CRIME_TYPES.get(unit, unit)
-        return self._update_slot_value(slot, new_value)
+        self._update_slot_value(slot, new_value)
+        idx += 1
+        if normalized:
+            template.add_slot(idx, LiteralSlot("per 1,000 people"))
+            idx += 1
+            added_slots += 1
+
+        return added_slots
 
     def _unit_percentage_points(self, slot):
         template = slot.parent
@@ -197,20 +224,24 @@ class EnglishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
+
+        # Add stuff _before_ the what slot ...
+        idx -= 1
+
         if not change:
-            if grouped_by == '_time_place':
-                template.add_slot(idx - 1, LiteralSlot("of all types of crime"))
-            elif grouped_by == '_crime_time':
-                template.add_slot(idx - 1, LiteralSlot("of all the municipalities"))
-            elif grouped_by == '_crime_place_year':
-                if slot.fact.when_type == 'month':
-                    template.add_slot(idx - 1, LiteralSlot("compared to the other months of the year"))
-                else:
-                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
-            else:
-                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-            added_slots += 1
+            template.add_slot(idx, LiteralSlot(CRIME_TYPES.get(unit, unit)))
             idx += 1
+            template.add_slot(idx, LiteralSlot("were committed"))
+            idx += 1
+            added_slots += 2
+
+        # Add a definite article before the what slot
+        template.add_slot(idx, LiteralSlot("the"))
+        added_slots += 1
+        idx += 1
+
+        # ... and jump back to the correct index
+        idx += 1
 
         if prev_slot.slot_type == 'what':
             # If the rank is first, the actual numeral isn't realized at all
@@ -219,11 +250,6 @@ class EnglishRealizer():
             # If the numeral is realized, it needs to be an ordinal
             else:
                 prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
-
-        # Add a definite article before the what slot
-        template.add_slot(idx - 1, LiteralSlot("the"))
-        added_slots += 1
-        idx += 1
 
         if rank in ['_rank', '_increase_rank', '_decrease_rank']:
             slot.value = lambda x: "most"
@@ -235,9 +261,25 @@ class EnglishRealizer():
         # If talking about changes, we will do the rest in the change handler
         if change:
             return added_slots
-        template.add_slot(idx, LiteralSlot(CRIME_TYPES.get(unit, unit)))
-        idx += 1
-        added_slots += 1
+
+        if not change:
+            # Skip over the time slot
+            idx += 1
+
+            if grouped_by == '_time_place':
+                template.add_slot(idx, LiteralSlot("compared to other types of crime"))
+            elif grouped_by == '_crime_time':
+                template.add_slot(idx, LiteralSlot("compared to other municipalities"))
+            elif grouped_by == '_crime_place_year':
+                if slot.fact.when_type == 'month':
+                    template.add_slot(idx, LiteralSlot("compared to other months during the same year"))
+                else:
+                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
+            else:
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+            added_slots += 1
+            idx += 1
+
         return added_slots
 
     def _ordinal(self, token):
@@ -294,6 +336,7 @@ class EnglishRealizer():
         return added_slots
 
     def _time_year(self, random, slot):
+        slot_in_focus = False
         if slot.slot_type[:-2] == 'when':
             year = slot.value
         elif slot.slot_type == 'time':
@@ -312,27 +355,35 @@ class EnglishRealizer():
             idx = 0
             if slot.attributes['name_type'] == 'pronoun':
                 slot.attributes['name_type'] = 'short'
+            slot_in_focus = True
         # The latter condition makes the system realize the full year roughly once in five sentences even
         # if the year hasn't changed.
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            template.add_slot(idx, LiteralSlot("in"))
+            added_slots += 1
+            idx += 1
             if slot.attributes['name_type'] == 'full':
-                new_slot = LiteralSlot("in the year")
+                new_slot = LiteralSlot("the year")
                 template.add_slot(idx, new_slot)
                 added_slots += 1
                 idx += 1
             if year is None:
                 # We have no idea when the event happened. This shouldn't be possible.
-                self._update_slot_value(slot, 'in an unknown time')
+                self._update_slot_value(slot, "unknown")
             elif type(year) is not str:
                 self._update_slot_value(slot, self._cardinal(year))
             else:
-                self._update_slot_value(slot, "in " + year)
+                self._update_slot_value(slot, year)
         elif slot.attributes['name_type'] == 'pronoun':
             reference_options = ["in the same year", "also during the same year", "also"]
             self._update_slot_value(slot, random.choice(reference_options))
         else:
             raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+        idx += 1
+        if slot_in_focus:
+            template.add_slot(idx, LiteralSlot(","))
+            added_slots += 1
         return added_slots
 
     def _time_change_year(self, random, slot):
