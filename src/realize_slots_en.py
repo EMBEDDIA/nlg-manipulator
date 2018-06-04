@@ -322,11 +322,12 @@ class EnglishRealizer():
                 added_slots += 1
                 idx += 1
             if year is None:
-                self._update_slot_value(slot, 'x')
+                # We have no idea when the event happened. This shouldn't be possible.
+                self._update_slot_value(slot, 'in an unknown time')
             elif type(year) is not str:
                 self._update_slot_value(slot, self._cardinal(year))
             else:
-                self._update_slot_value(slot, year)
+                self._update_slot_value(slot, "in " + year)
         elif slot.attributes['name_type'] == 'pronoun':
             reference_options = ["in the same year", "also during the same year", "also"]
             self._update_slot_value(slot, random.choice(reference_options))
@@ -399,12 +400,12 @@ class EnglishRealizer():
             place = "Finland"
         if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
-                self._update_slot_value(slot, prep + place)
+                self._update_slot_value(slot, prep + place + ",")
             elif random.rand() < 0.5:
                 if place_type == 'M':
-                    self._update_slot_value(slot, prep + "the municipality")
+                    self._update_slot_value(slot, prep + "the municipality,")
                 elif place_type == 'C':
-                    self._update_slot_value(slot, prep + "the country")
+                    self._update_slot_value(slot, prep + "the country,")
                 else:
                     raise Exception(
                         "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
