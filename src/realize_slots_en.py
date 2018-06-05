@@ -351,6 +351,7 @@ class EnglishRealizer():
             idx = 0
             if slot.attributes['name_type'] == 'pronoun':
                 slot.attributes['name_type'] = 'short'
+            slot.attributes['focus_slot'] = True
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
             new_slot = LiteralSlot("in " + MONTHS[month])
@@ -363,10 +364,13 @@ class EnglishRealizer():
             self._update_slot_value(slot, random.choice(reference_options))
         else:
             raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+        idx += 1
+        if slot.attributes.get('focus_slot', False):
+            template.add_slot(idx, LiteralSlot(","))
+            added_slots += 1
         return added_slots
 
     def _time_year(self, random, slot):
-        slot_in_focus = False
         if slot.slot_type[:-2] == 'when':
             year = slot.value
         elif slot.slot_type == 'time':
@@ -385,7 +389,7 @@ class EnglishRealizer():
             idx = 0
             if slot.attributes['name_type'] == 'pronoun':
                 slot.attributes['name_type'] = 'short'
-            slot_in_focus = True
+            slot.attributes['focus_slot'] = True
         # The latter condition makes the system realize the full year roughly once in five sentences even
         # if the year hasn't changed.
         if (slot.attributes['name_type'] in ['full', 'short']) or (
@@ -411,7 +415,7 @@ class EnglishRealizer():
         else:
             raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         idx += 1
-        if slot_in_focus:
+        if slot.attributes.get('focus_slot', False):
             template.add_slot(idx, LiteralSlot(","))
             added_slots += 1
         return added_slots
@@ -476,20 +480,27 @@ class EnglishRealizer():
         place_matcher = re.compile("\[PLACE:([^\]:]*):([^\]]*)\]")
         entity_code = slot.value
         place_type, place = place_matcher.match(entity_code).groups()
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
         prep = slot.attributes.get('prep', "in") + " "
         if place_type == 'C' and place == 'fi':
             place = "Finland"
         if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
-                self._update_slot_value(slot, prep + place + ",")
+                self._update_slot_value(slot, prep + place)
             elif random.rand() < 0.5:
                 if place_type == 'M':
-                    self._update_slot_value(slot, prep + "the municipality,")
+                    self._update_slot_value(slot, prep + "the municipality")
                 elif place_type == 'C':
-                    self._update_slot_value(slot, prep + "the country,")
+                    self._update_slot_value(slot, prep + "the country")
                 else:
                     raise Exception(
                         "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
             else:
                 self._update_slot_value(slot, "")
-        return 0
+        idx += 1
+        if slot.value and slot.attributes.get('focus_slot', False):
+            template.add_slot(idx, LiteralSlot(","))
+            added_slots += 1
+        return added_slots

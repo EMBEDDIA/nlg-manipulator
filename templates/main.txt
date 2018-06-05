@@ -19,23 +19,23 @@
 
 fi: {where, case=ssa} tapahtui {time} {what} {what_type}
 fi-head: {where, case=ssa} tapahtui {what} {what_type} {time}
-en: {where, prep=in} {what} {what_type} {time}
-en-head: {where, prep=in} {what} {what_type} {time}
+en: {where, focus_slot = True} {what} {what_type} {time}
+en-head: {where, focus_slot = True} {what} {what_type} {time}
 | where_type = [MC], when_1 = when_2
 
 # This can be used for rankings with non-change values
 fi: {where, case=ssa} tapahtui {time} {what} {what_type}
 fi-head: {where, case=ssa} tapahtui {what} {what_type} {time}
-en: {where, prep=in} {what} {what_type} {time}
-en-head: {where, prep=in} {what} {what_type} {time}
+en: {where, focus_slot = True} {what} {what_type} {time}
+en-head: {where, focus_slot = True} {what} {what_type} {time}
 | where_type = [MC], what_type = .*(?<!_change)_grouped_by.*
 
 fi: {where, case=ssa} {what} {what_type} {time, case=lla}
 fi: {where, case=ssa} {what} {what_type} {time}
 fi-head: {where, case=ssa} {what} {what_type} {time, case=lla}
 fi-head: {where, case=ssa} {what} {what_type} {time}
-en: {where, prep=in} {what} {what_type} {time}
-en-head: {where, prep=in} {what} {what_type} {time}
+en: {where, focus_slot = True} {what} {what_type} {time}
+en-head: {where, focus_slot = True} {what} {what_type} {time}
 | where_type = [MC], what_type = .*change.*, when_1 != when_2
 
 fi: {where, case=ssa} {what} {what_type} {time}
