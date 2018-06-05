@@ -23,6 +23,7 @@ class EnglishRealizer():
             'percentage': self._unit_percentage,
             'change': self._unit_change,
             'rank': self._unit_rank,
+            'trend': self._unit_trend,
         }
 
         self.time = {
@@ -279,6 +280,35 @@ class EnglishRealizer():
                 raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
             idx += 1
+
+        return added_slots
+
+    def _unit_trend(self, slot):
+        match = self.value_type_re.fullmatch(slot.value)
+        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
+        template = slot.parent
+        idx = template.components.index(slot)
+        added_slots = 0
+        what_slot = template.components[idx - 1]
+        if what_slot.slot_type != 'what':
+            raise AttributeError("The slot before a trend what_type should be the what slot!")
+
+        # Realise the unit of the trend
+        crime_name = CRIME_TYPES.get(unit, unit)
+        self._update_slot_value(slot, crime_name)
+        template.components[0].attributes['focus_slot'] = False
+        template.move_slot(idx, 0)
+        template.add_slot(0, LiteralSlot("the amount of"))
+        added_slots += 1
+        idx += 1
+
+        # Realise the direction of the trend
+        if what_slot.fact.what < 0:
+            self._update_slot_value(what_slot, "decreased")
+        elif what_slot.fact.what > 0:
+            self._update_slot_value(what_slot, "grew")
+        else:
+            self._update_slot_value(what_slot, "stayed the same")
 
         return added_slots
 

@@ -40,4 +40,6 @@ en-head: {where, prep=in} {what} {what_type} {time}
 
 fi: {where, case=ssa} {what} {what_type} {time}
 fi-head: {where, case=ssa} {what} {what_type} {time}
+en: {where, focus_slot = True} {what} {what_type} {time}
+en-head: {where, focus_slot = True} {what} {what_type} {time}
 | where_type = [MC], what_type = .*_mk_.*, when_1 != when_2
