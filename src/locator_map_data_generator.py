@@ -34,7 +34,7 @@ class LocatorMapDataGenerator():
 
     def __init__(self):
         landmark_gen = LandmarkGenerator()
-        self.REFERENCES = landmark_gen.generate(100, n_landmarks=17)
+        self.REFERENCES = landmark_gen.generate(100, n_landmarks=15 )
 
     def generate(self, location):
         try:
