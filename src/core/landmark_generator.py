@@ -24,7 +24,7 @@ class LandmarkGenerator:
             if m not in list(self._REFERENCES['name']):
                 print('\nMunicipality {} not in the latest population statistics, ignoring'.format(m))
             elif prefetch:
-                sys.stdout.write("\rPrefetching: {}".format(m))
+                sys.stdout.write("\rPrefetching: {:30s}".format(m))
                 sys.stdout.flush()
                 self._get_coords(m)
 
@@ -33,7 +33,7 @@ class LandmarkGenerator:
         ref_sorted = self._REFERENCES.sort_values(by='population', ascending=False)
         # Drop Maarianhamina, since it shouldn't be chosen as a landmark in any case.
         ref_sorted = ref_sorted.loc[ref_sorted['name'] != "Maarianhamina - Mariehamn"]
-        ref_sorted = ref_sorted.iloc[1:].reset_index(drop=True)
+        ref_sorted = ref_sorted.reset_index(drop=True)
         idx = 0
         while idx < len(ref_sorted):
             curr_name = ref_sorted.loc[idx, 'name']
