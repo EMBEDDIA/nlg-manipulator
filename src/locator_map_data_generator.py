@@ -32,9 +32,10 @@ class LocatorMapDataGenerator():
 
     MAP_MARGIN = 0.075
 
-    def __init__(self):
-        landmark_gen = LandmarkGenerator()
-        self.REFERENCES = landmark_gen.generate(100, n_landmarks=15 )
+    def __init__(self, auto_generate=True):
+        if auto_generate:
+            landmark_gen = LandmarkGenerator()
+            self.REFERENCES = landmark_gen.generate(100, n_landmarks=15 )
 
     def generate(self, location):
         try:

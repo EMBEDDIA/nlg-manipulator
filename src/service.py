@@ -38,7 +38,7 @@ class CrimeNlgService(object):
 
         # New registry and result importer
         self.registry = Registry()
-        self.locator_map_data_generator = LocatorMapDataGenerator()
+        self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
         self.graph_data_generator = GraphDataGenerator()
 
         crime_data = [
