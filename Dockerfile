@@ -14,12 +14,12 @@ RUN echo "\nPREPARING\n" && \
     echo "deb http://apertium.projectjj.com/apt/nightly $(lsb_release -c | cut -f2) main" \
       | tee /etc/apt/sources.list.d/apertium-nightly.list && \
     apt-get update && \
-    apt-get install -y --no-install-recommends hfst libhfst python3-libhfst zip autoconf automake && \
+    apt-get install -y --no-install-recommends hfst libhfst52 python3-libhfst zip autoconf automake && \
     #
     #
     echo "\nFIXING HFST\n" && \
     ls /usr/lib/python3/dist-packages/ && \
-    ln -s /usr/lib/python3/dist-packages/_libhfst.cpython-34m-x86_64-linux-gnu.so /usr/lib/python3/dist-packages/_libhfst.so
+    ln -s /usr/lib/python3/dist-packages/_libhfst.cpython-35m-x86_64-linux-gnu.so /usr/lib/python3/dist-packages/_libhfst.so
 
 RUN echo "\nINSTALLING OMORFI\n" && \
     apt-get update && apt-get install -y zip autoconf automake && \
@@ -34,7 +34,7 @@ RUN echo "\nINSTALLING OMORFI\n" && \
     ldconfig 
   
 RUN echo "\nINSTALLING OTHER REQUIREMENTS FROM APT\n" && \
-    apt-get update && apt-get install -y gfortran libhdf5-8
+    apt-get update && apt-get install -y gfortran libhdf5-100
 
 RUN echo "\nINSTALLING REQUIREMENTS FROM PIP\n"
 COPY ["requirements.txt", "requirements.txt"]
@@ -58,4 +58,5 @@ RUN chmod a+rxw -R /app
 RUN adduser --disabled-password myuser
 USER myuser
 
-CMD python3 /app/src/server.py $PORT
+#CMD python3 /app/src/server.py $PORT
+CMD python3 /app/src/server.py 8080

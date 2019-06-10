@@ -232,7 +232,9 @@ def pythonify_column_names(df):
     """
     if isinstance(df, pd.Series):
         return df
+    #cols = [col[0] for col in list(df)]
     cols = [col for col in df]
+    print(cols)
     new_cols = _prepare_names_for_hdf5(cols)
     df.columns = new_cols
     return df

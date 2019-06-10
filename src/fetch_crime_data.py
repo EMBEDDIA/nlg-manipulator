@@ -23,25 +23,28 @@ def run():
     print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
     os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
 
-    # Store and store population data
+    # Flatten and store population data
     df = Px(os.path.join(os.path.dirname(__file__), '../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_002.px'), language='en').pd_dataframe()
     df = flatten(df)
     df = pythonify_column_names(df)
     df.rename(columns={
-        'level_0': 'where',
-        'level_1': 'when',
-        'preliminary_population': 'population'}
-        , inplace=True)
+        ('level_0',): 'where',
+        ('level_1',): 'when',
+        ('Preliminary population',): 'population'
+    }, inplace=True)
     df = df[['when', 'where', 'population']]
     df.replace(['"-"', '".."'], 0, inplace=True)
     df.sort_values(['when', 'where'], ascending=[1, 1], inplace=True)
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv',), index=False)
 
-    # flatten and store crime statistics
+    # Flatten and store crime statistics
     df = Px(os.path.join(os.path.dirname(__file__), "../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px"), language='en').pd_dataframe().transpose()
     df = flatten(df, stacked_cols=[0])
     df = pythonify_column_names(df)
-    df.rename(columns={'level_0': 'when', 'level_1': 'where'}, inplace=True)
+    df.rename(columns={
+        'level_0': 'when', 
+        'level_1': 'where'
+    }, inplace=True)
     df.replace(['"-"', '".."'], 0, inplace=True)
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/crime.csv'))
 

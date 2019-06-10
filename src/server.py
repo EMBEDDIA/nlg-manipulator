@@ -30,7 +30,7 @@ log.addHandler(handler)
 app = Bottle()
 service = CrimeNlgService(
     random_seed = 4551546,
-    force_cache_refresh = args.force_cache_refresh
+    force_cache_refresh = args.force_cache_refresh, nomorphi=False
 )
 TEMPLATE_PATH.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../views/")
 static_root = os.path.dirname(os.path.realpath(__file__)) + "/../static/"
