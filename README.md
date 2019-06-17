@@ -1,4 +1,4 @@
-# News generation from Crime Statistics Data
+# News generation from customer price harmonised indices in EU
 
 Work-in-progress.
 
