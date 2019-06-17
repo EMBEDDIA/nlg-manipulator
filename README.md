@@ -1,4 +1,4 @@
-# News generation from customer price harmonised indices in EU
+# News generation from customer price harmonised indices
 
 Work-in-progress.
 
