@@ -40,7 +40,10 @@ class EnglishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
 
-        if abs(slot.fact.what) == 1:
+        log.info('Slot fact what is {}'.format(slot.fact.what))
+
+        #if abs(slot.fact.what) == 1:
+        if slot.fact.what == 1:
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
                 template.add_slot(idx - 1, LiteralSlot("there was "))

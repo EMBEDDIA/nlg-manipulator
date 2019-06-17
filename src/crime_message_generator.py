@@ -17,28 +17,8 @@ class CrimeMessageGenerator(MessageGenerator):
         """
         messages = []
         log.info("Generating messages from crime data")
-        datastore = registry.get('crime-data')
+        datastore = registry.get('cphi-data')
         ignored_cols = [c for c in datastore.all().columns.values if 'population' in c]
-        messages.extend((super().run(registry, random, language, datastore, where, where_type, when1, when2, when_type, ignored_cols=ignored_cols))[0])
-
-        log.info("Generating messages from comparative crime data")
-        datastore = registry.get('crime-comp-data')
-        ignored_cols = [c for c in datastore.all().columns.values if 'population' in c]
-        messages.extend((super().run(registry, random, language, datastore, where, where_type, when1, when2, when_type, ignored_cols=ignored_cols))[0])
-
-        log.info("Generating messages from broad-categories crime data")
-        datastore = registry.get('crime-bc-data')
-        ignored_cols = [c for c in datastore.all().columns.values if 'population' in c]
-        messages.extend((super().run(registry, random, language, datastore, where, where_type, when1, when2, when_type, ignored_cols=ignored_cols))[0])
-
-        log.info("Generating messages from comparative broad-categories crime data")
-        datastore = registry.get('crime-bc-comp-data')
-        ignored_cols = [c for c in datastore.all().columns.values if 'population' in c]
-        messages.extend((super().run(registry, random, language, datastore, where, where_type, when1, when2, when_type, ignored_cols=ignored_cols))[0])
-
-        log.info("Generating messages from broad-categories crime trend data")
-        datastore = registry.get('crime-bc-trend-data')
-        ignored_cols = [c for c in datastore.all().columns.values if 'trend' in c and not 'mk_trend' in c]
         messages.extend((super().run(registry, random, language, datastore, where, where_type, when1, when2, when_type, ignored_cols=ignored_cols))[0])
 
         if not messages:

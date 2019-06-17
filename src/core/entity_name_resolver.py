@@ -38,6 +38,7 @@ class EntityNameResolver(NLGPipelineComponent):
         Run this pipeline component.
         """
         log.info("Running NER")
+        log.info("{}".format(document_plan))
 
         if language.endswith("-head"):
             language = language[:-5]

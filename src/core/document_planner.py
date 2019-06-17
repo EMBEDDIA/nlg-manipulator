@@ -47,6 +47,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     """
 
     # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
+    # TODO: is this data specific? If so, needs to be changed.
     value_type_re = re.compile(
         r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
@@ -151,8 +152,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                     break
 
                 # Drop messages that have been EFFECTIVELY TOLD by another semantically-equivalent message
-                if self._is_effectively_repetition(satellite, messages):
-                    continue
+                # if self._is_effectively_repetition(satellite, messages):
+                #     continue
 
                 require_location = current_location is None or satellite.fact.where != current_location
                 # Only use the fact if we have a template to express it
@@ -266,10 +267,10 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 children = [satellite, msg]
                 messages[idx] = DocumentPlan(children, rel)
                 return
-            if self._is_same_stat_type(msg, satellite):
-                children = [msg, satellite]
-                messages[idx] = DocumentPlan(children, Relation.LIST)
-                return
+            # if self._is_same_stat_type(msg, satellite):
+            #     children = [msg, satellite]
+            #     messages[idx] = DocumentPlan(children, Relation.LIST)
+            #     return
         messages.append(satellite)
 
     def _check_relation(self, msg_1, msg_2):

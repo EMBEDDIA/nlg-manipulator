@@ -1,4 +1,4 @@
-from opendata.px_reader import *
+# from opendata.px_reader import *
 from opendata.statfi_px_api import *
 import pandas as pd
 import numpy as np
@@ -8,56 +8,102 @@ import os.path
 import columns as cls
 import paramconfig as prmcnf
 from operator import itemgetter
+import itertools
 
+
+def flatten(df):
+    '''
+    Flatten a data frame so that each field contains a single value.
+    '''
+
+    new_df = pd.DataFrame()
+    names = list(df.columns)
+
+    new_columns = names.pop(0)
+
+    initial_content = []
+    values = df.values.tolist()
+    values = [value[1:] for value in values]
+    values = list(itertools.chain.from_iterable(values))
+    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
+    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
+
+    for line in df[new_columns]:
+        for when in names:
+            initial_content.append((',').join([line, when]))
+    new_columns = (',').join([new_columns, 'when'])
+    new_df[new_columns] = initial_content
+
+    columns = new_columns.split(',')
+    new_df = new_df[new_columns].str.split(',', expand=True)
+    new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
+    new_df = new_df.rename(columns={'geo\\time':'where'})
+
+    new_df[['value', 'flag']] = values_n_flags
+
+    return new_df
 
 def run():
-    # Download list of available PX files
-    all_px = list_available_px()
+    # # Download list of available PX files
+    # all_px = list_available_px()
 
-    # Find Crime stats and Population stats
-    wanted_px = [px for px in all_px if ('statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_002.px' in str(px)) and px.language == 'fi']
+    # # Find Crime stats and Population stats
+    # wanted_px = [px for px in all_px if ('statfin_rpk_pxt_001.px' in str(px) or 'statfin_vamuu_pxt_002.px' in str(px)) and px.language == 'fi']
 
-    # Download the data
-    download_px(wanted_px, target_dir=os.path.join(os.path.dirname(__file__), '..'))
+    # # Download the data
+    # download_px(wanted_px, target_dir=os.path.join(os.path.dirname(__file__), '..'))
 
-    print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
-    os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
+    # print('Data dir is', os.path.join(os.path.dirname(__file__), '../data/'))
+    # os.makedirs(os.path.join(os.path.dirname(__file__), '../data/'), exist_ok=True)
 
-    # Flatten and store population data
-    df = Px(os.path.join(os.path.dirname(__file__), '../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_002.px'), language='en').pd_dataframe()
+    df = pd.read_csv('../database/ei_cphi_m.tsv', sep='\t')
+
+    # # Flatten and store population data
+    # df = Px(os.path.join(os.path.dirname(__file__), '../database/StatFin/vrm/vamuu/statfin_vamuu_pxt_002.px'), language='en').pd_dataframe()
+    # df = flatten(df)
+    # df = pythonify_column_names(df)
+    # df.rename(columns={
+    #     ('level_0',): 'where',
+    #     ('level_1',): 'when',
+    #     ('Preliminary population',): 'population'
+    # }, inplace=True)
+    # df = df[['when', 'where', 'population']]
+    # df.replace(['"-"', '".."'], 0, inplace=True)
+    # df.sort_values(['when', 'where'], ascending=[1, 1], inplace=True)
+    # df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv',), index=False)
+
+    # # Flatten and store crime statistics
+    # df = Px(os.path.join(os.path.dirname(__file__), "../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px"), language='en').pd_dataframe().transpose()
+    # df = flatten(df, stacked_cols=[0])
+    # df = pythonify_column_names(df)
+    # df.rename(columns={
+    #     'level_0': 'when', 
+    #     'level_1': 'where'
+    # }, inplace=True)
+    # df.replace(['"-"', '".."'], 0, inplace=True)
+
+    # Flatten DataFrame
     df = flatten(df)
-    df = pythonify_column_names(df)
-    df.rename(columns={
-        ('level_0',): 'where',
-        ('level_1',): 'when',
-        ('Preliminary population',): 'population'
-    }, inplace=True)
-    df = df[['when', 'where', 'population']]
-    df.replace(['"-"', '".."'], 0, inplace=True)
-    df.sort_values(['when', 'where'], ascending=[1, 1], inplace=True)
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/population.csv',), index=False)
 
-    # Flatten and store crime statistics
-    df = Px(os.path.join(os.path.dirname(__file__), "../database/StatFin/oik/rpk/statfin_rpk_pxt_001.px"), language='en').pd_dataframe().transpose()
-    df = flatten(df, stacked_cols=[0])
-    df = pythonify_column_names(df)
-    df.rename(columns={
-        'level_0': 'when', 
-        'level_1': 'where'
-    }, inplace=True)
-    df.replace(['"-"', '".."'], 0, inplace=True)
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/crime.csv'))
+    # Add when_type and where_type
+    where_type = ['C'] * df.shape[0]
+    when_type = ['month'] * df.shape[0]
 
-    print(os.path.join(os.path.dirname(__file__), '../data/crime.csv'))
+    df['where_type'] = where_type
+    df['when_type'] = when_type
 
-    print('Converter')
-    ConverterC()
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi.csv'))
 
-    print('Importer')
-    ImporterC()
+    # print(os.path.join(os.path.dirname(__file__), '../data/crime.csv'))
 
-    print('Trend Finder')
-    TrendFinder()
+    # print('Converter')
+    # ConverterC()
+
+    # print('Importer')
+    # ImporterC()
+
+    # print('Trend Finder')
+    # TrendFinder()
 
 
 class ImporterC:
@@ -72,15 +118,15 @@ class ImporterC:
         self._load_data(prefix)
 
         # Crime data
-        self.cd = self._add_ranks_to_crime_data(self.cd, self.cd_interesting_columns)
-        self.cd = self._add_outlierness_to_crime_data(self.cd, self.cd_interesting_columns, self.cd_id_columns)
+        self.cd = self._add_ranks_to_cphi_data(self.cd, self.cd_interesting_columns)
+        self.cd = self._add_outlierness_to_cphi_data(self.cd, self.cd_interesting_columns, self.cd_id_columns)
         self.cd = self._sort_columns(self.cd, self.cd_id_columns)
         self.cd.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "crime_pyn_ranks_outliers.csv"), index=False)
 
         print("Crime data half way")
 
-        self.bccd = self._add_ranks_to_crime_data(self.bccd, self.bccd_interesting_columns)
-        self.bccd = self._add_outlierness_to_crime_data(self.bccd, self.bccd_interesting_columns, self.bccd_id_columns)
+        self.bccd = self._add_ranks_to_cphi_data(self.bccd, self.bccd_interesting_columns)
+        self.bccd = self._add_outlierness_to_cphi_data(self.bccd, self.bccd_interesting_columns, self.bccd_id_columns)
         self.bccd = self._sort_columns(self.bccd, self.bccd_id_columns)
         self.bccd.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + prefix + "bc_crime_pyn_ranks_outliers.csv"), index=False)
 
@@ -139,7 +185,7 @@ class ImporterC:
         last_columns.sort()
         return df[id_columns + last_columns]
 
-    def _add_ranks_to_crime_data(self, df, ranked_columns):
+    def _add_ranks_to_cphi_data(self, df, ranked_columns):
 
         grouped_crime_time = df.groupby(["when", "when_type"])
         grouped_crime_place = df.groupby(["where", "where_type", "year", "when_type"])
@@ -204,7 +250,7 @@ class ImporterC:
 
         return df
 
-    def _add_outlierness_to_crime_data(self, df, outlierness_columns, id_columns):
+    def _add_outlierness_to_cphi_data(self, df, outlierness_columns, id_columns):
         const_max_out = 2
 
         def outlierness(val, count, min_val, q1, q2, q3, max_val):
@@ -445,49 +491,49 @@ class ConverterC:
     def __init__(self):
 
         # Assume files are available
-        self.crime_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "crime.csv"))
-        self.population_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "population.csv"))
+        self.cphi_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "cphi.csv"))
+        # self.population_data = pd.read_csv(os.path.join(os.path.dirname(__file__), '../data/' + "population.csv"))
 
         # Remove and rename
-        self.crime_data = drop_columns(self.crime_data, cls.keep_columns)
-        self.crime_data = rename_columns(self.crime_data, cls.rename_columns)
+        self.cphi_data = drop_columns(self.cphi_data, cls.keep_columns)
+        self.cphi_data = rename_columns(self.cphi_data, cls.rename_columns)
         self._rename_entries_and_columns()
 
         # Memorize some things
-        self.crime_times = list(set(self.crime_data['when']))
+        self.crime_times = list(set(self.cphi_data['when']))
         self.population_places = list(set(self.population_data['where']))
         self.population_times = list(set(self.population_data['when']))
-        self.crime_places = list(set(self.crime_data['where']))
+        self.crime_places = list(set(self.cphi_data['where']))
         self._years_and_corresponding_months()
 
 
         # Add columns
-        self.crime_data = self._add_yearly_entries(self.crime_data)
-        self.crime_data = self._add_when_type_column(self.crime_data)
-        self.crime_data = self._add_where_type_column(self.crime_data)
-        self.crime_data = self._add_year_column(self.crime_data)
-        self.crime_data = self._add_population_column(self.crime_data)
+        self.cphi_data = self._add_yearly_entries(self.cphi_data)
+        self.cphi_data = self._add_when_type_column(self.cphi_data)
+        self.cphi_data = self._add_where_type_column(self.cphi_data)
+        self.cphi_data = self._add_year_column(self.cphi_data)
+        self.cphi_data = self._add_population_column(self.cphi_data)
 
         # Make broad categories df
-        self.bc_crime_data = calculate_sums(self.crime_data, cls.new_columns, cls.carryover_columns)
+        self.bc_cphi_data = calculate_sums(self.cphi_data, cls.new_columns, cls.carryover_columns)
 
         # Add total columns
-        self.crime_data = total_column(self.crime_data, cls.ignore_columns)
-        self.bc_crime_data = total_column(self.bc_crime_data, cls.ignore_columns)
+        self.cphi_data = total_column(self.cphi_data, cls.ignore_columns)
+        self.bc_cphi_data = total_column(self.bc_cphi_data, cls.ignore_columns)
 
         # Normalize columns
-        self.crime_data = normalize(self.crime_data,  "population", cls.ignore_columns)
-        self.bc_crime_data = normalize(self.bc_crime_data, "population", cls.ignore_columns)
+        self.cphi_data = normalize(self.cphi_data,  "population", cls.ignore_columns)
+        self.bc_cphi_data = normalize(self.bc_cphi_data, "population", cls.ignore_columns)
 
         # Save data
-        self.crime_data.sort_values(by=['where', 'when'], ascending=[True, True], inplace=True)
-        self.bc_crime_data.sort_values(by=['where', 'when'], ascending=[True, True], inplace=True)
-        self.crime_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + "crime_pyn.csv"), index=False)
-        self.bc_crime_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + "bc_crime_pyn.csv"), index=False)
+        self.cphi_data.sort_values(by=['where', 'when'], ascending=[True, True], inplace=True)
+        self.bc_cphi_data.sort_values(by=['where', 'when'], ascending=[True, True], inplace=True)
+        self.cphi_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + "crime_pyn.csv"), index=False)
+        self.bc_cphi_data.to_csv(os.path.join(os.path.dirname(__file__), '../data/' + "bc_crime_pyn.csv"), index=False)
 
         # Make comparison data
-        self.crime_comp_data = self._make_comparison_data(self.crime_data, cls.ignore_columns)
-        self.bc_crime_comp_data = self._make_comparison_data(self.bc_crime_data, cls.ignore_columns)
+        self.crime_comp_data = self._make_comparison_data(self.cphi_data, cls.ignore_columns)
+        self.bc_crime_comp_data = self._make_comparison_data(self.bc_cphi_data, cls.ignore_columns)
 
         # Save comparison data
         self.crime_comp_data.sort_values(by=['where', 'when1', 'when2'], ascending=[True, True, True], inplace=True)
@@ -499,7 +545,7 @@ class ConverterC:
     Rename some columns and values for convenience.
     '''
     def _rename_entries_and_columns(self):
-        self.crime_data['where'].replace(to_replace='Total', value='fi', inplace=True)
+        self.cphi_data['where'].replace(to_replace='Total', value='fi', inplace=True)
         self.population_data['where'].replace(to_replace='WHOLE COUNTRY', value='fi', inplace=True)
         self.population_data['population'].replace(to_replace='..', value=np.nan, inplace=True)
 
@@ -508,7 +554,7 @@ class ConverterC:
     '''
     def _add_when_type_column(self, df):
         when_types = []
-        for time in self.crime_data['when'].values:
+        for time in self.cphi_data['when'].values:
             if len(time) == 4:
                 when_types.append("year")
             elif len(time) == 7:
@@ -523,7 +569,7 @@ class ConverterC:
     '''
     def _add_where_type_column(self, df):
         where_types = []
-        for place in self.crime_data['where']:
+        for place in self.cphi_data['where']:
             if place == "fi":
                 where_types.append('C')
             else:

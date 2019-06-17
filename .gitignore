@@ -12,3 +12,4 @@ virtualenv/
 /*.csv
 /venv/*
 .DS_Store
+/graveyard/

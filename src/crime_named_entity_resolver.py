@@ -1,4 +1,6 @@
 import re
+import logging
+log = logging.getLogger('root')
 from core import EntityNameResolver
 
 from realize_slots_fi import FinnishRealizer
@@ -32,6 +34,7 @@ class CrimeEntityNameResolver(EntityNameResolver):
             raise ValueError("Who value {} does not match entity regex".format(code))
         if not len(match.groups()) == 3:
             raise Exception("Invalid number of matched groups?!")
+        log.info("Match = {}".format(match.groups()))
         return match.groups()
 
     def resolve_entity_type(self, code):

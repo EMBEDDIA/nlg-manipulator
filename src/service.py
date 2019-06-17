@@ -27,7 +27,7 @@ from graph_data_generator import GraphDataGenerator
 
 class CrimeNlgService(object):
 
-    def __init__(self, random_seed=None, force_cache_refresh=False, nomorphi=False):
+    def __init__(self, random_seed=None, force_cache_refresh=False, nomorphi=True):
         """
         :param random_seed: seed for random number generation, for repeatability
         :param force_cache_refresh:
@@ -41,28 +41,39 @@ class CrimeNlgService(object):
         self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
         self.graph_data_generator = GraphDataGenerator()
 
-        crime_data = [
-            ('../data/bc_crime_pyn_comp_ranks_outliers.csv', '../data/bc_crime_comp.cache', 'crime-bc-comp-data'),
-            ('../data/bc_crime_pyn_ranks_outliers.csv', '../data/bc_crime.cache', 'crime-bc-data'),
-            ('../data/bc_crime_trends.csv', '../data/bc_crime_trends.cache', 'crime-bc-trend-data'),
-            ('../data/crime_pyn_comp_ranks_outliers.csv', '../data/crime_comp.cache', 'crime-comp-data'),
-            ('../data/crime_pyn_ranks_outliers.csv', '../data/crime.cache', 'crime-data'),
-        ]
-
-        for csv_path, cache_path, registry_name in crime_data:
-            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
-            cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
-            compute = None
-            if force_cache_refresh or not os.path.exists(cache_path):
-                if not os.path.exists(csv_path):
-                    log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
-                    from fetch_crime_data import run as fetch_data
-                    fetch_data()
-                compute = lambda: pd.read_csv(csv_path, index_col=False)
-            self.registry.register(registry_name, DataFrameStore(
+        csv_path = '../data/cphi.csv'
+        cache_path = '../data/cphi.cache'
+        
+        csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
+        cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
+        compute = lambda: pd.read_csv(csv_path, index_col=False)
+        self.registry.register('cphi-data', DataFrameStore(
                 cache_path,
                 compute=compute
             ))
+
+        # crime_data = [
+        #     ('../graveyard/bc_crime_pyn_comp_ranks_outliers.csv', '../graveyard/bc_crime_comp.cache', 'crime-bc-comp-data'),
+        #     ('../graveyard/bc_crime_pyn_ranks_outliers.csv', '../graveyard/bc_crime.cache', 'crime-bc-data'),
+        #     ('../graveyard/bc_crime_trends.csv', '../graveyard/bc_crime_trends.cache', 'crime-bc-trend-data'),
+        #     ('../graveyard/crime_pyn_comp_ranks_outliers.csv', '../graveyard/crime_comp.cache', 'crime-comp-data'),
+        #     ('../graveyard/crime_pyn_ranks_outliers.csv', '../graveyard/crime.cache', 'crime-data'),
+        # ]
+
+        # for csv_path, cache_path, registry_name in crime_data:
+        #     csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
+        #     cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
+        #     compute = None
+        #     if force_cache_refresh or not os.path.exists(cache_path):
+        #         if not os.path.exists(csv_path):
+        #             log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
+        #             from fetch_crime_data import run as fetch_data
+        #             fetch_data()
+        #         compute = lambda: pd.read_csv(csv_path, index_col=False)
+        #     self.registry.register(registry_name, DataFrameStore(
+        #         cache_path,
+        #         compute=compute
+        #     ))
 
         # Templates
         self.registry.register('templates',
@@ -93,13 +104,14 @@ class CrimeNlgService(object):
         def _get_components(headline=False):
             # Put together the list of components
             # This varies depending on whether it's for headlines and whether we're using Omorphi
-            yield CrimeMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
+            yield CrimeMessageGenerator(expand=False) 
+            #yield CrimeMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
             yield CrimeImportanceSelector()
             yield HeadlineDocumentPlanner() if headline else BodyDocumentPlanner()
             yield TemplateSelector()
             yield Aggregator()
             yield SlotRealizer()
-            yield CrimeEntityNameResolver()
+            #yield CrimeEntityNameResolver()
             if not nomorphi:
                 # Don't even try importing Omorphi if we're not using it
                 from omorfi_generator import OmorfiGenerator
@@ -109,7 +121,7 @@ class CrimeNlgService(object):
         log.info("Configuring Body NLG Pipeline")
         self.body_pipeline = NLGPipeline(self.registry, *_get_components())
         self.headline_pipeline = NLGPipeline(self.registry, *_get_components(headline=True))
-        self.graph_pipeline = NLGPipeline(self.registry, CrimeMessageGenerator(expand=False), CrimeImportanceSelector())
+        #self.graph_pipeline = NLGPipeline(self.registry, CrimeMessageGenerator(expand=False), CrimeImportanceSelector())
 
     def _get_cached_or_compute(self, cache, compute, force_cache_refresh=False, relative_path=True):
         if relative_path:
@@ -135,7 +147,7 @@ class CrimeNlgService(object):
             os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates", "main.txt")))
 
     def _load_geodata(self):
-        return list(self.registry.get('crime-data').all()['where'].unique())
+        return list(self.registry.get('cphi-data').all()['where'].unique())
 
     def run_pipeline(self, language, where, where_type):
         log.info("Running Body NLG pipeline: language={}, where={}, where_type={}".format(language, where, where_type))

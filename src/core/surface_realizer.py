@@ -31,7 +31,9 @@ class SurfaceRealizer(NLGPipelineComponent):
         output = ""
         for message in sequence.children:
             template = message.template
-            sent = " ".join([component.value for component in template.components if component.value != ""]).rstrip()
+            log.info("Message is {}".format(message))
+            # TODO: I used a quick fix for getting rid of unwanted integers
+            sent = " ".join([str(component.value) for component in template.components if component.value != ""]).rstrip()
             # Temp fix: remove extra spaces occurring with braces and sometimes before commas.
             sent = re.sub(r'\(\s', r'(', sent)
             sent = re.sub(r'\s\)', r')', sent)

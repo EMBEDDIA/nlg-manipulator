@@ -22,7 +22,7 @@ formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s - %(module)s - %(
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
 log = logging.getLogger('root')
-log.setLevel(logging.INFO)
+log.setLevel(logging.DEBUG)
 #log.setLevel(5) # Enable for way too much logging, even more than DEBUG
 log.addHandler(handler)
 
@@ -30,7 +30,7 @@ log.addHandler(handler)
 app = Bottle()
 service = CrimeNlgService(
     random_seed = 4551546,
-    force_cache_refresh = args.force_cache_refresh, nomorphi=False
+    force_cache_refresh = args.force_cache_refresh
 )
 TEMPLATE_PATH.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../views/")
 static_root = os.path.dirname(os.path.realpath(__file__)) + "/../static/"
@@ -115,17 +115,17 @@ def news_html():
 @app.route('/api/news')
 @allow_cors
 def news_api():
-    language = request.query.language or "fi"
+    language = request.query.language or "en"
     where = request.query.where or None
     where_type = request.query.where_type or None
 
-    if not where:
-        response.status = 400
-        return {"error": "Must have at least one of the following query parameters: 'where'"}
+    # if not where:
+    #     response.status = 400
+    #     return {"error": "Must have at least one of the following query parameters: 'where'"}
 
     if not where:
         where_type = 'C'
-        where = 'fi'
+        where = 'FI'
 
     header, body, locator_map, graph = get_article(language, where, where_type)
     return dict({
@@ -134,8 +134,8 @@ def news_api():
         "language": language,
         "header": header,
         "body": body,
-        "locator_map": locator_map,
-        "graph": graph,
+        #"locator_map": locator_map,
+        #"graph": graph,
     })
 
 def random_news():
