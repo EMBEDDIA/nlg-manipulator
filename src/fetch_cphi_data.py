@@ -41,7 +41,17 @@ def flatten(df):
 
     new_df[['value', 'flag']] = values_n_flags
 
+    new_df = new_df.replace(to_replace=':', value=np.nan)
+
+    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['unit', 'indic'], values = 'value', aggfunc='first')
+    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df.columns = new_df.columns.to_flat_index()
+    new_df.columns = [column[0]+column[1] for column in new_df.columns]
+
+    print(new_df.head())
+
     return new_df
+
 
 def run():
     # # Download list of available PX files
@@ -91,6 +101,8 @@ def run():
 
     df['where_type'] = where_type
     df['when_type'] = when_type
+
+    
 
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi.csv'))
 
