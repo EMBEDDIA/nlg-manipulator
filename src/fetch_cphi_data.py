@@ -11,6 +11,21 @@ from operator import itemgetter
 import itertools
 
 
+def rank_df(df, ranked_columns):
+    ranked_columns = ranked_columns
+
+    grouped_cphi_time = df.groupby(["when", "when_type"])
+    #grouped_cphi_place = df.groupby(["where", "where_type", "when", "when_type"])
+
+    for col_name in ranked_columns:
+        ranked_col_name = "{}_grouped_by_cphi_time_rank".format(col_name)
+        reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
+        grouped = grouped_cphi_time[col_name]
+        df[ranked_col_name] = grouped.rank(ascending=False, method="dense", na_option='keep')
+        df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense", na_option='keep')
+    return df
+
+
 def flatten(df):
     '''
     Flatten a data frame so that each field contains a single value.
@@ -47,8 +62,8 @@ def flatten(df):
     new_df.reset_index(level=['where', 'when'], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
     new_df.columns = [column[0]+column[1] for column in new_df.columns]
-
-    print(new_df.head())
+    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
 
     return new_df
 
@@ -102,7 +117,9 @@ def run():
     df['where_type'] = where_type
     df['when_type'] = when_type
 
-    
+    # Rank value columns
+    not_value_columns = ['where', 'where_type', 'when', 'when_type']
+    df = rank_df(df, [column for column in df.columns if column not in not_value_columns])
 
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi.csv'))
 
