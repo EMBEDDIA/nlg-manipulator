@@ -1,4 +1,4 @@
-from service import CrimeNlgService
+from service import CPHINlgService
 import os
 import random
 import sys
@@ -28,7 +28,7 @@ log.addHandler(handler)
 
 # Bottle
 app = Bottle()
-service = CrimeNlgService(
+service = CPHINlgService(
     random_seed = 4551546,
     force_cache_refresh = args.force_cache_refresh
 )

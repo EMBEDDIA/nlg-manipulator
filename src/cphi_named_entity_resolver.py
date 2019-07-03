@@ -8,7 +8,7 @@ from realize_slots_sv import SwedishRealizer
 from realize_slots_en import EnglishRealizer
 
 
-class CrimeEntityNameResolver(EntityNameResolver):
+class CPHIEntityNameResolver(EntityNameResolver):
     value_type_re = re.compile(
         r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 

@@ -10,22 +10,22 @@ from collections import OrderedDict
 log = logging.getLogger('root')
 
 from core import Registry, NLGPipeline, DataFrameStore
-from crime_message_generator import CrimeMessageGenerator, NoMessagesForSelectionException
+from cphi_message_generator import CPHIMessageGenerator, NoMessagesForSelectionException
 from core import BodyDocumentPlanner, HeadlineDocumentPlanner
 from templates.read_multiling import read_templates_file
 from core import SlotRealizer
 from core import TemplateSelector
 from core import Aggregator
-from crime_named_entity_resolver import CrimeEntityNameResolver
+from cphi_named_entity_resolver import CPHIEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
-from crime_importance_allocator import CrimeImportanceSelector
+from cphi_importance_allocator import CPHIImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 from locations import LocationHierarchy
 from locator_map_data_generator import LocatorMapDataGenerator
 from graph_data_generator import GraphDataGenerator
 
 
-class CrimeNlgService(object):
+class CPHINlgService(object):
 
     def __init__(self, random_seed=None, force_cache_refresh=False, nomorphi=True):
         """
@@ -41,16 +41,20 @@ class CrimeNlgService(object):
         self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
         self.graph_data_generator = GraphDataGenerator()
 
-        csv_path = '../data/cphi.csv'
-        cache_path = '../data/cphi.cache'
+        # csv_path = '../data/cphi.csv'
+        # cache_path = '../data/cphi.cache'
+
+        cphi_data = [
+            ('../data/cphi.csv', '../data/cphi.cache', 'cphi-data'),
+        ]
         
-        csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
-        cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
-        compute = lambda: pd.read_csv(csv_path, index_col=False)
-        self.registry.register('cphi-data', DataFrameStore(
-                cache_path,
-                compute=compute
-            ))
+        # csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
+        # cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
+        # compute = lambda: pd.read_csv(csv_path, index_col=False)
+        # self.registry.register('cphi-data', DataFrameStore(
+        #         cache_path,
+        #         compute=compute
+        #     ))
 
         # crime_data = [
         #     ('../graveyard/bc_crime_pyn_comp_ranks_outliers.csv', '../graveyard/bc_crime_comp.cache', 'crime-bc-comp-data'),
@@ -60,25 +64,24 @@ class CrimeNlgService(object):
         #     ('../graveyard/crime_pyn_ranks_outliers.csv', '../graveyard/crime.cache', 'crime-data'),
         # ]
 
-        # for csv_path, cache_path, registry_name in crime_data:
-        #     csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
-        #     cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
-        #     compute = None
-        #     if force_cache_refresh or not os.path.exists(cache_path):
-        #         if not os.path.exists(csv_path):
-        #             log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
-        #             from fetch_crime_data import run as fetch_data
-        #             fetch_data()
-        #         compute = lambda: pd.read_csv(csv_path, index_col=False)
-        #     self.registry.register(registry_name, DataFrameStore(
-        #         cache_path,
-        #         compute=compute
-        #     ))
+        for csv_path, cache_path, registry_name in cphi_data:
+            csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
+            cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
+            compute = None
+            if force_cache_refresh or not os.path.exists(cache_path):
+                if not os.path.exists(csv_path):
+                    log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
+                    from fetch_cphi_data import run as fetch_data
+                    fetch_data()
+                compute = lambda: pd.read_csv(csv_path, index_col=False)
+            self.registry.register(registry_name, DataFrameStore(
+                cache_path,
+                compute=compute
+            ))
 
         # Templates
-        self.registry.register('templates',
-                               self._get_cached_or_compute(
-                                   '../data/templates.cache',
+        self.registry.register('templates', self._get_cached_or_compute(
+                                    '../data/templates.cache',
                                    self._load_templates,
                                    force_cache_refresh=force_cache_refresh
                                )
@@ -104,9 +107,8 @@ class CrimeNlgService(object):
         def _get_components(headline=False):
             # Put together the list of components
             # This varies depending on whether it's for headlines and whether we're using Omorphi
-            yield CrimeMessageGenerator(expand=False) 
-            #yield CrimeMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
-            yield CrimeImportanceSelector()
+            yield CPHIMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
+            yield CPHIImportanceSelector()
             yield HeadlineDocumentPlanner() if headline else BodyDocumentPlanner()
             yield TemplateSelector()
             yield Aggregator()
@@ -241,7 +243,7 @@ class CrimeNlgService(object):
         }
         geodata_lookup["C"]["fi"] = country_name
 
-        municipalities = self.registry.get('crime-data').query('where_type == "M"')['where'].unique()
+        municipalities = self.registry.get('cphi-data').query('where_type == "C"')['where'].unique()
         geodata["fi"]["children"] = {m: {
             "name": m,
             "id": m,
@@ -269,7 +271,7 @@ if __name__ == "__main__":
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     log = logging.getLogger('root')
-    log.setLevel(logging.DEBUG)
+    #log.setLevel(logging.DEBUG)
     log.addHandler(handler)
 
     # Run

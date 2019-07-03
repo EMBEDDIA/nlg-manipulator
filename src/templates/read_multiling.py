@@ -259,6 +259,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             rule_ref = 0
 
                         # Map alternative field names to their canonical form used internally
+                        log.info(FACT_FIELD_MAP)
                         try:
                             field_name = FACT_FIELD_MAP[field_name]
                         except KeyError:
@@ -267,7 +268,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             ))
 
                         # Only some of the field names are allowed to be used in templates
-                        if field_name not in ['what', 'where', 'when_1', 'when_2', 'what_type', 'time']:
+                        if field_name not in ['what', 'where', 'when_1', 'when_2', 'what_type', 'time', 'where_type', 'value', 'value_type', 'place']:
                             raise TemplateReadingError("invalid field name '{}' for use in a template: {}".format(
                                 field_name, expanded_template_line
                             ))

@@ -1,45 +1,31 @@
-# fi: {name} sai {value} {unit} [{place, case=ssa}]
-# fi: {name} sai {place, case=ssa} {value} {unit}
-# en: {name} got {value} {unit} [in {place}]
-# | what_type in {base}, what > 0, when_2 = 2017
+en: in {where} in {time} the value of {what_type} increased {what}% compared to previous month
+en-head: in {where} in {time} the value of {what_type} increased {what}% compared to previous month
+| what_type = RT1.*, what > 0
 
-# ---Group definitions---
+en: in {where} in {time} the value of {what_type} decresed {what}% compared to previous month
+en-head: in {where} in {time} the value of {what_type} decresed {what}% compared to previous month
+| what_type = RT1.*, what < 0
 
-# ${base}: total_votes, percentage_votes
-# ${change}: percentage_votes_change, seats_change, total_votes_change
-# ${vote_change}: percentage_votes_change, total_votes_change
+en: in {where} in {time} the value of {what_type} was the same as in the previous month
+en-head: in {where} in {time} the value of {what_type} was the same as in the previous month
+| what_type = RT1.*, what == 0
 
+en: in {where} in {time} the value of {what_type} increased {what}% compared to previous year
+en-head: in {where} in {time} the value of {what_type} increased {what}% compared to previous year
+| what_type = RT12.*, what > 0
 
-# Regex example:
+en: in {where} in {time} the value of {what_type} decreased {what}% compared to previous year
+en-head: in {where} in {time} the value of {what_type} decreased {what}% compared to previous year
+| what_type = RT12.*, what < 0
 
-# fi: {name} sai {time} {value} {unit} [{place, case=ssa}]
-# | what_type = .*_votes, what > 0, when_2 = 2017
+en: in {where} in {time} the value of {what_type} was the same as in the previous year
+en-head: in {where} in {time} the value of {what_type} was the same as in the previous year
+| what_type = RT12.*, what == 0
 
+en: in {where} in {time} the value of {what_type} was {what}
+en-head: in {where} in {time} the value of {what_type} was {what}
+| what_type = HICP2015.*
 
-
-fi: {where, case=ssa} tapahtui {time} {what} {what_type}
-fi-head: {where, case=ssa} tapahtui {what} {what_type} {time}
-en: {where, focus_slot = True} {what} {what_type} {time}
-en-head: {where, focus_slot = True} {what} {what_type} {time}
-| where_type = [MC], when_1 = when_2
-
-# This can be used for rankings with non-change values
-fi: {where, case=ssa} tapahtui {time} {what} {what_type}
-fi-head: {where, case=ssa} tapahtui {what} {what_type} {time}
-en: {where, focus_slot = True} {what} {what_type} {time}
-en-head: {where, focus_slot = True} {what} {what_type} {time}
-| where_type = [MC], what_type = .*(?<!_change)_grouped_by.*
-
-fi: {where, case=ssa} {what} {what_type} {time, case=lla}
-fi: {where, case=ssa} {what} {what_type} {time}
-fi-head: {where, case=ssa} {what} {what_type} {time, case=lla}
-fi-head: {where, case=ssa} {what} {what_type} {time}
-en: {where, focus_slot = True} {what} {what_type} {time}
-en-head: {where, focus_slot = True} {what} {what_type} {time}
-| where_type = [MC], what_type = .*change.*, when_1 != when_2
-
-fi: {where, case=ssa} {what} {what_type} {time}
-fi-head: {where, case=ssa} {what} {what_type} {time}
-en: {where, focus_slot = True} {what} {what_type} {time}
-en-head: {where, focus_slot = True} {what} {what_type} {time}
-| where_type = [MC], what_type = .*_mk_.*, when_1 != when_2
+en: in {where} in {time}
+en-head: in {where} in {time}
+| what_type = when
