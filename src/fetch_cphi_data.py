@@ -26,6 +26,82 @@ def rank_df(df, ranked_columns):
     return df
 
 
+def add_outlierness_to_cphi_data(df, outlierness_columns, id_columns):
+    const_max_out = 2
+
+    def outlierness(val, count, min_val, q1, q2, q3, max_val):
+        size_weight = sqrt(1 / sqrt(count))
+        if q1 == q3:
+            if val == q2:
+                return 0.5 * size_weight
+            if val > q3:
+                return 0.5 + (const_max_out - 0.5) * (val - q2) / (max_val - q2) * size_weight
+            if val < q1:
+                return 0.5 + (const_max_out - 0.5) * (q2 - val) / (q2 - min_val) * size_weight
+        else:
+            if (q1 < val) and (val < q3):
+                return min(
+                    outlierness(q1, count, min_val, q1, q2, q3, max_val),
+                    outlierness(q3, count, min_val, q1, q2, q3, max_val)
+                ) * size_weight
+            return abs(val - q2) / (q3 - q1) * size_weight
+
+    def group_outlierness(grp):
+        quantiles = grp.quantile([.25, .5, .75])
+        min_val = grp.min()
+        max_val = grp.max()
+        q1 = quantiles[0.25]
+        q2 = quantiles[0.5]
+        q3 = quantiles[0.75]
+        return grp.apply(outlierness, args=(grp.size, min_val, q1, q2, q3, max_val))
+
+    rank_columns = [col for col in df.columns.values if "_rank" in col]
+    numeric_columns = outlierness_columns
+
+    for column_name in numeric_columns:
+        outlierness_ct_column_name = "{}_grouped_by_cphi_time_outlierness".format(column_name)
+        df[outlierness_ct_column_name] = df.groupby(["when", "when_type"])[column_name].apply(group_outlierness)
+
+            # outlierness_ct_column_name = "{}_grouped_by_crime_place_year_outlierness".format(column_name)
+            # df[outlierness_ct_column_name] = df.groupby(["where", "where_type", "year", "when_type"])[column_name].apply(group_outlierness)
+            # df.loc[df['when_type'] == 'year', outlierness_ct_column_name] = np.nan
+
+    # Last outlierness:
+    #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
+    raw_numbers_columns = [x for x in numeric_columns if 'normalized' not in x]
+    normalized_columns = [x for x in numeric_columns if 'normalized' in x]
+
+    raw_outlierness = df[raw_numbers_columns]
+    norm_outlierness = df[normalized_columns]
+
+    raw_outlierness.reset_index(drop=True, inplace=True)
+    norm_outlierness.reset_index(drop=True, inplace=True)
+
+    for i in range(len(raw_outlierness)):
+        raw_outlierness.iloc[i] = group_outlierness(raw_outlierness.iloc[i])
+        norm_outlierness.iloc[i] = group_outlierness(norm_outlierness.iloc[i])
+
+    raw_outlierness = raw_outlierness.add_suffix("_grouped_by_time_place_outlierness")
+    norm_outlierness = norm_outlierness.add_suffix("_grouped_by_time_place_outlierness")
+
+    df = pd.concat([df, raw_outlierness], axis=1)
+    df = pd.concat([df, norm_outlierness], axis=1)
+
+    for rank_column_name in rank_columns:
+        normal_column_name = rank_column_name.replace("_reverse", "").replace("_rank", "")
+        outlierness_rank_column_name = "{}_outlierness".format(rank_column_name)
+        outlierness_normal_column_name = "{}_outlierness".format(normal_column_name)
+        df[outlierness_rank_column_name] = df[outlierness_normal_column_name]
+
+    non_numeric_columns = id_columns
+    for column_name in non_numeric_columns:
+        #log.debug("Generating outlyingness values for column {}".format(column_name))
+        outlierness_column_name = "{}_outlierness".format(column_name)
+        df[outlierness_column_name] = 0.5
+
+    return df
+
+
 def flatten(df):
     '''
     Flatten a data frame so that each field contains a single value.
@@ -117,9 +193,14 @@ def run():
     df['where_type'] = where_type
     df['when_type'] = when_type
 
+    id_columns = ['when', 'when_type', 'where', 'where_type']
+
     # Rank value columns
-    not_value_columns = ['where', 'where_type', 'when', 'when_type']
-    df = rank_df(df, [column for column in df.columns if column not in not_value_columns])
+    df = rank_df(df, [column for column in df.columns if column not in id_columns])
+
+    # Add outlierness to data
+    outlierness_columns = [column for column in df.columns if column not in id_columns]
+    df = add_outlierness_to_cphi_data(df, outlierness_columns, id_columns)
 
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi.csv'))
 
