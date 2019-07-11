@@ -45,6 +45,7 @@ class EntityNameResolver(NLGPipelineComponent):
             log.debug("Language had suffix '-head', removing. Result: {}".format(language))
 
         previous_entities = defaultdict(lambda: None)
+        log.info("TYPE: {}".format(type(registry) == 'core.document_plan.DocumentPlan'))
         self._recurse(registry, random, language, document_plan, previous_entities, set())
 
         if log.isEnabledFor(logging.DEBUG):
@@ -80,7 +81,13 @@ class EntityNameResolver(NLGPipelineComponent):
             # Had no children, must be a leaf node
 
             added_slots = 0
-            entity = this.value
+
+            # FYI: I added this try - except to catch the times this tries to find value for a DocumentPlan etc. 
+            try:
+                entity = this.value
+            except AttributeError:
+                log.debug("Tried to find value for a non-entity")
+                return added_slots, encountered, previous_entities
 
             if not self.is_entity(entity):
                 log.debug("Visited leaf non-NE leaf node {}".format(entity))
