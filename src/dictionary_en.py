@@ -111,6 +111,34 @@ CRIME_TYPES = {
     'other_offences_against_other_acts_decrees_total': "offences against other Acts and Decrees",
 }
 
+INDICATORS = {
+	'hi00' :	'all items',
+	'hi01' :	'food and non alcoholic beverages',
+	'hi02' :	'alcoholic beverages and tobacco',
+	'hi03' :	'clothing and footwear',
+	'hi04' :	'housing, water, electricity,gas and other fuels',
+	'hi05' :	'furnishings, household equipment and maintenance',
+	'hi06' :	'health',
+	'hi07' :	'transport',
+	'hi08' :	'communication',
+	'hi09'	: 'recreation and culture',
+	'hi10' :	'education',
+	'hi11' :	'hotels, cafes and restaurants',
+	'hi12' :	'miscellaneous goods and services',
+	'hi00xef' : 'all items excluding energy, food, alcohol and tobacco',
+	'hi00xtb' :	'all items excluding tobacco',
+	'hie' :	'energy',
+	'hif' :	'food',
+	'hifu' :	'unprocessed food',
+	'hig' :	'total goods',
+	'hiig' :	'industrial goods',
+	'hiS' :	'total services',
+	'hiigxe' :	'non-energy industrial goods',
+	'hi00xe' :	'all items excluding energy',
+	'hi00xefu' :	'all items excluding energy and unprocessed food',
+	'hi00xes' :	'all items excluding energy and seasonal food',
+}
+
 SMALL_ORDINALS = {
     '1': "first",
     '2': "second",
