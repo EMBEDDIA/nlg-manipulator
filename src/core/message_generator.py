@@ -61,7 +61,7 @@ class MessageGenerator(NLGPipelineComponent):
         col_names = [
             col_name for col_name in df 
             if not (
-                col_name in ["where", "when1", "when2", "where_type", "when_type"]
+                col_name in ["where", 'when', "when1", "when2", "where_type", "when_type"]
                 or col_name in ignored_cols 
                 or "_outlierness" in col_name
             )
@@ -98,7 +98,7 @@ class MessageGenerator(NLGPipelineComponent):
             # _grouped_by_crime_place_year_outlierness
             # Adjusted the code to choose the _time_place_outlierness for now
             if not outlierness:
-                outlierness = row.get(col_name + '_grouped_by_time_place_outlierness', None)
+                outlierness = row.get(col_name + '_grouped_by_cphi_time_outlierness', None)
 
             if what is None or what == "" or (isinstance(what, float) and isnan(what)):
                 # 'what' is effectively undefined, do not REALLY generate the message.
