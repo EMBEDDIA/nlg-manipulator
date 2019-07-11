@@ -113,7 +113,7 @@ class CPHINlgService(object):
             yield TemplateSelector()
             yield Aggregator()
             yield SlotRealizer()
-            #yield CrimeEntityNameResolver()
+            yield CPHIEntityNameResolver()
             if not nomorphi:
                 # Don't even try importing Omorphi if we're not using it
                 from omorfi_generator import OmorfiGenerator
@@ -275,4 +275,4 @@ if __name__ == "__main__":
     log.addHandler(handler)
 
     # Run
-    CrimeNlgService().run_pipeline('fi', 'Akaa', 'M')
+    CPHINlgService().run_pipeline('fi', 'fi', 'C')

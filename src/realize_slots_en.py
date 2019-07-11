@@ -1,7 +1,6 @@
 import re
 import logging
-from cphi_codes import INDICATOR
-from dictionary_en import MONTHS
+from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, INDICATORS, CRIME_TYPES
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
@@ -10,7 +9,7 @@ log = logging.getLogger('root')
 class EnglishRealizer():
 
     value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_cphi_time|_cphi_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def __init__(self):
 
@@ -40,35 +39,34 @@ class EnglishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
-        #if abs(slot.fact.what) == 1:
-        if slot.fact.what == 1:
+        what_type = slot.fact.what_type.split('cp_')
+        if what_type[0] == "rt12":
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
-                template.add_slot(idx - 1, LiteralSlot("there was "))
+                template.add_slot(idx - 1, LiteralSlot("the growth rate from previous year was"))
                 added_slots += 1
                 idx += 1
 
-            template.add_slot(idx, LiteralSlot("case of "))
-            added_slots += 1
-            idx += 1
-            new_value = CRIME_TYPES.get(unit, unit)
-        else:
+        elif what_type[0] == "rt1":
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
-                template.add_slot(idx - 1, LiteralSlot("there were "))
+                template.add_slot(idx - 1, LiteralSlot("the growth rate from previous month was"))
                 added_slots += 1
                 idx += 1
 
-            template.add_slot(idx, LiteralSlot("cases of "))
-            added_slots += 1
-            idx += 1
-            new_value = CRIME_TYPES.get(unit, unit)
+        new_value = INDICATORS.get(what_type[1], what_type[1])
+
         self._update_slot_value(slot, new_value)
         idx += 1
-        if normalized:
-            template.add_slot(idx, LiteralSlot("per 1,000 people"))
-            idx += 1
-            added_slots += 1
+
+        template.add_slot(idx-1, LiteralSlot("for"))
+        added_slots += 1
+        idx += 1
+
+        # if normalized:
+        #     template.add_slot(idx, LiteralSlot("per 1,000 people"))
+        #     idx += 1
+        #     added_slots += 1
 
         return added_slots
 
@@ -200,14 +198,14 @@ class EnglishRealizer():
         # The end comparison
         if grouped_by and 'no_grouping' not in slot.attributes.keys():
             if grouped_by == '_time_place':
-                template.add_slot(idx, LiteralSlot("compared to other types of crime"))
+                template.add_slot(idx, LiteralSlot("compared to other harmonised indices"))
                 added_slots += 1
                 idx += 1
-            elif grouped_by == '_crime_time':
-                template.add_slot(idx, LiteralSlot("among all municipalities in Finland"))
+            elif grouped_by == '_cphi_time':
+                template.add_slot(idx, LiteralSlot("among all harmoniced indices"))
                 added_slots += 1
                 idx += 1
-            elif grouped_by == 'crime_place_year':
+            elif grouped_by == 'cphi_place_year':
                 if slot.fact.when_type == 'month':
                     template.add_slot(idx, LiteralSlot("compared to other months"))
                 else:
@@ -226,16 +224,21 @@ class EnglishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-
+        unit = unit.split('_')
         # Add stuff _before_ the what slot ...
         idx -= 1
-
         if not change:
-            template.add_slot(idx, LiteralSlot(CRIME_TYPES.get(unit, unit)))
+            if len(unit) > 1:
+                new_value = INDICATORS.get(unit[1], unit[1])
+            else:
+                new_value = INDICATORS.get(unit[0], unit[0])
+            template.add_slot(idx, LiteralSlot("HICP value for"))
             idx += 1
-            template.add_slot(idx, LiteralSlot("were committed"))
+            template.add_slot(idx, LiteralSlot(new_value))
             idx += 1
-            added_slots += 2
+            template.add_slot(idx, LiteralSlot("was"))
+            idx += 1
+            added_slots += 3
 
         # Add a definite article before the what slot
         template.add_slot(idx, LiteralSlot("the"))
@@ -254,9 +257,9 @@ class EnglishRealizer():
                 prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
 
         if rank in ['_rank', '_increase_rank', '_decrease_rank']:
-            slot.value = lambda x: "most"
+            slot.value = lambda x: "highest"
         elif rank == '_rank_reverse':
-            slot.value = lambda x: "least"
+            slot.value = lambda x: "lowest"
         else:
             raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
         idx += 1
@@ -269,10 +272,10 @@ class EnglishRealizer():
             idx += 1
 
             if grouped_by == '_time_place':
-                template.add_slot(idx, LiteralSlot("compared to other types of crime"))
-            elif grouped_by == '_crime_time':
-                template.add_slot(idx, LiteralSlot("compared to other municipalities"))
-            elif grouped_by == '_crime_place_year':
+                template.add_slot(idx, LiteralSlot("compared to other ???"))
+            elif grouped_by == '_cphi_time':
+                template.add_slot(idx, LiteralSlot("compared to other price categories"))
+            elif grouped_by == '_cphi_place_year':
                 if slot.fact.when_type == 'month':
                     template.add_slot(idx, LiteralSlot("compared to other months during the same year"))
                 else:
@@ -395,28 +398,28 @@ class EnglishRealizer():
             slot.attributes['focus_slot'] = True
         # The latter condition makes the system realize the full year roughly once in five sentences even
         # if the year hasn't changed.
-        # if (slot.attributes['name_type'] in ['full', 'short']) or (
-        #         slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
-        #     template.add_slot(idx, LiteralSlot("in"))
-        #     added_slots += 1
-        #     idx += 1
-        #     if slot.attributes['name_type'] == 'full':
-        #         new_slot = LiteralSlot("the year")
-        #         template.add_slot(idx, new_slot)
-        #         added_slots += 1
-        #         idx += 1
-        #     if year is None:
-        #         # We have no idea when the event happened. This shouldn't be possible.
-        #         self._update_slot_value(slot, "unknown")
-        #     elif type(year) is not str:
-        #         self._update_slot_value(slot, self._cardinal(year))
-        #     else:
-        #         self._update_slot_value(slot, year)
-        # elif slot.attributes['name_type'] == 'pronoun':
-        #     reference_options = ["in the same year", "also during the same year", "also"]
-        #     self._update_slot_value(slot, random.choice(reference_options))
-        # else:
-        #     raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+        if (slot.attributes['name_type'] in ['full', 'short']) or (
+                slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            template.add_slot(idx, LiteralSlot("in"))
+            added_slots += 1
+            idx += 1
+            if slot.attributes['name_type'] == 'full':
+                new_slot = LiteralSlot("the year")
+                template.add_slot(idx, new_slot)
+                added_slots += 1
+                idx += 1
+            if year is None:
+                # We have no idea when the event happened. This shouldn't be possible.
+                self._update_slot_value(slot, "unknown")
+            elif type(year) is not str:
+                self._update_slot_value(slot, self._cardinal(year))
+            else:
+                self._update_slot_value(slot, year)
+        elif slot.attributes['name_type'] == 'pronoun':
+            reference_options = ["in the same year", "also during the same year", "also"]
+            self._update_slot_value(slot, random.choice(reference_options))
+        else:
+            raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
         idx += 1
         if slot.attributes.get('focus_slot', False):
             template.add_slot(idx, LiteralSlot(","))
@@ -429,24 +432,24 @@ class EnglishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        # if slot.attributes['name_type'] == 'full':
-        #     new_slot = LiteralSlot("from")
-        #     template.add_slot(idx, new_slot)
-        #     added_slots += 1
-        #     idx += 1
-        #     template.add_slot(idx, LiteralSlot(match.group(1)))
-        #     added_slots += 1
-        #     idx += 1
-        #     new_slot = LiteralSlot("to")
-        #     template.add_slot(idx, new_slot)
-        #     added_slots += 1
-        #     idx += 1
-        #     self._update_slot_value(slot, match.group(2))
-        # elif slot.attributes['name_type'] == 'short':
-        #     self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
-        #     slot.attributes['case'] = 'nominative'
-        # else:
-        #     self._update_slot_value(slot, "")
+        if slot.attributes['name_type'] == 'full':
+            new_slot = LiteralSlot("from")
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            template.add_slot(idx, LiteralSlot(match.group(1)))
+            added_slots += 1
+            idx += 1
+            new_slot = LiteralSlot("to")
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            self._update_slot_value(slot, match.group(2))
+        elif slot.attributes['name_type'] == 'short':
+            self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
+            slot.attributes['case'] = 'nominative'
+        else:
+            self._update_slot_value(slot, "")
         return added_slots
 
     def _time_change_month(self, random, slot):
@@ -457,26 +460,26 @@ class EnglishRealizer():
         added_slots = 0
         template = slot.parent
         idx = template.components.index(slot)
-        # if slot.attributes['name_type'] == 'full':
-        #     new_slot = LiteralSlot("from " + MONTHS[month1])
-        #     template.add_slot(idx, new_slot)
-        #     added_slots += 1
-        #     idx += 1
-        #     template.add_slot(idx, LiteralSlot(year1))
-        #     added_slots += 1
-        #     idx += 1
-        #     new_slot = LiteralSlot("to " + MONTHS[month2])
-        #     template.add_slot(idx, new_slot)
-        #     added_slots += 1
-        #     idx += 1
-        #     template.add_slot(idx, LiteralSlot(year2))
-        #     added_slots += 1
-        #     idx += 1
-        # elif slot.attributes['name_type'] == 'short':
-        #     self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
-        #     slot.attributes['case'] = 'nominative'
-        # else:
-        #     self._update_slot_value(slot, "")
+        if slot.attributes['name_type'] == 'full':
+            new_slot = LiteralSlot("from " + MONTHS[month1])
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            template.add_slot(idx, LiteralSlot(year1))
+            added_slots += 1
+            idx += 1
+            new_slot = LiteralSlot("to " + MONTHS[month2])
+            template.add_slot(idx, new_slot)
+            added_slots += 1
+            idx += 1
+            template.add_slot(idx, LiteralSlot(year2))
+            added_slots += 1
+            idx += 1
+        elif slot.attributes['name_type'] == 'short':
+            self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
+            slot.attributes['case'] = 'nominative'
+        else:
+            self._update_slot_value(slot, "")
         return added_slots
 
     def place(self, random, slot):
@@ -487,21 +490,21 @@ class EnglishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prep = slot.attributes.get('prep', "in") + " "
-        if place_type == 'C' and place == 'FI':
+        if place_type == 'C' and place == 'fi':
             place = "Finland"
-        # if place_type in ["C", "M"]:
-        #     if slot.attributes['name_type'] == 'full':
-        #         self._update_slot_value(slot, prep + place)
-        #     elif random.rand() < 0.5:
-        #         if place_type == 'M':
-        #             self._update_slot_value(slot, prep + "the municipality")
-        #         elif place_type == 'C':
-        #             self._update_slot_value(slot, prep + "the country")
-        #         else:
-        #             raise Exception(
-        #                 "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
-        #     else:
-        #         self._update_slot_value(slot, "")
+        if place_type in ["C", "M"]:
+            if slot.attributes['name_type'] == 'full':
+                self._update_slot_value(slot, prep + place)
+            elif random.rand() < 0.5:
+                if place_type == 'M':
+                    self._update_slot_value(slot, prep + "the municipality")
+                elif place_type == 'C':
+                    self._update_slot_value(slot, prep + "the country")
+                else:
+                    raise Exception(
+                        "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
+            else:
+                self._update_slot_value(slot, "")
         idx += 1
         if slot.value and slot.attributes.get('focus_slot', False):
             template.add_slot(idx, LiteralSlot(","))

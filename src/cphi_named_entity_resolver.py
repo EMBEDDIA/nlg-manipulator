@@ -10,7 +10,7 @@ from realize_slots_en import EnglishRealizer
 
 class CPHIEntityNameResolver(EntityNameResolver):
     value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_cphi_time|_cphi_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def __init__(self):
         # [ENTITY:<group1>:<group2>] where group1 and group2 can contain anything but square brackets or double colon
@@ -34,7 +34,6 @@ class CPHIEntityNameResolver(EntityNameResolver):
             raise ValueError("Who value {} does not match entity regex".format(code))
         if not len(match.groups()) == 3:
             raise Exception("Invalid number of matched groups?!")
-        log.info("Match = {}".format(match.groups()))
         return match.groups()
 
     def resolve_entity_type(self, code):
