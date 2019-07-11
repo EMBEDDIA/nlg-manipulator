@@ -1,31 +1,5 @@
-en: in {where} in {time} the value of {what_type} increased {what}% compared to previous month
-en-head: in {where} in {time} the value of {what_type} increased {what}% compared to previous month
-| what_type = RT1.*, what > 0
 
-en: in {where} in {time} the value of {what_type} decresed {what}% compared to previous month
-en-head: in {where} in {time} the value of {what_type} decresed {what}% compared to previous month
-| what_type = RT1.*, what < 0
 
-en: in {where} in {time} the value of {what_type} was the same as in the previous month
-en-head: in {where} in {time} the value of {what_type} was the same as in the previous month
-| what_type = RT1.*, what == 0
-
-en: in {where} in {time} the value of {what_type} increased {what}% compared to previous year
-en-head: in {where} in {time} the value of {what_type} increased {what}% compared to previous year
-| what_type = RT12.*, what > 0
-
-en: in {where} in {time} the value of {what_type} decreased {what}% compared to previous year
-en-head: in {where} in {time} the value of {what_type} decreased {what}% compared to previous year
-| what_type = RT12.*, what < 0
-
-en: in {where} in {time} the value of {what_type} was the same as in the previous year
-en-head: in {where} in {time} the value of {what_type} was the same as in the previous year
-| what_type = RT12.*, what == 0
-
-en: in {where} in {time} the value of {what_type} was {what}
-en-head: in {where} in {time} the value of {what_type} was {what}
-| what_type = HICP2015.*
-
-en: in {where} in {time}
-en-head: in {where} in {time}
-| what_type = when
+en: {where} {time} {what} {what_type}
+en-head: {where} {time} {what} {what_type}
+| where_type = C
