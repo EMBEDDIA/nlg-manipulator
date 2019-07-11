@@ -49,7 +49,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
     # TODO: is this data specific? If so, needs to be changed.
     value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
+        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_cphi_time|_cphi_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
 
     def run(self, registry, random, language, scored_messages):
         """
@@ -75,7 +75,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                                        # ... or percentage ...
                                        or '_percentage' in msg.fact.what_type)
                                   # ... and is comparing different municipalities
-                                  and '_grouped_by_crime_time' in msg.fact.what_type)
+                                  and '_grouped_by_cphi_time' in msg.fact.what_type)
                               # ... or the message is telling about one of the crimes that was done the least (aka zero times)
                               or ('_rank_reverse' in msg.fact.what_type and msg.fact.what == 1)
                               )]
