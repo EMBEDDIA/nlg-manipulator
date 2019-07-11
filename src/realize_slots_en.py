@@ -1,6 +1,6 @@
 import re
 import logging
-from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, INDICATORS, CRIME_TYPES
+from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, INDICATORS
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
@@ -51,6 +51,13 @@ class EnglishRealizer():
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
                 template.add_slot(idx - 1, LiteralSlot("the growth rate from previous month was"))
+                added_slots += 1
+                idx += 1
+        
+        elif what_type[0] == "hicp2015":
+            if slot.attributes.get('form', '') != 'short':
+                # Add the predicate _before_ the value
+                template.add_slot(idx - 1, LiteralSlot("the HICP value was"))
                 added_slots += 1
                 idx += 1
 
