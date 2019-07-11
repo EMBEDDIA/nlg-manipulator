@@ -137,7 +137,7 @@ def flatten(df):
     new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['unit', 'indic'], values = 'value', aggfunc='first')
     new_df.reset_index(level=['where', 'when'], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
-    new_df.columns = [column[0]+column[1] for column in new_df.columns]
+    new_df.columns = [(column[0]+column[1]).replace('-', '_').lower() for column in new_df.columns]
     data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
     new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
 
@@ -201,6 +201,10 @@ def run():
     # Add outlierness to data
     outlierness_columns = [column for column in df.columns if column not in id_columns]
     df = add_outlierness_to_cphi_data(df, outlierness_columns, id_columns)
+    # Remove redundant spaces
+    df['when'] = [when.strip(' ') for when in df['when']]
+    # Lowercase countrie names to match Valtteri style
+    df['where'] = [where.lower() for where in df['where']]
 
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi.csv'))
 
