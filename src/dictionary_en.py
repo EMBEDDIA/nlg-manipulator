@@ -132,7 +132,7 @@ INDICATORS = {
 	'hifu' :	'unprocessed food',
 	'hig' :	'total goods',
 	'hiig' :	'industrial goods',
-	'hiS' :	'total services',
+	'his' :	'total services',
 	'hiigxe' :	'non-energy industrial goods',
 	'hi00xe' :	'all items excluding energy',
 	'hi00xefu' :	'all items excluding energy and unprocessed food',
