@@ -1,5 +1,3 @@
-
-
 en: {where} {time} {what} {what_type}
 en-head: {where} {time} {what} {what_type}
 | where_type = C
