@@ -39,22 +39,23 @@ class EnglishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
-        what_type = slot.fact.what_type.split('cp_')
-        if what_type[0] == "rt12":
+        what_type = slot.fact.what_type.split('_')
+
+        if what_type[0] == "rt12cp":
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
                 template.add_slot(idx - 1, LiteralSlot("the growth rate from previous year was"))
                 added_slots += 1
                 idx += 1
 
-        elif what_type[0] == "rt1":
+        elif what_type[0] == "rt1cp":
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
                 template.add_slot(idx - 1, LiteralSlot("the growth rate from previous month was"))
                 added_slots += 1
                 idx += 1
         
-        elif what_type[0] == "hicp2015":
+        elif what_type[0] == "hicp2015cp":
             if slot.attributes.get('form', '') != 'short':
                 # Add the predicate _before_ the value
                 template.add_slot(idx - 1, LiteralSlot("the HICP value was"))
@@ -62,13 +63,27 @@ class EnglishRealizer():
                 idx += 1
 
         new_value = INDICATORS.get(what_type[1], what_type[1])
-
         self._update_slot_value(slot, new_value)
         idx += 1
 
-        template.add_slot(idx-1, LiteralSlot("for"))
-        added_slots += 1
-        idx += 1
+        if "comp_eu" in slot.fact.what_type:
+            if slot.fact.what < 0:
+                template.add_slot(idx-1, LiteralSlot("less than EU average for price category"))
+            else:
+                template.add_slot(idx-1, LiteralSlot("more than EU average for price category"))
+            added_slots += 1
+            idx += 1
+        elif "comp_us" in slot.fact.what_type:
+            if slot.fact.what < 0:
+                template.add_slot(idx-1, LiteralSlot("less than US average for price category"))
+            else:
+                template.add_slot(idx-1, LiteralSlot("more than US average for price category"))
+            added_slots += 1
+            idx += 1
+        else:
+            template.add_slot(idx-1, LiteralSlot("for price category"))
+            added_slots += 1
+            idx += 1
 
         # if normalized:
         #     template.add_slot(idx, LiteralSlot("per 1,000 people"))
