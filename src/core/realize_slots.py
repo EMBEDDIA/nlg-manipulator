@@ -85,8 +85,9 @@ class SlotRealizer(NLGPipelineComponent):
         return 0
 
     def _realize_unit(self, slot):
-        value_type_re = re.compile(
-            r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_cphi_time|_cphi_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
+        from paramconfig import value_type_re
+        value_type_re = re.compile(value_type_re)
+        
         match = value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         try:

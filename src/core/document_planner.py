@@ -47,9 +47,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
     """
 
     # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
-    # TODO: is this data specific? If so, needs to be changed.
-    value_type_re = re.compile(
-        r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_cphi_time|_cphi_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
+    from paramconfig import value_type_re
+    value_type_re = re.compile(value_type_re)
 
     def run(self, registry, random, language, scored_messages):
         """
@@ -66,6 +65,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
 
         # Drop messages with rank or rank_reverse values of more than 4 and messages with comparisons between
         # municipalities using the reported values instead of normalized or percentage values
+        # TODO: SHould the avoided values somehow be defined in paramconfig file
         scored_messages = [msg for msg in scored_messages
                            if not
                              # drop the message if it is about a rank or rank_reverse of more than 4 ...

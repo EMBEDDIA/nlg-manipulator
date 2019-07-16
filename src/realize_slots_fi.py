@@ -7,7 +7,8 @@ log = logging.getLogger('root')
 
 class FinnishRealizer():
 
-    value_type_re = re.compile(r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_crime_time|_crime_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)')
+    from paramconfig import value_type_re
+    value_type_re = re.compile(value_type_re)
 
     def __init__(self):
 
