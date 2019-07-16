@@ -31,6 +31,7 @@ rank_reverse_weight = 1
 rank_weight = 2
 
 eu_comp_weight = 5
+us_comp_weight = 5
 
 comparison_change = 3
 # I am making the assumption that the comparison_change is more important in crime data than the comparison_empty,
