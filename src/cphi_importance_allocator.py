@@ -46,7 +46,11 @@ class CPHIImportanceSelector(NLGPipelineComponent):
         # importance of fact
         category = fact.what_type.split('_')[0]
         what_type_score = pfg.category_scores.get(category, 1)
-        if '_rank_reverse' in fact.what_type:
+        if '_comp_eu' in fact.what_type:
+            what_type_score *= pfg.eu_comp_weight
+        elif '_comp_us' in fact.what_type:
+            what_type_score *= pfg.us_comp_weight
+        elif '_rank_reverse' in fact.what_type:
             what_type_score *= pfg.rank_reverse_weight
         elif '_rank' in fact.what_type:
             what_type_score *= pfg.rank_weight
