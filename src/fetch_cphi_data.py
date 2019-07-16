@@ -9,13 +9,33 @@ from operator import itemgetter
 import itertools
 
 
-def rank_df(df, ranked_columns):
-    ranked_columns = ranked_columns
+def compare_to_us(df, compare_columns):
+    grouped_cphi_time = df.groupby(["when", "when_type"])
+    us_value = 1 # TODO: this is hardcoded so I can move forward, must be fixed
 
+    for col_name in compare_columns:
+        compared_col_name = "{}_grouped_by_cphi_time_comp_us".format(col_name)
+        grouped = grouped_cphi_time[col_name]
+        df[compared_col_name] = grouped.apply(lambda x: x - us_value)
+    return df
+
+
+def compare_to_eu(df, compare_columns):
+    grouped_cphi_time = df.groupby(["when", "when_type"])
+    eu_value = 1 # TODO: this is hardcoded so I can move forward, must be fixed
+
+    for col_name in compare_columns:
+        compared_col_name = "{}_grouped_by_cphi_time_comp_eu".format(col_name)
+        grouped = grouped_cphi_time[col_name]
+        df[compared_col_name] = grouped.apply(lambda x: x - eu_value)
+    return df
+
+
+def rank_df(df, rank_columns):
     grouped_cphi_time = df.groupby(["when", "when_type"])
     #grouped_cphi_place = df.groupby(["where", "where_type", "when", "when_type"])
 
-    for col_name in ranked_columns:
+    for col_name in rank_columns:
         ranked_col_name = "{}_grouped_by_cphi_time_rank".format(col_name)
         reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
         grouped = grouped_cphi_time[col_name]
@@ -25,6 +45,7 @@ def rank_df(df, ranked_columns):
 
 
 def add_outlierness_to_cphi_data(df, outlierness_columns, id_columns):
+
     const_max_out = 2
 
     def outlierness(val, count, min_val, q1, q2, q3, max_val):
@@ -60,9 +81,9 @@ def add_outlierness_to_cphi_data(df, outlierness_columns, id_columns):
         outlierness_ct_column_name = "{}_grouped_by_cphi_time_outlierness".format(column_name)
         df[outlierness_ct_column_name] = df.groupby(["when", "when_type"])[column_name].apply(group_outlierness)
 
-            # outlierness_ct_column_name = "{}_grouped_by_crime_place_year_outlierness".format(column_name)
-            # df[outlierness_ct_column_name] = df.groupby(["where", "where_type", "year", "when_type"])[column_name].apply(group_outlierness)
-            # df.loc[df['when_type'] == 'year', outlierness_ct_column_name] = np.nan
+        # outlierness_ct_column_name = "{}_grouped_by_crime_place_year_outlierness".format(column_name)
+        # df[outlierness_ct_column_name] = df.groupby(["where", "where_type", "year", "when_type"])[column_name].apply(group_outlierness)
+        # df.loc[df['when_type'] == 'year', outlierness_ct_column_name] = np.nan
 
     # Last outlierness:
     #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
@@ -149,7 +170,7 @@ def run():
     # Flatten DataFrame
     df = flatten(df)
 
-    # Add when_type and where_type
+    # Add when_type and where_type TODO: for example the euro area is now labeled as a country
     where_type = ['C'] * df.shape[0]
     when_type = ['month'] * df.shape[0]
 
@@ -157,19 +178,27 @@ def run():
     df['when_type'] = when_type
 
     id_columns = ['when', 'when_type', 'where', 'where_type']
+    base_columns = [column for column in df.columns if column not in id_columns]
+
+    # Compare columns to EU average
+    df = compare_to_eu(df, base_columns)
+
+    # Compare columns to USA average
+    df = compare_to_us(df, base_columns)
 
     # Rank value columns
-    df = rank_df(df, [column for column in df.columns if column not in id_columns])
+    df = rank_df(df, base_columns)
 
     # Add outlierness to data
     outlierness_columns = [column for column in df.columns if column not in id_columns]
     df = add_outlierness_to_cphi_data(df, outlierness_columns, id_columns)
+
     # Remove redundant spaces
     df['when'] = [when.strip(' ') for when in df['when']]
     # Lowercase countrie names to match Valtteri style
     df['where'] = [where.lower() for where in df['where']]
 
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi.csv'))
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi_test.csv'), index=False)
 
 
     # print('Converter')
