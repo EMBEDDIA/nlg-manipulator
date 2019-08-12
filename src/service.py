@@ -41,30 +41,11 @@ class CPHINlgService(object):
         self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
         self.graph_data_generator = GraphDataGenerator()
 
-        # csv_path = '../data/cphi.csv'
-        # cache_path = '../data/cphi.cache'
-
-        cphi_data = [
-            ('../data/cphi.csv', '../data/cphi.cache', 'cphi-data'),
+        data = [
+            ('../data/data.csv', '../data/data.cache', 'cphi-data'),
         ]
-        
-        # csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
-        # cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
-        # compute = lambda: pd.read_csv(csv_path, index_col=False)
-        # self.registry.register('cphi-data', DataFrameStore(
-        #         cache_path,
-        #         compute=compute
-        #     ))
 
-        # crime_data = [
-        #     ('../graveyard/bc_crime_pyn_comp_ranks_outliers.csv', '../graveyard/bc_crime_comp.cache', 'crime-bc-comp-data'),
-        #     ('../graveyard/bc_crime_pyn_ranks_outliers.csv', '../graveyard/bc_crime.cache', 'crime-bc-data'),
-        #     ('../graveyard/bc_crime_trends.csv', '../graveyard/bc_crime_trends.cache', 'crime-bc-trend-data'),
-        #     ('../graveyard/crime_pyn_comp_ranks_outliers.csv', '../graveyard/crime_comp.cache', 'crime-comp-data'),
-        #     ('../graveyard/crime_pyn_ranks_outliers.csv', '../graveyard/crime.cache', 'crime-data'),
-        # ]
-
-        for csv_path, cache_path, registry_name in cphi_data:
+        for csv_path, cache_path, registry_name in data:
             csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), csv_path))
             cache_path = os.path.abspath(os.path.join(os.path.dirname(__file__), cache_path))
             compute = None
