@@ -1,6 +1,6 @@
 import re
 import logging
-from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, INDICATORS
+from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, CPHI, INCOME, HEALTH
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
@@ -34,63 +34,109 @@ class EnglishRealizer():
         }
 
     def _unit_base(self, slot):
-        match = self.value_type_re.fullmatch(slot.value)
-        unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
+        #match = self.value_type_re.fullmatch(slot.value)
+        #unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
         what_type = slot.fact.what_type.split('_')
 
-        if what_type[0] == "rt12cp":
+        if what_type[0] == 'cphi':
             if slot.attributes.get('form', '') != 'short':
-                # Add the predicate _before_ the value
-                template.add_slot(idx - 1, LiteralSlot("the growth rate from previous year was"))
+                template.add_slot(idx - 1, LiteralSlot(CPHI.get(what_type[1])))
                 added_slots += 1
                 idx += 1
-
-        elif what_type[0] == "rt1cp":
-            if slot.attributes.get('form', '') != 'short':
-                # Add the predicate _before_ the value
-                template.add_slot(idx - 1, LiteralSlot("the growth rate from previous month was"))
+                template.add_slot(idx - 1, LiteralSlot("was"))
                 added_slots += 1
                 idx += 1
-        
-        elif what_type[0] == "hicp2015cp":
-            if slot.attributes.get('form', '') != 'short':
-                # Add the predicate _before_ the value
-                template.add_slot(idx - 1, LiteralSlot("the HICP value was"))
-                added_slots += 1
-                idx += 1
-
-        new_value = INDICATORS.get(what_type[1], what_type[1])
-        self._update_slot_value(slot, new_value)
-        idx += 1
-
-        if "comp_eu" in slot.fact.what_type:
-            if slot.fact.what < 0:
-                template.add_slot(idx-1, LiteralSlot("less than EU average for price category"))
-            else:
-                template.add_slot(idx-1, LiteralSlot("more than EU average for price category"))
-            added_slots += 1
+            new_value = CPHI.get(what_type[2])
+            self._update_slot_value(slot, new_value)
             idx += 1
-        elif "comp_us" in slot.fact.what_type:
-            if slot.fact.what < 0:
-                template.add_slot(idx-1, LiteralSlot("less than US average for price category"))
-            else:
-                template.add_slot(idx-1, LiteralSlot("more than US average for price category"))
-            added_slots += 1
-            idx += 1
-        else:
+
+            if "comp" in slot.fact.what_type:
+                template, added_slots, idx = self._comparisons(slot, template, what_type, added_slots, idx)
+
             template.add_slot(idx-1, LiteralSlot("for price category"))
             added_slots += 1
             idx += 1
 
+        elif what_type[0] == 'income':
+            if slot.attributes.get('form', '') != 'short':
+                # Add _before_ the value
+                template.add_slot(idx - 1, LiteralSlot(INCOME.get(what_type[2])))
+                added_slots += 1
+                idx += 1
+                template.add_slot(idx - 1, LiteralSlot("in age group"))
+                added_slots += 1
+                idx += 1
+                template.add_slot(idx - 1, LiteralSlot(INCOME.get(what_type[1])))
+                added_slots += 1
+                idx += 1
+                template.add_slot(idx - 1, LiteralSlot(INCOME.get(what_type[3])))
+                added_slots += 1
+                idx += 1
+                template.add_slot(idx - 1, LiteralSlot("was"))
+                added_slots += 1
+                idx += 1
+
+            self._update_slot_value(slot, INCOME.get(what_type[4]))
+            idx += 1            
+
+            if "comp" in slot.fact.what_type:
+                template, added_slots, idx = self._comparisons(slot, template, what_type, added_slots, idx)
+
+            template.add_slot(idx - 1, LiteralSlot("expressed in"))
+            added_slots += 1
+            idx += 1 
+
+        elif what_type[0] == 'health':
+            if slot.attributes.get('form', '') != 'short':
+                # Add _before_ the value
+                template.add_slot(idx - 1, LiteralSlot(HEALTH.get(what_type[2])))
+                added_slots += 1
+                idx += 1
+                template.add_slot(idx - 1, LiteralSlot("was"))
+                added_slots += 1
+                idx += 1
+
+            self._update_slot_value(slot, HEALTH.get(what_type[1]))
+            idx += 1        
+
+            if "comp" in slot.fact.what_type:
+                template, added_slots, idx = self._comparisons(slot, template, what_type, added_slots, idx)
+                
+            template.add_slot(idx - 1, LiteralSlot("expressed in"))
+            added_slots += 1
+            idx += 1    
         # if normalized:
         #     template.add_slot(idx, LiteralSlot("per 1,000 people"))
         #     idx += 1
         #     added_slots += 1
 
         return added_slots
+
+    def _comparisons(self, slot, template, what_type, added_slots, idx):
+        if slot.fact.what < 0:
+            template.add_slot(idx-1, LiteralSlot("less than"))
+            added_slots += 1
+            idx += 1
+        else:
+            template.add_slot(idx-1, LiteralSlot("more than"))
+            added_slots += 1
+            idx += 1
+        if "eu" in what_type:
+            template.add_slot(idx-1, LiteralSlot("EU average"))
+            added_slots += 1
+            idx += 1
+        elif "us" in what_type:
+            template.add_slot(idx-1, LiteralSlot("US average"))
+            added_slots += 1
+            idx += 1
+        elif "similar" in what_type:
+            template.add_slot(idx-1, LiteralSlot("the average for countries that are considered to be similar"))
+            added_slots += 1
+            idx += 1
+        return template, added_slots, idx        
 
     def _unit_percentage_points(self, slot):
         template = slot.parent
@@ -223,11 +269,11 @@ class EnglishRealizer():
                 template.add_slot(idx, LiteralSlot("compared to other harmonised indices"))
                 added_slots += 1
                 idx += 1
-            elif grouped_by == '_cphi_time':
+            elif grouped_by == '_time':
                 template.add_slot(idx, LiteralSlot("among all harmoniced indices"))
                 added_slots += 1
                 idx += 1
-            elif grouped_by == 'cphi_place_year':
+            elif grouped_by == '_place_year':
                 if slot.fact.when_type == 'month':
                     template.add_slot(idx, LiteralSlot("compared to other months"))
                 else:
@@ -246,66 +292,113 @@ class EnglishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-        unit = unit.split('_')
+        unit = unit.split('.')
         # Add stuff _before_ the what slot ...
         idx -= 1
-        if not change:
-            if len(unit) > 1:
-                new_value = INDICATORS.get(unit[1], unit[1])
-            else:
-                new_value = INDICATORS.get(unit[0], unit[0])
-            template.add_slot(idx, LiteralSlot("HICP value for"))
-            idx += 1
-            template.add_slot(idx, LiteralSlot(new_value))
-            idx += 1
-            template.add_slot(idx, LiteralSlot("was"))
-            idx += 1
-            added_slots += 3
 
-        # Add a definite article before the what slot
-        template.add_slot(idx, LiteralSlot("the"))
-        added_slots += 1
-        idx += 1
-
-        # ... and jump back to the correct index
-        idx += 1
-
-        if prev_slot.slot_type == 'what':
-            # If the rank is first, the actual numeral isn't realized at all
-            if slot.fact.what == 1:
-                prev_slot.value = lambda x: ""
-            # If the numeral is realized, it needs to be an ordinal
-            else:
-                prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
-
-        if rank in ['_rank', '_increase_rank', '_decrease_rank']:
-            slot.value = lambda x: "highest"
-        elif rank == '_rank_reverse':
-            slot.value = lambda x: "lowest"
-        else:
-            raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-        idx += 1
-        # If talking about changes, we will do the rest in the change handler
-        if change:
-            return added_slots
-
-        if not change:
-            # Skip over the time slot
-            idx += 1
-
-            if grouped_by == '_time_place':
-                template.add_slot(idx, LiteralSlot("compared to other ???"))
-            elif grouped_by == '_cphi_time':
-                template.add_slot(idx, LiteralSlot("compared to other price categories"))
-            elif grouped_by == '_cphi_place_year':
-                if slot.fact.when_type == 'month':
-                    template.add_slot(idx, LiteralSlot("compared to other months during the same year"))
+        if unit[0] == 'cphi':
+            if not change:
+                if len(unit) > 1:
+                    new_value = CPHI.get(unit[1], unit[1])
                 else:
-                    raise AttributeError("This is impossible. _crime_place_year is a valid grouping only for monthly data!")
-            else:
-                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+                    new_value = CPHI.get(unit[0], unit[0])
+                template.add_slot(idx, LiteralSlot("HICP value for"))
+                idx += 1
+                template.add_slot(idx, LiteralSlot(new_value))
+                idx += 1
+                template.add_slot(idx, LiteralSlot("was"))
+                idx += 1
+                added_slots += 3
+
+            # Add a definite article before the what slot
+            template.add_slot(idx, LiteralSlot("the"))
             added_slots += 1
             idx += 1
+
+            # ... and jump back to the correct index
+            idx += 1
+
+            if prev_slot.slot_type == 'what':
+                # If the rank is first, the actual numeral isn't realized at all
+                if slot.fact.what == 1:
+                    prev_slot.value = lambda x: ""
+                # If the numeral is realized, it needs to be an ordinal
+                else:
+                    prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
+
+            if rank in ['_rank', '_increase_rank', '_decrease_rank']:
+                slot.value = lambda x: "highest"
+            elif rank == '_rank_reverse':
+                slot.value = lambda x: "lowest"
+            else:
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+            idx += 1
+            # If talking about changes, we will do the rest in the change handler
+            if change:
+                return added_slots
+
+            if not change:
+                # Skip over the time slot
+                idx += 1
+
+                if grouped_by == '_time':
+                    template.add_slot(idx, LiteralSlot("compared to other price categories"))
+                else:
+                    raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+                added_slots += 1
+                idx += 1
+
+        elif unit[0] == 'income':
+            if not change:
+                template.add_slot(idx, LiteralSlot(INCOME.get(unit[3])))
+                idx += 1
+                template.add_slot(idx, LiteralSlot(INCOME.get(unit[2])))
+                idx += 1
+                template.add_slot(idx, LiteralSlot("for age group"))
+                idx += 1
+                template.add_slot(idx, LiteralSlot(INCOME.get(unit[1])))
+                idx += 1
+                template.add_slot(idx, LiteralSlot("was"))
+                idx += 1
+                added_slots += 5
+
+            # Add a definite article before the what slot
+            template.add_slot(idx, LiteralSlot("the"))
+            added_slots += 1
+            idx += 1
+
+            # ... and jump back to the correct index
+            idx += 1
+
+            if prev_slot.slot_type == 'what':
+                # If the rank is first, the actual numeral isn't realized at all
+                if slot.fact.what == 1:
+                    prev_slot.value = lambda x: ""
+                # If the numeral is realized, it needs to be an ordinal
+                else:
+                    prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
+
+            if rank in ['_rank', '_increase_rank', '_decrease_rank']:
+                slot.value = lambda x: "highest"
+            elif rank == '_rank_reverse':
+                slot.value = lambda x: "lowest"
+            else:
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+            idx += 1
+            # If talking about changes, we will do the rest in the change handler
+            if change:
+                return added_slots
+
+            if not change:
+                # Skip over the time slot
+                idx += 1
+
+                if grouped_by == '_time':
+                    template.add_slot(idx, LiteralSlot("compared to other age groups"))
+                else:   
+                    raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+                added_slots += 1
+                idx += 1
 
         return added_slots
 
