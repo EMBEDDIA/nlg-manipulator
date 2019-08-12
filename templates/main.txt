@@ -1,3 +1,11 @@
 en: {where} {time} {what} {what_type}
 en-head: {where} {time} {what} {what_type}
-| where_type = C
+| what_type = cphi.*
+
+en: {where} {time} {what} {what_type}
+en-head: {where} {time} {what} {what_type}
+| what_type = income.*
+
+en: {where} {time} {what} {what_type}
+en-head: {where} {time} {what} {what_type}
+| what_type = health.*
