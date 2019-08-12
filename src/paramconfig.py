@@ -12,7 +12,7 @@ Configuration file containing 'importance' constants for crime facts
 
 # dictionary of parameters
 
-value_type_re = r'([0-9_a-z]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_cphi_time|_cphi_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)'
+value_type_re = r'([0-9_a-z\-.]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_time|_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)'
 
 category_scores = {
     'life':      10,
@@ -30,8 +30,7 @@ category_scores = {
 rank_reverse_weight = 1
 rank_weight = 2
 
-eu_comp_weight = 5
-us_comp_weight = 5
+comp_weight = 200
 
 comparison_change = 3
 # I am making the assumption that the comparison_change is more important in crime data than the comparison_empty,
