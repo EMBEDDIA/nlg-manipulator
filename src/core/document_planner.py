@@ -75,7 +75,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                                        # ... or percentage ...
                                        or '_percentage' in msg.fact.what_type)
                                   # ... and is comparing different municipalities
-                                  and '_grouped_by_cphi_time' in msg.fact.what_type)
+                                  and '_grouped_by_time' in msg.fact.what_type
+                                  )
                               # ... or the message is telling about one of the crimes that was done the least (aka zero times)
                               or ('_rank_reverse' in msg.fact.what_type and msg.fact.what == 1)
                               )]
