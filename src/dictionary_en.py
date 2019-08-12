@@ -77,7 +77,6 @@ INCOME = {
         'y-ge65': '65 years or over',
         'y-lT75': 'less than 75 years',
         'y-ge75': '75 years or over',
-g
 }
 
 HEALTH = {
