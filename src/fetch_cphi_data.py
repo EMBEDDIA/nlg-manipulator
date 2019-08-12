@@ -7,38 +7,64 @@ import columns as cls
 import paramconfig as prmcnf
 from operator import itemgetter
 import itertools
+from country_clusteriser import CountryClusteriser
 
 
 def compare_to_us(df, compare_columns):
-    grouped_cphi_time = df.groupby(["when", "when_type"])
-    us_value = 1 # TODO: this is hardcoded so I can move forward, must be fixed
+
+    us_df = df.loc[df['where'] == 'US']
+    df = df.drop(us_df.index)
+    df = pd.concat([us_df, df])
+
+    grouped_cphi_time = df.groupby("when")
 
     for col_name in compare_columns:
-        compared_col_name = "{}_grouped_by_cphi_time_comp_us".format(col_name)
+        compared_col_name = "{}_grouped_by_time_comp_us".format(col_name)
         grouped = grouped_cphi_time[col_name]
-        df[compared_col_name] = grouped.apply(lambda x: x - us_value)
+        df[compared_col_name] = df[col_name] - grouped.transform('first')
+
     return df
 
 
 def compare_to_eu(df, compare_columns):
-    grouped_cphi_time = df.groupby(["when", "when_type"])
-    eu_value = 1 # TODO: this is hardcoded so I can move forward, must be fixed
+
+    eu_df = df.loc[df['where'] == 'EU']
+    df = df.drop(eu_df.index)
+    df = pd.concat([eu_df, df])
+
+    grouped_cphi_time = df.groupby("when")
 
     for col_name in compare_columns:
-        compared_col_name = "{}_grouped_by_cphi_time_comp_eu".format(col_name)
+        compared_col_name = "{}_grouped_by_time_comp_eu".format(col_name)
         grouped = grouped_cphi_time[col_name]
-        df[compared_col_name] = grouped.apply(lambda x: x - eu_value)
+        df[compared_col_name] = df[col_name] - grouped.transform('first')
+
+    return df
+
+
+def compare_to_similar(df, cluster_df, compare_columns):
+
+    df = df.merge(cluster_df, on="where")
+    grouped_b_time_and_cluster = df.groupby(["when", "cluster"])
+
+    for col_name in compare_columns:
+        compared_col_name = "{}_grouped_by_time_comp_similar".format(col_name)
+        grouped = grouped_b_time_and_cluster[col_name]
+        df[compared_col_name] = df[col_name] - grouped.transform('mean')
+
+    df = df.drop("cluster", axis=1)
+
     return df
 
 
 def rank_df(df, rank_columns):
-    grouped_cphi_time = df.groupby(["when", "when_type"])
+    grouped_time = df.groupby(["when", "when_type"])
     #grouped_cphi_place = df.groupby(["where", "where_type", "when", "when_type"])
 
     for col_name in rank_columns:
-        ranked_col_name = "{}_grouped_by_cphi_time_rank".format(col_name)
+        ranked_col_name = "{}_grouped_by_time_rank".format(col_name)
         reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
-        grouped = grouped_cphi_time[col_name]
+        grouped = grouped_time[col_name]
         df[ranked_col_name] = grouped.rank(ascending=False, method="dense", na_option='keep')
         df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense", na_option='keep')
     return df
@@ -78,7 +104,7 @@ def add_outlierness_to_cphi_data(df, outlierness_columns, id_columns):
     numeric_columns = outlierness_columns
 
     for column_name in numeric_columns:
-        outlierness_ct_column_name = "{}_grouped_by_cphi_time_outlierness".format(column_name)
+        outlierness_ct_column_name = "{}_grouped_by_time_outlierness".format(column_name)
         df[outlierness_ct_column_name] = df.groupby(["when", "when_type"])[column_name].apply(group_outlierness)
 
         # outlierness_ct_column_name = "{}_grouped_by_crime_place_year_outlierness".format(column_name)
@@ -121,11 +147,13 @@ def add_outlierness_to_cphi_data(df, outlierness_columns, id_columns):
     return df
 
 
-def flatten(df):
+def flatten_cphi(df):
     '''
     Flatten a data frame so that each field contains a single value.
     '''
-
+    # Replace every underscore in DataFrame
+    for column in df.columns:
+        df[column] = df[column].str.replace('_','-')
     new_df = pd.DataFrame()
     names = list(df.columns)
 
@@ -151,31 +179,158 @@ def flatten(df):
 
     new_df[['value', 'flag']] = values_n_flags
 
-    new_df = new_df.replace(to_replace=':', value=np.nan)
-
     new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['unit', 'indic'], values = 'value', aggfunc='first')
     new_df.reset_index(level=['where', 'when'], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
-    new_df.columns = [(column[0]+column[1]).replace('-', '_').lower() for column in new_df.columns]
+    new_df.columns = [('cphi_'+column[0]+'_'+column[1]).lower() for column in new_df.columns]
+    new_df.rename(columns={'cphi_where_':'where', 'cphi_when_':'when'}, inplace=True)
+
+    new_df = new_df.replace(to_replace=':', value=np.nan)
+
     data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
     new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
+
+    # Add when_type and where_type TODO: for example the euro area is now labeled as a country
+    where_type = ['C'] * new_df.shape[0]
+    when_type = ['month'] * new_df.shape[0]
+
+    new_df['where_type'] = where_type
+    new_df['when_type'] = when_type
+
+    # Remove redundant spaces
+    new_df['when'] = [when.strip(' ') for when in new_df['when']]
+    # Lowercase countrie names to match Valtteri style
+    new_df['where'] = [where.lower() for where in new_df['where']]
+
+    return new_df
+
+
+def flatten_health(df):
+    '''
+    Flatten a data frame so that each field contains a single value.
+    '''
+    # Replace every underscore in DataFrame
+    for column in df.columns:
+        df[column] = df[column].str.replace('_','-')
+    new_df = pd.DataFrame()
+    names = list(df.columns)
+
+    new_columns = names.pop(0)
+
+    initial_content = []
+    values = df.values.tolist()
+    values = [value[1:] for value in values]
+    values = list(itertools.chain.from_iterable(values))
+    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
+    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
+
+    for line in df[new_columns]:
+        for when in names:
+            initial_content.append((',').join([line, when]))
+    new_columns = (',').join([new_columns, 'when'])
+    new_df[new_columns] = initial_content
+
+    columns = new_columns.split(',')
+    new_df = new_df[new_columns].str.split(',', expand=True)
+    new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
+    new_df = new_df.rename(columns={'geo\\TIME_PERIOD':'where'})
+
+    new_df[['value', 'flag']] = values_n_flags
+    new_df = pd.pivot_table(new_df, index =['where','when'], columns =['unit','icha11_hf'], values = 'value', aggfunc='first')
+    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df.columns = new_df.columns.to_flat_index()
+    new_df.columns = [('health_'+column[0]+'_'+column[1]).lower() for column in new_df.columns]
+    new_df.rename(columns={'health_where_':'where', 'health_when_':'when'}, inplace=True)
+    new_df = new_df.replace(to_replace=':', value=np.nan)
+
+    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
+
+    # Add when_type and where_type TODO: for example the euro area is now labeled as a country
+    where_type = ['C'] * new_df.shape[0]
+    when_type = ['year'] * new_df.shape[0]
+
+    new_df['where_type'] = where_type
+    new_df['when_type'] = when_type
+
+    # Lowercase countrie names to match Valtteri style
+    new_df['where'] = [where.lower() for where in new_df['where']]
+
+    return new_df
+
+
+def flatten_income(df):
+    '''
+    Flatten a data frame so that each field contains a single value.
+    '''
+    # Replace every underscore in DataFrame
+    for column in df.columns:
+        df[column] = df[column].str.replace('_','-')
+    new_df = pd.DataFrame()
+    names = list(df.columns)
+    new_columns = names.pop(0)
+
+    initial_content = []
+    values = df.values.tolist()
+    values = [value[1:] for value in values]
+    values = list(itertools.chain.from_iterable(values))
+    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
+    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
+    values_n_flags['value'] = values_n_flags['value'].str.replace(',', '')
+    
+    for line in df[new_columns]:
+        for when in names:
+            initial_content.append((',').join([line, when]))
+    new_columns = (',').join([new_columns, 'when'])
+    new_df[new_columns] = initial_content
+
+    columns = new_columns.split(',')
+    new_df = new_df[new_columns].str.split(',', expand=True)
+    new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
+    new_df = new_df.rename(columns={'GEO':'where'})
+    new_df[['value', 'flag']] = values_n_flags
+
+    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['AGE', 'SEX', 'INDIC_IL', 'UNIT\TIME'], values = 'value', aggfunc='first')
+    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df.columns = new_df.columns.to_flat_index()
+    new_df.columns = [('income_'+column[0]+'_'+column[1]+'_'+column[2]+'_'+column[3]).lower() for column in new_df.columns]
+    new_df.rename(columns={'income_where___':'where', 'income_when___':'when'}, inplace=True)
+    new_df = new_df.replace(to_replace=':', value=np.nan)
+
+    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
+
+    # Add when_type and where_type TODO: for example the euro area is now labeled as a country
+    where_type = ['C'] * new_df.shape[0]
+    when_type = ['year'] * new_df.shape[0]
+
+    new_df['where_type'] = where_type
+    new_df['when_type'] = when_type
+
+    # Lowercase countrie names to match Valtteri style
+    new_df['where'] = [where.lower() for where in new_df['where']]
 
     return new_df
 
 
 def run():
 
-    df = pd.read_csv('../database/ei_cphi_m.tsv', sep='\t')
+    cphi_df = pd.read_csv('../database/ei_cphi_m.tsv', sep='\t')
+    health_out_of_pocket_df = pd.read_csv('../database/tepsr_sp310+ESTAT.tsv', sep='\t')
+    income_df = pd.read_csv('../database/ilc_di03_1.tsv', sep='\t')
 
-    # Flatten DataFrame
-    df = flatten(df)
+    # Flatten DataFrames
+    cphi_df = flatten_cphi(cphi_df)
+    health_out_of_pocket_df = flatten_health(health_out_of_pocket_df)
+    income_df = flatten_income(income_df)
 
-    # Add when_type and where_type TODO: for example the euro area is now labeled as a country
-    where_type = ['C'] * df.shape[0]
-    when_type = ['month'] * df.shape[0]
+    # Merge DataFrames
+    dfs = [cphi_df]
+    df = pd.concat(dfs)
 
-    df['where_type'] = where_type
-    df['when_type'] = when_type
+    # Clusters for countries
+    clusteriser = CountryClusteriser()
+    country_clusters_df = clusteriser.run()
 
     id_columns = ['when', 'when_type', 'where', 'where_type']
     base_columns = [column for column in df.columns if column not in id_columns]
@@ -186,6 +341,9 @@ def run():
     # Compare columns to USA average
     df = compare_to_us(df, base_columns)
 
+    # Compare to similar countries
+    df = compare_to_similar(df, country_clusters_df, base_columns)
+
     # Rank value columns
     df = rank_df(df, base_columns)
 
@@ -193,22 +351,7 @@ def run():
     outlierness_columns = [column for column in df.columns if column not in id_columns]
     df = add_outlierness_to_cphi_data(df, outlierness_columns, id_columns)
 
-    # Remove redundant spaces
-    df['when'] = [when.strip(' ') for when in df['when']]
-    # Lowercase countrie names to match Valtteri style
-    df['where'] = [where.lower() for where in df['where']]
-
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/cphi_test.csv'), index=False)
-
-
-    # print('Converter')
-    # ConverterC()
-
-    # print('Importer')
-    # ImporterC()
-
-    # print('Trend Finder')
-    # TrendFinder()
+    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/test.csv'), index=False)
 
 
 # class ImporterC:
