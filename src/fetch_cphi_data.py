@@ -290,7 +290,7 @@ def flatten_income(df):
     new_df = new_df.rename(columns={'GEO':'where'})
     new_df[['value', 'flag']] = values_n_flags
 
-    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['AGE', 'SEX', 'INDIC_IL', 'UNIT\TIME'], values = 'value', aggfunc='first')
+    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['AGE', 'SEX', 'INDIC_IL', 'UNIT\\TIME'], values = 'value', aggfunc='first')
     new_df.reset_index(level=['where', 'when'], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
     new_df.columns = [('income_'+column[0]+'_'+column[1]+'_'+column[2]+'_'+column[3]).lower() for column in new_df.columns]
