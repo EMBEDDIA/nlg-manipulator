@@ -73,7 +73,6 @@ class CountryClusteriser():
         kmeans = KMeans(n_clusters=4, random_state=0).fit(X)
         df['cluster'] = kmeans.labels_
         df = df[['where', 'cluster']]
-        df['where'] = [name.lower() for name in df['where']]
         
         return df
 
