@@ -6,7 +6,7 @@ Work-in-progress.
 
 Data that is used is collected from [Eurostat Database](https://ec.europa.eu/eurostat/data/database).
 
-Chosen datasets are flattened to two dimensional Pandas DataFrames and combined. The subDataFrames have the following columns: `'when', 'when_type', 'where', 'where_type'` and columns for the actual values. The value column names begin with an indicator to the original dataset. Value column name maps to `what_type` and value to `what` in message generation.
+Chosen datasets are flattened to two dimensional Pandas DataFrames and combined. The subDataFrames have the following columns: `'when', 'when_type', 'where', 'where_type'` and columns for the actual values. The value column names begin with an indicator to the original dataset. Value column name maps to `what_type` and value to `what` in message generation. The `fetch_eu_data.py` file is run if there is no correct data file available when the server boots. This will take a lot of time!
 
 ## Pipeline
 
