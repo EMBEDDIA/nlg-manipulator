@@ -1,11 +1,5 @@
 en: {where} {time} {what} {what_type}
+fi: Alueella {where} {time} {what} {what_type}
 en-head: {where} {time} {what} {what_type}
-| what_type = cphi.*
-
-en: {where} {time} {what} {what_type}
-en-head: {where} {time} {what} {what_type}
-| what_type = income.*
-
-en: {where} {time} {what} {what_type}
-en-head: {where} {time} {what} {what_type}
-| what_type = health.*
+fi-head: Alueella {where} {time} {what} {what_type}
+| where_type = C
