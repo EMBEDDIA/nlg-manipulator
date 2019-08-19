@@ -1,7 +1,7 @@
 import re
 import logging
 from core.template import LiteralSlot
-from dictionary_fi import CRIME_TYPES, MONTHS, SMALL_CARDINALS, SMALL_ORDINALS
+from dictionary_fi import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS
 log = logging.getLogger('root')
 
 
