@@ -1,8 +1,8 @@
 from .pipeline import NLGPipelineComponent
 
-from realize_slots_fi import FinnishRealizer
+from realize_slots_fi_new import FinnishRealizer
 from realize_slots_sv import SwedishRealizer
-from realize_slots_en import EnglishRealizer
+from realize_slots_en_new import EnglishRealizer
 
 import logging
 import re
