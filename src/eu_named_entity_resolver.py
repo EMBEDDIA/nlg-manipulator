@@ -3,12 +3,12 @@ import logging
 log = logging.getLogger('root')
 from core import EntityNameResolver
 
-from realize_slots_fi import FinnishRealizer
+from realize_slots_fi_new import FinnishRealizer
 from realize_slots_sv import SwedishRealizer
-from realize_slots_en import EnglishRealizer
+from realize_slots_en_new import EnglishRealizer
 
 
-class CPHIEntityNameResolver(EntityNameResolver):
+class EUEntityNameResolver(EntityNameResolver):
     from paramconfig import value_type_re
     value_type_re = re.compile(value_type_re)
 

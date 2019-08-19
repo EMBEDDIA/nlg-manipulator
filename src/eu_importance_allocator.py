@@ -7,7 +7,7 @@ import paramconfig as pfg
 log = logging.getLogger('root')
 
 
-class CPHIImportanceSelector(NLGPipelineComponent):
+class EUImportanceSelector(NLGPipelineComponent):
     def run(self, registry, random, language, messages):
         """
         Runs this pipeline component.
@@ -46,10 +46,8 @@ class CPHIImportanceSelector(NLGPipelineComponent):
         # importance of fact
         category = fact.what_type.split('_')[0]
         what_type_score = pfg.category_scores.get(category, 1)
-        if '_comp_eu' in fact.what_type:
-            what_type_score *= pfg.eu_comp_weight
-        elif '_comp_us' in fact.what_type:
-            what_type_score *= pfg.us_comp_weight
+        if '_comp_similar' in fact.what_type:
+            what_type_score *= pfg.comp_weight
         elif '_rank_reverse' in fact.what_type:
             what_type_score *= pfg.rank_reverse_weight
         elif '_rank' in fact.what_type:
@@ -61,7 +59,7 @@ class CPHIImportanceSelector(NLGPipelineComponent):
             what_type_score *= 500
 
         # importance of value
-        what_score = what_type_score * outlier_score
+        what_score = what_type_score# * outlier_score
 
         when_score = 20
         # importance of time
