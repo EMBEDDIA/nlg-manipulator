@@ -1,4 +1,4 @@
-from service import CPHINlgService
+from service import EUNlgService
 import os
 import random
 import sys
@@ -28,7 +28,7 @@ log.addHandler(handler)
 
 # Bottle
 app = Bottle()
-service = CPHINlgService(
+service = EUNlgService(
     random_seed = 4551546,
     force_cache_refresh = args.force_cache_refresh
 )

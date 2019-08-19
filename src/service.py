@@ -10,22 +10,22 @@ from collections import OrderedDict
 log = logging.getLogger('root')
 
 from core import Registry, NLGPipeline, DataFrameStore
-from cphi_message_generator import CPHIMessageGenerator, NoMessagesForSelectionException
+from eu_message_generator import EUMessageGenerator, NoMessagesForSelectionException
 from core import BodyDocumentPlanner, HeadlineDocumentPlanner
 from templates.read_multiling import read_templates_file
 from core import SlotRealizer
 from core import TemplateSelector
 from core import Aggregator
-from cphi_named_entity_resolver import CPHIEntityNameResolver
+from eu_named_entity_resolver import EUEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
-from cphi_importance_allocator import CPHIImportanceSelector
+from eu_importance_allocator import EUImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 from locations import LocationHierarchy
 from locator_map_data_generator import LocatorMapDataGenerator
 from graph_data_generator import GraphDataGenerator
 
 
-class CPHINlgService(object):
+class EUNlgService(object):
 
     def __init__(self, random_seed=None, force_cache_refresh=False, nomorphi=True):
         """
@@ -42,7 +42,7 @@ class CPHINlgService(object):
         self.graph_data_generator = GraphDataGenerator()
 
         data = [
-            ('../data/data.csv', '../data/data.cache', 'cphi-data'),
+            ('../data/eu_data.csv', '../data/eu_data.cache', 'eu-data'),
         ]
 
         for csv_path, cache_path, registry_name in data:
@@ -52,7 +52,7 @@ class CPHINlgService(object):
             if force_cache_refresh or not os.path.exists(cache_path):
                 if not os.path.exists(csv_path):
                     log.info('No pre-computed CSV at "{}", generating'.format(csv_path))
-                    from fetch_cphi_data import run as fetch_data
+                    from fetch_eu_data import run as fetch_data
                     fetch_data()
                 compute = lambda: pd.read_csv(csv_path, index_col=False)
             self.registry.register(registry_name, DataFrameStore(
@@ -88,13 +88,13 @@ class CPHINlgService(object):
         def _get_components(headline=False):
             # Put together the list of components
             # This varies depending on whether it's for headlines and whether we're using Omorphi
-            yield CPHIMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
-            yield CPHIImportanceSelector()
+            yield EUMessageGenerator(expand=not headline)  # Don't expand facts for headlines!
+            yield EUImportanceSelector()
             yield HeadlineDocumentPlanner() if headline else BodyDocumentPlanner()
             yield TemplateSelector()
             yield Aggregator()
             yield SlotRealizer()
-            yield CPHIEntityNameResolver()
+            yield EUEntityNameResolver()
             if not nomorphi:
                 # Don't even try importing Omorphi if we're not using it
                 from omorfi_generator import OmorfiGenerator
