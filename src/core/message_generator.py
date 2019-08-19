@@ -98,7 +98,7 @@ class MessageGenerator(NLGPipelineComponent):
             # _grouped_by_crime_place_year_outlierness
             # Adjusted the code to choose the _time_place_outlierness for now
             if not outlierness:
-                outlierness = row.get(col_name + '_grouped_by_cphi_time_outlierness', None)
+                outlierness = row.get(col_name + '_grouped_by_time_outlierness', None)
 
             if what is None or what == "" or (isinstance(what, float) and isnan(what)):
                 # 'what' is effectively undefined, do not REALLY generate the message.
