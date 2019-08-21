@@ -72,7 +72,7 @@ INCOME = {
 }
 
 HEALTH = {
-    'hf3': "kotitalouksien suora maksu",
+    'hf3': "kotitalouksien suoraan maksamana",
     'pc-che': "prosentuaalinen osuus nykyisistä terveysmenoista",
 }
 
@@ -122,8 +122,8 @@ COUNTRIES = {
 COMPARISONS = {
     'more': 'enemmän kuin',
     'less': 'vähemmän kuin',
-    'eu': "EU keskiarvo",
-    'us': "US keskiarvo",
+    'eu': "Euroopan Unionin keskiarvo",
+    'us': "Yhdysvaltojen keskiarvo",
     'similar': "keskiarvo maille, joita pidetään samankaltaisina",
 }
 
