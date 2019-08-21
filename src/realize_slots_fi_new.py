@@ -379,12 +379,13 @@ class FinnishRealizer():
         place_type, place = place_matcher.match(entity_code).groups()
         template = slot.parent
         idx = template.components.index(slot)
+        prep = slot.attributes.get('prep', "alueella") + " "
         added_slots = 0
         if place_type == 'C':
             place = COUNTRIES.get(place)
         if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
-                self._update_slot_value(slot, place)
+                self._update_slot_value(slot, prep + place)
             elif random.rand() < 0.5:
                 if place_type == 'M':
                     self._update_slot_value(slot, "kunnassa")

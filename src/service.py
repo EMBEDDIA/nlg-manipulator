@@ -22,7 +22,6 @@ from eu_importance_allocator import EUImportanceSelector
 from language_constants import pronouns, vocabulary, errors
 from locations import LocationHierarchy
 from locator_map_data_generator import LocatorMapDataGenerator
-from graph_data_generator import GraphDataGenerator
 
 
 class EUNlgService(object):
@@ -39,7 +38,6 @@ class EUNlgService(object):
         # New registry and result importer
         self.registry = Registry()
         self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
-        self.graph_data_generator = GraphDataGenerator()
 
         data = [
             ('../data/eu_data.csv', '../data/eu_data.cache', 'eu-data'),
@@ -164,17 +162,7 @@ class EUNlgService(object):
 
         locator_map_data = self.locator_map_data_generator.generate(where) if where_type == 'M' else ''
 
-        if where_type == 'M':
-            graph_nucleus = self.graph_pipeline.run(
-                (where, where_type),
-                'fi',
-                prng_seed=self.registry.get('seed'),
-            )[0][0]
-            graph_data = self.graph_data_generator.generate(self.registry, graph_nucleus, where, language)
-        else:
-            graph_data = ''
-
-        return headline, body, locator_map_data, graph_data
+        return headline, body
 
     def _set_seed(self, seed_val=None):
         log.info("Selecting seed for NLG pipeline")

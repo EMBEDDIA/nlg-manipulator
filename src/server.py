@@ -3,6 +3,7 @@ import os
 import random
 import sys
 import argparse
+from dictionary_en import COUNTRIES
 from bottle import Bottle, route, request, response, run, redirect, view, TEMPLATE_PATH, static_file, get, post
 
 #
@@ -100,15 +101,15 @@ def news_html():
         where_type = 'C'
         where = 'fi'
 
-    header, body, locator_map, graph = get_article(language, where, where_type)
+    header, body = get_article(language, where, where_type)
     return dict({
         "where": where,
         "where_type": where_type,
         "language": language,
         "header": header,
         "body": body,
-        "locator_map": locator_map,
-        "graph": graph
+        # "locator_map": locator_map,
+        # "graph": graph
     })
 
 
@@ -127,7 +128,7 @@ def news_api():
         where_type = 'C'
         where = 'FI'
 
-    header, body, locator_map, graph = get_article(language, where, where_type)
+    header, body = get_article(language, where, where_type)
     return dict({
         "where": where,
         "where_type": where_type,
@@ -140,19 +141,18 @@ def news_api():
 
 def random_news():
     language = request.query.language or "fi"
-    geodata = service.registry.get('geodata-lookup')
-    options = list(geodata.get(language, geodata["fi"])["M"].keys())
+    options = list(COUNTRIES.keys())
     m = random.choice(options)
 
-    header, body, locator_map, graph = get_article(language, m, "M")
+    header, body = get_article(language, m, "C")
     return dict({
         "where": m,
-        "where_type": "M",
+        "where_type": "C",
         "language": language,
         "header": header,
         "body": body,
-        "locator_map": locator_map,
-        "graph": graph,
+        # "locator_map": locator_map,
+        # "graph": graph,
     })
 
 @app.route('/random')

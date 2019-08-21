@@ -4,7 +4,6 @@ log = logging.getLogger('root')
 from core import EntityNameResolver
 
 from realize_slots_fi_new import FinnishRealizer
-from realize_slots_sv import SwedishRealizer
 from realize_slots_en_new import EnglishRealizer
 
 
@@ -18,7 +17,6 @@ class EUEntityNameResolver(EntityNameResolver):
         self._matcher = re.compile("\[(PLACE|TIME):([^\]:]*):([^\]]*)\]")
         self._realizers = {
             'fi': FinnishRealizer(),
-            'sv': SwedishRealizer(),
             'en': EnglishRealizer(),
         }
 
