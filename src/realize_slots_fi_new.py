@@ -20,10 +20,7 @@ class FinnishRealizer():
 
         self.units = {
             'base': self._unit_base,
-            # 'percentage': self._unit_percentage,
-            # 'change': self._unit_change,
             'rank': self._unit_rank,
-            # 'trend': self._unit_trend,
         }
 
         self.time = {
@@ -96,137 +93,89 @@ class FinnishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-        unit = unit.split('.')
+        unit = unit.split('_')
         # Add stuff _before_ the what slot ...
         idx -= 1
 
+        templ = TEMPLATES.get(unit[0])
         if unit[0] == 'cphi':
-            if not change:
-                if len(unit) > 1:
-                    new_value = CPHI.get(unit[1], unit[1])
-                else:
-                    new_value = CPHI.get(unit[0], unit[0])
-                template.add_slot(idx, LiteralSlot("HICP value for"))
-                idx += 1
-                template.add_slot(idx, LiteralSlot(new_value))
-                idx += 1
-                template.add_slot(idx, LiteralSlot("was"))
-                idx += 1
-                added_slots += 3
-
-            # Add a definite article before the what slot
-            template.add_slot(idx, LiteralSlot("the"))
-            added_slots += 1
-            idx += 1
-
-            # ... and jump back to the correct index
-            idx += 1
-
-            if prev_slot.slot_type == 'what':
-                # If the rank is first, the actual numeral isn't realized at all
-                if slot.fact.what == 1:
-                    prev_slot.value = lambda x: ""
-                # If the numeral is realized, it needs to be an ordinal
-                else:
-                    prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
-
-            if rank in ['_rank', '_increase_rank', '_decrease_rank']:
-                slot.value = lambda x: "highest"
-            elif rank == '_rank_reverse':
-                slot.value = lambda x: "lowest"
-            else:
-                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-            idx += 1
-            # If talking about changes, we will do the rest in the change handler
-            if change:
-                return added_slots
-
-            if not change:
-                # Skip over the time slot
-                idx += 1
-
-                if grouped_by == '_time':
-                    template.add_slot(idx, LiteralSlot("compared to other price categories"))
-                else:
-                    raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-                added_slots += 1
-                idx += 1
-
+            dictionary = CPHI
         elif unit[0] == 'income':
-            if not change:
-                template.add_slot(idx, LiteralSlot(INCOME.get(unit[3])))
-                idx += 1
-                template.add_slot(idx, LiteralSlot(INCOME.get(unit[2])))
-                idx += 1
-                template.add_slot(idx, LiteralSlot("for age group"))
-                idx += 1
-                template.add_slot(idx, LiteralSlot(INCOME.get(unit[1])))
-                idx += 1
-                template.add_slot(idx, LiteralSlot("was"))
-                idx += 1
-                added_slots += 5
+            dictionary = INCOME
+        elif unit[0] == 'health':
+            dictionary = HEALTH
 
-            # Add a definite article before the what slot
-            template.add_slot(idx, LiteralSlot("the"))
+        for t in templ:
+            if isinstance(t,int):
+                template.add_slot(idx - 1, LiteralSlot(dictionary.get(unit[t])))
+            else:
+                template.add_slot(idx - 1, LiteralSlot(t))
+            added_slots += 1
+            idx += 1 
+
+        idx, added_slots, template = self._rank(idx, added_slots, template, slot, prev_slot, rank)
+
+        # If talking about changes, we will do the rest in the change handler
+        if change:
+            return added_slots
+        if not change:
+            # Skip over the time slot
+            idx += 1
+
+            if grouped_by == '_time':
+                template.add_slot(idx, LiteralSlot(COMPARISONS.get('rank')))
+            else:   
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
             idx += 1
-
-            # ... and jump back to the correct index
-            idx += 1
-
-            if prev_slot.slot_type == 'what':
-                # If the rank is first, the actual numeral isn't realized at all
-                if slot.fact.what == 1:
-                    prev_slot.value = lambda x: ""
-                # If the numeral is realized, it needs to be an ordinal
-                else:
-                    prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
-
-            if rank in ['_rank', '_increase_rank', '_decrease_rank']:
-                slot.value = lambda x: "highest"
-            elif rank == '_rank_reverse':
-                slot.value = lambda x: "lowest"
-            else:
-                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-            idx += 1
-            # If talking about changes, we will do the rest in the change handler
-            if change:
-                return added_slots
-
-            if not change:
-                # Skip over the time slot
-                idx += 1
-
-                if grouped_by == '_time':
-                    template.add_slot(idx, LiteralSlot("compared to other age groups"))
-                else:   
-                    raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-                added_slots += 1
-                idx += 1
 
         return added_slots
 
 
+    def _rank(self, idx, added_slots, template, slot, prev_slot, rank):
+        # TODO took of the definite article to combine English and Finnish realization
+        # # Add a definite article before the what slot
+        # template.add_slot(idx, LiteralSlot("the"))
+        # added_slots += 1
+        # idx += 1
+
+        # ... and jump back to the correct index
+        idx += 1
+
+        if prev_slot.slot_type == 'what':
+            # If the rank is first, the actual numeral isn't realized at all
+            if slot.fact.what == 1:
+                prev_slot.value = lambda x: ""
+            # If the numeral is realized, it needs to be an ordinal
+            else:
+                prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
+
+        if rank in ['_rank']:
+            slot.value = lambda x: COMPARISONS.get('highest')
+        elif rank == '_rank_reverse':
+            slot.value = lambda x: COMPARISONS.get('lowest')
+        else:
+            raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+        idx += 1
+        
+        return idx, added_slots, template
+
+    
     def _ordinal(self, token):
         token = "{:n}".format(token)
         if token in SMALL_ORDINALS:
-            # Use words for numbers up to 12
-            # 0 shouldn't really be needed, but use 0th if it really has to be used
             return SMALL_ORDINALS[token]
-        if len(token) > 1 and token[-2:] in ['11', '12', '13']:
-            return token + "th"
-        if token[-1] == '1':
-            return token + "st"
-        if token[-1] == '2':
-            return token + "nd"
-        if token[-1] == '3':
-            return token + "rd"
-        else:
-            return token + "th"
+        return token + "."
+
 
     def _cardinal(self, token):
         token_str = "{:.2f}".format(token).rstrip("0").rstrip(".")
-        return SMALL_CARDINALS.get(token_str, token_str)
+        if "." in token_str:
+            token_str = re.sub(r'(\d+).(\d+)', r'\1,\2', token_str)
+        if token_str in SMALL_CARDINALS:
+            return SMALL_CARDINALS[token_str]
+        return token_str
+
 
     def _update_slot_value(self, slot, new_value):
         slot.value = lambda x: new_value

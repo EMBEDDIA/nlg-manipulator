@@ -119,12 +119,20 @@ COUNTRIES = {
 	'US': 'Yhdysvallat',
 }
 
+PLACES = {
+    'M': 'kunta',
+    'C': 'maa',
+}
+
 COMPARISONS = {
     'more': 'enemmän kuin',
     'less': 'vähemmän kuin',
     'eu': "Euroopan Unionin keskiarvo",
     'us': "Yhdysvaltojen keskiarvo",
     'similar': "keskiarvo maille, joita pidetään samankaltaisina",
+    'highest': 'korkein',
+    'lowest': 'matalin',
+    'rank': 'verrattuna muihin maihin',
 }
 
 SMALL_ORDINALS = {
@@ -138,6 +146,10 @@ SMALL_ORDINALS = {
     '8': "kahdeksas",
     '9': "yhdeksäs",
     '10': "kymmenes",
+}
+
+ORDINALS = {
+    'else': '.',
 }
 
 SMALL_CARDINALS = {

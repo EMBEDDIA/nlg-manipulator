@@ -1,8 +1,8 @@
 # what type palojen järjestys määritelty täällä
 TEMPLATES = {
-    'cphi': [1, 'was', 'for price category', 2], # cphi_hicp2015_cp-hi00
+    'cphi': [1, 'was', 'for price category', 2], # cphi(0)_hicp2015(1)_cp-hi00(2)
     'income': ['among', 2, 'in age group', 1, 'the', 3, 'was in', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
-    'health': ['the', 1, 'was for', 2], # health_pc-che_hf3
+    'health': ['the', 1, 'was for', 2], # health(0)_pc-che(1)_hf3(2)
 }
 
 CPHI = {
@@ -10,31 +10,30 @@ CPHI = {
     'rt1': 'growth rate on previous month', # growth rate on previous period (t/t-1)
     'rt12': 'growth rate', # growth rate (t/t-12)
     'cp-hi00': 'all items',
-    'cp-hi01':	'food and non alcoholic beverages',
-    'cp-hi02':	'alcoholic beverages and tobacco',
-    'cp-hi03':	'clothing and footwear',
-    'cp-hi04':	'housing, water, electricity,gas and other fuels',
-    'cp-hi05':	'furnishings, household equipment and maintenance',
-    'cp-hi06':	'health',
-    'cp-hi07':	'transport',
-    'cp-hi08':	'communication',
+    'cp-hi01': 'food and non alcoholic beverages',
+    'cp-hi02': 'alcoholic beverages and tobacco',
+    'cp-hi03': 'clothing and footwear',
+    'cp-hi04': 'housing, water, electricity,gas and other fuels',
+    'cp-hi05': 'furnishings, household equipment and maintenance',
+    'cp-hi06': 'health',
+    'cp-hi07': 'transport',
+    'cp-hi08': 'communication',
     'cp-hi09': 'recreation and culture',
-    'cp-hi10':	'education',
-    'cp-hi11':	'hotels, cafes and restaurants',
-    'cp-hi12':	'miscellaneous goods and services',
+    'cp-hi10': 'education',
+    'cp-hi11': 'hotels, cafes and restaurants',
+    'cp-hi12': 'miscellaneous goods and services',
     'cp-hi00xef': 'all items excluding energy, food, alcohol and tobacco',
     'cp-hi00xtb': 'all items excluding tobacco',
     'cp-hie': 'energy',
     'cp-hif': 'food',
-    'cp-hifu':	'unprocessed food',
+    'cp-hifu': 'unprocessed food',
     'cp-hig': 'total goods',
-    'cp-hiig':	'industrial goods',
+    'cp-hiig': 'industrial goods',
     'cp-his': 'total services',
     'cp-hiigxe': 'non-energy industrial goods',
     'cp-hi00xe': 'all items excluding energy',
     'cp-hi00xefu': 'all items excluding energy and unprocessed food',
     'cp-hi00xes': 'all items excluding energy and seasonal food',
-
 }
 
 INCOME = {
@@ -64,12 +63,12 @@ INCOME = {
     'y25-54': 'from 25 to 54 years',
     'y50-64': 'from 50 to 64 years',
     'y55-64': 'from 55 to 64 years',
-    'y-lT60': 'less than 60 years',
+    'y-lt60': 'less than 60 years',
     'y-ge60': '60 years or over',
-    'y-lT65': 'less than 65 years',
+    'y-lt65': 'less than 65 years',
     'y65-74': 'from 65 to 74 years',
     'y-ge65': '65 years or over',
-    'y-lT75': 'less than 75 years',
+    'y-lt75': 'less than 75 years',
     'y-ge75': '75 years or over',
 }
 
@@ -81,7 +80,7 @@ HEALTH = {
 SMALL_ORDINALS = {
     '1': "first",
     '2': "second",
-    '3': "tcp-hird",
+    '3': "third",
     '4': "fourth",
     '5': "fifth",
     '6': "sixth",
@@ -91,6 +90,13 @@ SMALL_ORDINALS = {
     '10': "tenth",
     '11': "eleventh",
     '12': "twelfth",
+}
+
+ORDINALS = {
+    '1': "st",
+    '2': "nd",
+    '3': "rd",
+    'else': 'th',
 }
 
 SMALL_CARDINALS = {
@@ -119,6 +125,12 @@ MONTHS = {
     '10': "October",
     '11': "November",
     '12': "December",
+    'reference_options': ["during the month", "also", "at the same time"],
+}
+
+PLACES = {
+    'M': 'the municipality',
+    'C': 'the country',
 }
 
 COUNTRIES = {
@@ -170,4 +182,7 @@ COMPARISONS = {
     'eu': "EU average",
     'us': "US average",
     'similar': "the average for countries that are considered to be similar",
+    'highest': 'highest',
+    'lowest': 'lowest',
+    'rank': 'compared to other countries',
 }

@@ -1,6 +1,6 @@
 import re
 import logging
-from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, CPHI, INCOME, HEALTH, COMPARISONS, COUNTRIES, TEMPLATES
+from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, CPHI, INCOME, HEALTH, COMPARISONS, COUNTRIES, TEMPLATES, PLACES
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
@@ -20,10 +20,7 @@ class EnglishRealizer():
 
         self.units = {
             'base': self._unit_base,
-            # 'percentage': self._unit_percentage,
-            # 'change': self._unit_change,
             'rank': self._unit_rank,
-            # 'trend': self._unit_trend,
         }
 
         self.time = {
@@ -34,14 +31,12 @@ class EnglishRealizer():
         }
 
     def _unit_base(self, slot):
-        #match = self.value_type_re.fullmatch(slot.value)
-        #unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
         what_type = slot.fact.what_type.split('_')
 
-        temp = TEMPLATES.get(what_type[0])
+        templ = TEMPLATES.get(what_type[0])
         if what_type[0] == 'cphi':
             dictionary = CPHI
         elif what_type[0] == 'income':
@@ -49,7 +44,7 @@ class EnglishRealizer():
         elif what_type[0] == 'health':
             dictionary = HEALTH
             
-        for t in temp:
+        for t in templ:
             if isinstance(t,int):
                 template.add_slot(idx - 1, LiteralSlot(dictionary.get(what_type[t])))
             else:
@@ -96,117 +91,74 @@ class EnglishRealizer():
         idx = template.components.index(slot)
         added_slots = 0
         prev_slot = template.components[idx - 1]
-        unit = unit.split('.')
+        unit = unit.split('_')
         # Add stuff _before_ the what slot ...
         idx -= 1
 
+        templ = TEMPLATES.get(unit[0])
         if unit[0] == 'cphi':
-            if not change:
-                if len(unit) > 1:
-                    new_value = CPHI.get(unit[1], unit[1])
-                else:
-                    new_value = CPHI.get(unit[0], unit[0])
-                template.add_slot(idx, LiteralSlot("HICP value for"))
-                idx += 1
-                template.add_slot(idx, LiteralSlot(new_value))
-                idx += 1
-                template.add_slot(idx, LiteralSlot("was"))
-                idx += 1
-                added_slots += 3
-
-            # Add a definite article before the what slot
-            template.add_slot(idx, LiteralSlot("the"))
-            added_slots += 1
-            idx += 1
-
-            # ... and jump back to the correct index
-            idx += 1
-
-            if prev_slot.slot_type == 'what':
-                # If the rank is first, the actual numeral isn't realized at all
-                if slot.fact.what == 1:
-                    prev_slot.value = lambda x: ""
-                # If the numeral is realized, it needs to be an ordinal
-                else:
-                    prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
-
-            if rank in ['_rank', '_increase_rank', '_decrease_rank']:
-                slot.value = lambda x: "highest"
-            elif rank == '_rank_reverse':
-                slot.value = lambda x: "lowest"
-            else:
-                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-            idx += 1
-            # If talking about changes, we will do the rest in the change handler
-            if change:
-                return added_slots
-
-            if not change:
-                # Skip over the time slot
-                idx += 1
-
-                if grouped_by == '_time':
-                    template.add_slot(idx, LiteralSlot("compared to other price categories"))
-                else:
-                    raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-                added_slots += 1
-                idx += 1
-
+            dictionary = CPHI
         elif unit[0] == 'income':
-            if not change:
-                template.add_slot(idx, LiteralSlot(INCOME.get(unit[3])))
-                idx += 1
-                template.add_slot(idx, LiteralSlot(INCOME.get(unit[2])))
-                idx += 1
-                template.add_slot(idx, LiteralSlot("for age group"))
-                idx += 1
-                template.add_slot(idx, LiteralSlot(INCOME.get(unit[1])))
-                idx += 1
-                template.add_slot(idx, LiteralSlot("was"))
-                idx += 1
-                added_slots += 5
+            dictionary = INCOME
+        elif unit[0] == 'health':
+            dictionary = HEALTH
 
-            # Add a definite article before the what slot
-            template.add_slot(idx, LiteralSlot("the"))
+        for t in templ:
+            if isinstance(t,int):
+                template.add_slot(idx - 1, LiteralSlot(dictionary.get(unit[t])))
+            else:
+                template.add_slot(idx - 1, LiteralSlot(t))
+            added_slots += 1
+            idx += 1 
+
+        idx, added_slots, template = self._rank(idx, added_slots, template, slot, prev_slot, rank)
+
+        # If talking about changes, we will do the rest in the change handler
+        if change:
+            return added_slots
+        if not change:
+            # Skip over the time slot
+            idx += 1
+
+            if grouped_by == '_time':
+                template.add_slot(idx, LiteralSlot(COMPARISONS.get('rank')))
+            else:   
+                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
             added_slots += 1
             idx += 1
-
-            # ... and jump back to the correct index
-            idx += 1
-
-            if prev_slot.slot_type == 'what':
-                # If the rank is first, the actual numeral isn't realized at all
-                if slot.fact.what == 1:
-                    prev_slot.value = lambda x: ""
-                # If the numeral is realized, it needs to be an ordinal
-                else:
-                    prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
-
-            if rank in ['_rank', '_increase_rank', '_decrease_rank']:
-                slot.value = lambda x: "highest"
-            elif rank == '_rank_reverse':
-                slot.value = lambda x: "lowest"
-            else:
-                raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-            idx += 1
-            # If talking about changes, we will do the rest in the change handler
-            if change:
-                return added_slots
-
-            if not change:
-                # Skip over the time slot
-                idx += 1
-
-                if grouped_by == '_time':
-                    template.add_slot(idx, LiteralSlot("compared to other age groups"))
-                else:   
-                    raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
-                added_slots += 1
-                idx += 1
 
         return added_slots
 
 
+    def _rank(self, idx, added_slots, template, slot, prev_slot, rank):
+        # TODO took of the definite article to combine English and Finnish realization
+        # # Add a definite article before the what slot
+        # template.add_slot(idx, LiteralSlot("the"))
+        # added_slots += 1
+        # idx += 1
+
+        # ... and jump back to the correct index
+        idx += 1
+
+        if prev_slot.slot_type == 'what':
+            # If the rank is first, the actual numeral isn't realized at all
+            if slot.fact.what == 1:
+                prev_slot.value = lambda x: ""
+            # If the numeral is realized, it needs to be an ordinal
+            else:
+                prev_slot.value = lambda x: self._ordinal(prev_slot.fact.what)
+
+        if rank in ['_rank']:
+            slot.value = lambda x: COMPARISONS.get('highest')
+        elif rank == '_rank_reverse':
+            slot.value = lambda x: COMPARISONS.get('lowest')
+        else:
+            raise AttributeError("This is impossible. The regex accepts only the above options for this group.")
+        idx += 1
+
+        return idx, added_slots, template
+
+    
     def _ordinal(self, token):
         token = "{:n}".format(token)
         if token in SMALL_ORDINALS:
@@ -251,13 +203,14 @@ class EnglishRealizer():
             slot.attributes['focus_slot'] = True
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
+            # TODO
             new_slot = LiteralSlot("in " + MONTHS[month])
             template.add_slot(idx, new_slot)
             added_slots += 1
             idx += 1
             self._update_slot_value(slot, year)
         elif slot.attributes['name_type'] == 'pronoun':
-            reference_options = ["during the month", "also", "at the same time"]
+            reference_options = MONTHS.get(reference_options)
             self._update_slot_value(slot, random.choice(reference_options))
         else:
             raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
@@ -384,15 +337,12 @@ class EnglishRealizer():
         if place_type == 'C':
             place = COUNTRIES.get(place)
         if place_type in ["C", "M"]:
-            print(place)
             if slot.attributes['name_type'] == 'full':
                 self._update_slot_value(slot, prep + place)
             elif random.rand() < 0.5:
-                if place_type == 'M':
-                    self._update_slot_value(slot, prep + "the municipality")
-                elif place_type == 'C':
-                    self._update_slot_value(slot, prep + "the country")
-                else:
+                try:
+                    self._update_slot_value(slot, prep + PLACES.get(place_type))
+                except:
                     raise Exception(
                         "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
             else:
