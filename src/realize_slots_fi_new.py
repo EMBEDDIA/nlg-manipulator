@@ -265,24 +265,14 @@ class FinnishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         if slot.attributes['name_type'] == 'full':
-            new_slot = LiteralSlot("vuodesta")
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            template.add_slot(idx, LiteralSlot(match.group(1)))
-            added_slots += 1
-            idx += 1
-            new_slot = LiteralSlot("vuoteen")
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            self._update_slot_value(slot, match.group(2))
+            self._update_slot_value(slot, TEMPLATES.get('year_change').format(match.group(1), match.grouo(2)))
         elif slot.attributes['name_type'] == 'short':
             self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
             slot.attributes['case'] = 'nominative'
         else:
             self._update_slot_value(slot, "")
         return added_slots
+
 
     def _time_change_month(self, random, slot):
         time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
@@ -293,20 +283,7 @@ class FinnishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         if slot.attributes['name_type'] == 'full':
-            new_slot = LiteralSlot(MONTHS[month1] + 'sta')
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            template.add_slot(idx, LiteralSlot(year1))
-            added_slots += 1
-            idx += 1
-            new_slot = LiteralSlot(MONTHS[month2] + 'hun')
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            template.add_slot(idx, LiteralSlot(year2))
-            added_slots += 1
-            idx += 1
+            self._update_slot_value(slot, TEMPLATES.get('month_change').format(month1, year1, month2, year2))
         elif slot.attributes['name_type'] == 'short':
             self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
             slot.attributes['case'] = 'nominative'
@@ -320,19 +297,17 @@ class FinnishRealizer():
         place_type, place = place_matcher.match(entity_code).groups()
         template = slot.parent
         idx = template.components.index(slot)
-        prep = slot.attributes.get('prep', "alueella") + " "
         added_slots = 0
+        
         if place_type == 'C':
             place = COUNTRIES.get(place)
         if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
-                self._update_slot_value(slot, prep + place)
+                self._update_slot_value(slot, TEMPLATES.get('place').format(place))
             elif random.rand() < 0.5:
-                if place_type == 'M':
-                    self._update_slot_value(slot, "kunnassa")
-                elif place_type == 'C':
-                    self._update_slot_value(slot, "maassa")
-                else:
+                try:
+                    self._update_slot_value(slot, TEMPLATES.get('place').format(place))
+                except:
                     raise Exception(
                         "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
             else:

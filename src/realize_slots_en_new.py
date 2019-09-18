@@ -204,7 +204,7 @@ class EnglishRealizer():
             slot.attributes['focus_slot'] = True
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
-            self._update_slot_value(slot, TEMPLATES.get('month_ssa').format(MONTHS.get(month), year))
+            self._update_slot_value(slot, TEMPLATES.get('month').format(MONTHS.get(month), year))
         elif slot.attributes['name_type'] == 'pronoun':
             reference_options = MONTHS.get(reference_options)
             self._update_slot_value(slot, random.choice(reference_options))
@@ -241,7 +241,7 @@ class EnglishRealizer():
         # if the year hasn't changed.
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
-            self._update_slot_value(slot, TEMPLATES.get('year_ssa').format(year))
+            self._update_slot_value(slot, TEMPLATES.get('year').format(year))
             if year is None:
                 # We have no idea when the event happened. This shouldn't be possible.
                 self._update_slot_value(slot, "unknown")
@@ -268,24 +268,14 @@ class EnglishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         if slot.attributes['name_type'] == 'full':
-            new_slot = LiteralSlot("from")
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            template.add_slot(idx, LiteralSlot(match.group(1)))
-            added_slots += 1
-            idx += 1
-            new_slot = LiteralSlot("to")
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            self._update_slot_value(slot, match.group(2))
+            self._update_slot_value(slot, TEMPLATES.get('year_change').format(match.group(1), match.grouo(2)))
         elif slot.attributes['name_type'] == 'short':
             self._update_slot_value(slot, match.group(1) + "-" + match.group(2))
             slot.attributes['case'] = 'nominative'
         else:
             self._update_slot_value(slot, "")
         return added_slots
+
 
     def _time_change_month(self, random, slot):
         time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
@@ -296,20 +286,7 @@ class EnglishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         if slot.attributes['name_type'] == 'full':
-            new_slot = LiteralSlot("from " + MONTHS[month1])
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            template.add_slot(idx, LiteralSlot(year1))
-            added_slots += 1
-            idx += 1
-            new_slot = LiteralSlot("to " + MONTHS[month2])
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            template.add_slot(idx, LiteralSlot(year2))
-            added_slots += 1
-            idx += 1
+            self._update_slot_value(slot, TEMPLATES.get('month_change').format(month1, year1, month2, year2))
         elif slot.attributes['name_type'] == 'short':
             self._update_slot_value(slot, month1 + "/" + year1 + "-" + month2 + "/" + year2)
             slot.attributes['case'] = 'nominative'
@@ -324,15 +301,15 @@ class EnglishRealizer():
         template = slot.parent
         idx = template.components.index(slot)
         added_slots = 0
-        prep = slot.attributes.get('prep', "in") + " "
+        
         if place_type == 'C':
             place = COUNTRIES.get(place)
         if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
-                self._update_slot_value(slot, prep + place)
+                self._update_slot_value(slot, TEMPLATES.get('place').format(place))
             elif random.rand() < 0.5:
                 try:
-                    self._update_slot_value(slot, prep + PLACES.get(place_type))
+                    self._update_slot_value(slot, TEMPLATES.get('place').format(place))
                 except:
                     raise Exception(
                         "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")

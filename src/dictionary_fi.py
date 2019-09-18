@@ -2,8 +2,11 @@ TEMPLATES = {
     'cphi': [1, 'oli hintakategorialle', 2], # cphi_hicp2015_cp-hi00
     'income': [2, 'ikäryhmässä', 1, 3, 'oli', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
     'health': [1, 'oli', 2], # health_pc-che_hf3
-    'month_ssa': 'ajassa {} {}',
-    'year_ssa': 'vuonna {}',
+    'month': 'ajassa {} {}',
+    'year': 'vuonna {}',
+    'year_change': 'vuodesta {} vuoteen {}',
+    'month_change': 'ajasta {} {} aikaan {} {}',
+    'place': 'alueella {}',
 }
 
 CPHI = {
