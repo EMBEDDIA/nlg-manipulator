@@ -244,4 +244,4 @@ if __name__ == "__main__":
     log.addHandler(handler)
 
     # Run
-    CPHINlgService().run_pipeline('en', 'fi', 'C')
+    EUNlgService().run_pipeline('en', 'fi', 'C')
