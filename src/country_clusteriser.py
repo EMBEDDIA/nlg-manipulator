@@ -3,7 +3,6 @@ import numpy as np
 from math import sqrt
 import math
 import os.path
-import columns as cls
 import paramconfig as prmcnf
 from operator import itemgetter
 import itertools
