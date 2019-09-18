@@ -3,6 +3,8 @@ TEMPLATES = {
     'cphi': [1, 'was', 'for price category', 2], # cphi(0)_hicp2015(1)_cp-hi00(2)
     'income': ['among', 2, 'in age group', 1, 'the', 3, 'was in', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
     'health': ['the', 1, 'was for', 2], # health(0)_pc-che(1)_hf3(2)
+    'month_ssa': 'in {} {}',
+    'year_ssa': 'in the year {}',
 }
 
 CPHI = {
@@ -126,6 +128,10 @@ MONTHS = {
     '11': "November",
     '12': "December",
     'reference_options': ["during the month", "also", "at the same time"],
+}
+
+YEARS = {
+    'reference_options': ["in the same year", "also during the same year", "also"],
 }
 
 PLACES = {

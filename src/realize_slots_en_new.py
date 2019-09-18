@@ -1,6 +1,6 @@
 import re
 import logging
-from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, CPHI, INCOME, HEALTH, COMPARISONS, COUNTRIES, TEMPLATES, PLACES
+from dictionary_en import MONTHS, SMALL_CARDINALS, SMALL_ORDINALS, CPHI, INCOME, HEALTH, COMPARISONS, COUNTRIES, TEMPLATES, PLACES, YEARS
 
 from core.template import LiteralSlot
 log = logging.getLogger('root')
@@ -184,6 +184,7 @@ class EnglishRealizer():
         slot.value = lambda x: new_value
         return 0
 
+
     def _time_month(self, random, slot):
         log.info(slot.slot_type)
         if slot.slot_type[:-2] == 'when':
@@ -203,12 +204,7 @@ class EnglishRealizer():
             slot.attributes['focus_slot'] = True
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
-            # TODO
-            new_slot = LiteralSlot("in " + MONTHS[month])
-            template.add_slot(idx, new_slot)
-            added_slots += 1
-            idx += 1
-            self._update_slot_value(slot, year)
+            self._update_slot_value(slot, TEMPLATES.get('month_ssa').format(MONTHS.get(month), year))
         elif slot.attributes['name_type'] == 'pronoun':
             reference_options = MONTHS.get(reference_options)
             self._update_slot_value(slot, random.choice(reference_options))
@@ -219,6 +215,7 @@ class EnglishRealizer():
             template.add_slot(idx, LiteralSlot(","))
             added_slots += 1
         return added_slots
+
 
     def _time_year(self, random, slot):
         if slot.slot_type[:-2] == 'when':
@@ -244,23 +241,16 @@ class EnglishRealizer():
         # if the year hasn't changed.
         if (slot.attributes['name_type'] in ['full', 'short']) or (
                 slot.attributes['name_type'] == 'pronoun' and random.rand() > 0.8):
-            template.add_slot(idx, LiteralSlot("in"))
-            added_slots += 1
-            idx += 1
-            if slot.attributes['name_type'] == 'full':
-                new_slot = LiteralSlot("the year")
-                template.add_slot(idx, new_slot)
-                added_slots += 1
-                idx += 1
+            self._update_slot_value(slot, TEMPLATES.get('year_ssa').format(year))
             if year is None:
                 # We have no idea when the event happened. This shouldn't be possible.
                 self._update_slot_value(slot, "unknown")
             elif type(year) is not str:
                 self._update_slot_value(slot, self._cardinal(year))
-            else:
-                self._update_slot_value(slot, year)
+            # else:
+            #     self._update_slot_value(slot, year)
         elif slot.attributes['name_type'] == 'pronoun':
-            reference_options = ["in the same year", "also during the same year", "also"]
+            reference_options = YEARS.get('reference_options')
             self._update_slot_value(slot, random.choice(reference_options))
         else:
             raise AttributeError("This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
@@ -269,6 +259,7 @@ class EnglishRealizer():
             template.add_slot(idx, LiteralSlot(","))
             added_slots += 1
         return added_slots
+
 
     def _time_change_year(self, random, slot):
         time_matcher = re.compile("\[TIME:([^\]:]*):([^\]]*)\]")
