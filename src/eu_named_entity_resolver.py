@@ -3,8 +3,7 @@ import logging
 log = logging.getLogger('root')
 from core import EntityNameResolver
 
-from realize_slots_fi_new import FinnishRealizer
-from realize_slots_en_new import EnglishRealizer
+from eu_realize_slots import EURealizer
 
 
 class EUEntityNameResolver(EntityNameResolver):
@@ -15,10 +14,6 @@ class EUEntityNameResolver(EntityNameResolver):
     def __init__(self):
         # [ENTITY:<group1>:<group2>] where group1 and group2 can contain anything but square brackets or double colon
         self._matcher = re.compile("\[(PLACE|TIME):([^\]:]*):([^\]]*)\]")
-        self._realizers = {
-            'fi': FinnishRealizer(),
-            'en': EnglishRealizer(),
-        }
 
     def is_entity(self, maybe_entity):
         # Match and convert the result to boolean
@@ -39,14 +34,15 @@ class EUEntityNameResolver(EntityNameResolver):
         return self._parse_code(code)[0]
 
     def resolve_surface_form(self, registry, random, language, slot):
+        realizer = EURealizer(language)
         entity_type = self._parse_code(slot.value)[0]
         if entity_type == 'PLACE':
-            return self._realizers[language].place(random, slot)
+            return realizer.place(random, slot)
         elif entity_type == 'TIME':
             match = self.value_type_re.fullmatch(slot.fact.what_type)
             unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
             if change or trend:
-                return self._realizers[language].time.get(slot.fact.when_type + '_change')(random, slot)
+                return realizer.time.get(slot.fact.when_type + '_change')(random, slot)
             else:
-                return self._realizers[language].time.get(slot.fact.when_type)(random, slot)
+                return realizer.time.get(slot.fact.when_type)(random, slot)
         raise ValueError("Unknown entity: {}".format(slot.value))

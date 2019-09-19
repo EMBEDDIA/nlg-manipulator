@@ -1,7 +1,6 @@
 from .pipeline import NLGPipelineComponent
 
-from realize_slots_fi_new import FinnishRealizer
-from realize_slots_en_new import EnglishRealizer
+from eu_realize_slots import EURealizer
 
 import logging
 import re
@@ -11,10 +10,6 @@ log = logging.getLogger('root')
 class SlotRealizer(NLGPipelineComponent):
 
     def __init__(self):
-        self._realizers = {
-            'fi': FinnishRealizer(),
-            'en': EnglishRealizer(),
-        }
         self._realizer = None
         self._default_numeral = lambda x: "{:n}".format(x)
         self._default_unit = lambda x: None
@@ -26,7 +21,7 @@ class SlotRealizer(NLGPipelineComponent):
         Run this pipeline component.
         """
         log.info("Realizing slots")
-        self._realizer = self._realizers[language[:2]]
+        self._realizer = EURealizer(language[:2])
         self._random = random
         self._recurse(document_plan)
         return (document_plan, )
