@@ -82,6 +82,12 @@ HEALTH = {
     'pc-che': "percentual share of total current health expenditure",
 }
 
+DATA =  {
+    'cphi': CPHI,
+    'income': INCOME,
+    'health': HEALTH,
+}
+
 SMALL_ORDINALS = {
     '1': "first",
     '2': "second",
@@ -95,12 +101,6 @@ SMALL_ORDINALS = {
     '10': "tenth",
     '11': "eleventh",
     '12': "twelfth",
-}
-
-ORDINALS = {
-    '1': "st",
-    '2': "nd",
-    '3': "rd",
     'else': 'th',
 }
 

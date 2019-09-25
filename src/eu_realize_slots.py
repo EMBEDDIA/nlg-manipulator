@@ -10,6 +10,7 @@ class EURealizer():
     value_type_re = re.compile(value_type_re)
 
     def __init__(self, language):
+        self.language = language
 
         from config import REALIZERS
         self.dic = REALIZERS.get(language)
@@ -31,6 +32,7 @@ class EURealizer():
             'year_change': self._time_change_year
         }
 
+
     def _unit_base(self, slot):
         template = slot.parent
         idx = template.components.index(slot)
@@ -38,16 +40,11 @@ class EURealizer():
         what_type = slot.fact.what_type.split('_')
 
         templ = self.dic.TEMPLATES.get(what_type[0])
-        if what_type[0] == 'cphi':
-            dictionary = self.dic.CPHI
-        elif what_type[0] == 'income':
-            dictionary = self.dic.INCOME
-        elif what_type[0] == 'health':
-            dictionary = self.dic.HEALTH
+        data = self.dic.DATA.get(what_type[0])
             
         for t in templ:
             if isinstance(t,int):
-                template.add_slot(idx - 1, LiteralSlot(dictionary.get(what_type[t])))
+                template.add_slot(idx - 1, LiteralSlot(data.get(what_type[t])))
             else:
                 template.add_slot(idx - 1, LiteralSlot(t))
             added_slots += 1
@@ -60,6 +57,7 @@ class EURealizer():
             template, added_slots, idx = self._comparisons(slot, template, what_type, added_slots, idx)
 
         return added_slots
+
 
     def _comparisons(self, slot, template, what_type, added_slots, idx):
         if slot.fact.what < 0:
@@ -97,16 +95,11 @@ class EURealizer():
         idx -= 1
 
         templ = self.dic.TEMPLATES.get(unit[0])
-        if unit[0] == 'cphi':
-            dictionary = self.dic.CPHI
-        elif unit[0] == 'income':
-            dictionary = self.dic.INCOME
-        elif unit[0] == 'health':
-            dictionary = self.dic.HEALTH
+        data = self.dic.DATA.get(unit[0])
 
         for t in templ:
             if isinstance(t,int):
-                template.add_slot(idx - 1, LiteralSlot(dictionary.get(unit[t])))
+                template.add_slot(idx - 1, LiteralSlot(data.get(unit[t])))
             else:
                 template.add_slot(idx - 1, LiteralSlot(t))
             added_slots += 1
@@ -162,20 +155,19 @@ class EURealizer():
     
     def _ordinal(self, token):
         token = "{:n}".format(token)
+        if self.language is 'en':
+            if len(token) > 1 and token[-2:] in ['11', '12', '13']:
+                return token + "th"
+            if token[-1] == '1':
+                return token + "st"
+            if token[-1] == '2':
+                return token + "nd"
+            if token[-1] == '3':
+                return token + "rd"
         if token in self.dic.SMALL_ORDINALS:
-            # Use words for numbers up to 12
-            # 0 shouldn't really be needed, but use 0th if it really has to be used
             return self.dic.SMALL_ORDINALS[token]
-        if len(token) > 1 and token[-2:] in ['11', '12', '13']:
-            return token + "th"
-        if token[-1] == '1':
-            return token + "st"
-        if token[-1] == '2':
-            return token + "nd"
-        if token[-1] == '3':
-            return token + "rd"
         else:
-            return token + "th"
+            return token + self.dic.SMALL_ORDINALS['else']
 
 
     def _cardinal(self, token):
@@ -296,6 +288,7 @@ class EURealizer():
         else:
             self._update_slot_value(slot, "")
         return added_slots
+
 
     def place(self, random, slot):
         place_matcher = re.compile("\[PLACE:([^\]:]*):([^\]]*)\]")

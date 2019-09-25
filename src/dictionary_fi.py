@@ -81,6 +81,12 @@ HEALTH = {
     'pc-che': "prosentuaalinen osuus nykyisistä terveysmenoista",
 }
 
+DATA =  {
+    'cphi': CPHI,
+    'income': INCOME,
+    'health': HEALTH,
+}
+
 COUNTRIES = {
   'EA': 'euroalue (EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)',
 	'EA19': 'euroalue (19 maata)',
@@ -151,9 +157,6 @@ SMALL_ORDINALS = {
     '8': "kahdeksas",
     '9': "yhdeksäs",
     '10': "kymmenes",
-}
-
-ORDINALS = {
     'else': '.',
 }
 
