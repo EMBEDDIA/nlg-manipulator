@@ -26,8 +26,8 @@ CPHI = {
     'cp-hi10':	'koulutus',
     'cp-hi11':	'hotellit, kahvilat ja ravintolat',
     'cp-hi12':	'sekalaiset tuotteet ja palvelut',
-    'cp-hi00xef': 'kaikki tuotteet poislukien energia ruoka, alkoholi ja tupakka',
-    'cp-hi00xtb': 'kaikki tuotteet poislukien tupakka',
+    'cp-hi00xef': 'kaikki tuotteet pois lukien energia ruoka, alkoholi ja tupakka',
+    'cp-hi00xtb': 'kaikki tuotteet pois lukien tupakka',
     'cp-hie': 'energia',
     'cp-hif': 'ruoka',
     'cp-hifu':	'prosessoimaton ruoka',
@@ -35,9 +35,9 @@ CPHI = {
     'cp-hiig':	'teollisuustuotteet',
     'cp-his': 'kaikki palvelut',
     'cp-hiigxe': 'ei-energia teollisuustuotteet',
-    'cp-hi00xe': 'kaikki poislukien energia',
-    'cp-hi00xefu': 'kaikki poislukien energia ja prosessoimaton ruoka',
-    'cp-hi00xes': 'kaikki poislukien energia ja sesonkiruoka',
+    'cp-hi00xe': 'kaikki pois lukien energia',
+    'cp-hi00xefu': 'kaikki pois lukien energia ja prosessoimaton ruoka',
+    'cp-hi00xes': 'kaikki pois lukien energia ja sesonkiruoka',
 }
 
 INCOME = {
@@ -88,11 +88,11 @@ DATA =  {
 }
 
 COUNTRIES = {
-  'EA': 'euroalue (EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)',
+  'EA': 'euroalue (kyseisellä ajanhetkellä)', #(EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)
 	'EA19': 'euroalue (19 maata)',
 	'EA18':	'euroalue (18 maata)',
-	'EU': 'Euroopan unioni (EU6-1958, EU9-1973, EU10-1981, EU12-1986, EU15-1995, EU25-2004, EU27-2007, EU28-2013)',
-	'EU28':	'Euroopan unioni - 28 maata',
+	'EU': 'Euroopan unioni (kyseisellä ajanhetkellä)', #(EU6-1958, EU9-1973, EU10-1981, EU12-1986, EU15-1995, EU25-2004, EU27-2007, EU28-2013)
+	'EU28':	'Euroopan unioni (28 maata)',
 	'BE': 'Belgia',
 	'BG': 'Bulgaria',
 	'CZ': 'Tsekki',
