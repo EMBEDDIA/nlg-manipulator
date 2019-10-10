@@ -88,7 +88,7 @@ DATA =  {
 }
 
 COUNTRIES = {
-  'EA': 'euroalue (kyseisellä ajanhetkellä)', #(EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)
+    'EA': 'euroalue (kyseisellä ajanhetkellä)', #(EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)
 	'EA19': 'euroalue (19 maata)',
 	'EA18':	'euroalue (18 maata)',
 	'EU': 'Euroopan unioni (kyseisellä ajanhetkellä)', #(EU6-1958, EU9-1973, EU10-1981, EU12-1986, EU15-1995, EU25-2004, EU27-2007, EU28-2013)
