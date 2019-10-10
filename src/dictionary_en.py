@@ -1,17 +1,16 @@
 TEMPLATES = {
+    # data
     'cphi': [1, 'was', 'for price category', 2], # cphi(0)_hicp2015(1)_cp-hi00(2)
     'income': ['among', 2, 'in age group', 1, 'the', 3, 'was in', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
     'health': ['the', 1, 'was for', 2], # health(0)_pc-che(1)_hf3(2)
+
+    #general
     'month': 'in {} {}', # month, year
     'year': 'in the year {}', # year
     'year_change': 'from {} to {}', # from year to year
     'month_change': 'from {} {} to {} {}', # from month year to month year
     'place': 'in {}', # area_name
 }
-
-# In Finland in the year 2016 the percentual share of total 
-# current health expenditure was for household out-of-pocket payment 
-# 5.17 more than the average for countries that are considered to be similar
 
 CPHI = {
     'hicp2015': 'harmonized consumer price index', # harmonized consumer price index (2015=100)
@@ -146,16 +145,16 @@ PLACES = {
 }
 
 COUNTRIES = {
-    'EA': 'Euro area (EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)',
+    'EA': 'Euro area (at that point in time)', #(EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)
 	'EA19': 'Euro area (19 countries)',
 	'EA18':	'Euro area (18 countries)',
-	'EU': 'European Union (EU6-1958, EU9-1973, EU10-1981, EU12-1986, EU15-1995, EU25-2004, EU27-2007, EU28-2013)',
-	'EU28':	'European Union - 28 countries',
+	'EU': 'European Union (at that point in time)', #(EU6-1958, EU9-1973, EU10-1981, EU12-1986, EU15-1995, EU25-2004, EU27-2007, EU28-2013)
+	'EU28':	'European Union (28 countries)',
 	'BE': 'Belgium',
 	'BG': 'Bulgaria',
 	'CZ': 'Czechia',
 	'DK': 'Denmark',
-	'DE': 'Germany (until 1990 former territory of the FRG)',
+	'DE': 'Germany', #(until 1990 former territory of the FRG)
 	'EE': 'Estonia',
 	'IE': 'Ireland',
 	'EL': 'Greece',
