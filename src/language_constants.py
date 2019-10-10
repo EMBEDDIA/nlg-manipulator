@@ -32,6 +32,12 @@ vocabulary = {
         "subord_clause_start": ", som är",
         "comparator": "än",
     },
+    "de": {
+        "default_combiner": "und",
+        "inverse_combiner": "aber",
+        "subord_clause_start": ", der/das/die ist",
+        "comparator": "als",
+    },
 }
 
 errors = {

@@ -18,7 +18,7 @@ class EUMessageGenerator(MessageGenerator):
         messages = []
         log.info("Generating messages from EU data")
         datastore = registry.get('eu-data')
-        ignored_cols = ['s_adj']
+        ignored_cols = []
         messages.extend((super().run(registry, random, language, datastore, where, where_type, when1, when2, when_type, ignored_cols=ignored_cols))[0])
 
         if not messages:

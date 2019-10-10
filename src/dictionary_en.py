@@ -9,6 +9,10 @@ TEMPLATES = {
     'place': 'in {}', # area_name
 }
 
+# In Finland in the year 2016 the percentual share of total 
+# current health expenditure was for household out-of-pocket payment 
+# 5.17 more than the average for countries that are considered to be similar
+
 CPHI = {
     'hicp2015': 'harmonized consumer price index', # harmonized consumer price index (2015=100)
     'rt1': 'growth rate on previous month', # growth rate on previous period (t/t-1)
