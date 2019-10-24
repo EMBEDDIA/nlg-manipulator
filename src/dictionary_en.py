@@ -3,6 +3,7 @@ TEMPLATES = {
     'cphi': [1, 'was', 'for price category', 2], # cphi(0)_hicp2015(1)_cp-hi00(2)
     'income': ['among', 2, 'in age group', 1, 'the', 3, 'was in', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
     'health': ['the', 1, 'was for', 2], # health(0)_pc-che(1)_hf3(2)
+    'env': ['the national expenditure in the category of', 1, 'in charasteristics of', 2, 'was in', 3], # env_cepa3_eps-p1_mio-eur
 
     #general
     'month': 'in {} {}', # month, year
@@ -58,11 +59,11 @@ INCOME = {
     'y6-11': 'from 6 to 11 years',
     'y11-15': 'from 11 to 15 years',
     'y12-17': 'from 12 to 17 years',
-    'y-lT16': 'less than 16 years',
+    'y-lt16': 'less than 16 years',
     'y16-24': 'from 16 to 24 years',
     'y16-64': 'from 16 to 64 years',
     'y-ge16': '16 years or over',
-    'y-lT18': 'less than 18 years',
+    'y-lt18': 'less than 18 years',
     'y18-24': 'from 18 to 24 years',
     'y18-64': 'from 18 to 64 years',
     'y-ge18': '18 years or over',
@@ -84,10 +85,40 @@ HEALTH = {
     'pc-che': "percentual share of total current health expenditure",
 }
 
+ENV = {
+    'tot_cepa': 'total environmental protection activities',
+	'cepa1_4-9': 'protection of ambient air and climate; protection and remediation of soil, groundwater and surface water; noise and vibration abatement; protection...',
+	'cepa1': 'protection of ambient air and climate',
+	'cepa112_122': 'protection of climate and ozone layer',
+	'cepa2': 'wastewater management',
+	'cepa3': 'waste management',
+	'cepa4': 'protection and remediation of soil, groundwater and surface water',
+	'cepa5': 'noise and vibration abatement (excluding workplace protection)',
+	'cepa6': 'protection of biodiversity and landscapes',
+	'cepa7': 'protection against radiation (excluding external safety)',
+	'cepa8': 'environmental research and development',
+	'cepa9': 'other environmental protection activities',
+    'eps-p1': 'output',
+	'eps-p11': 'market output',
+	'eps-p13': 'non-market output',
+	'eps-p1-anc': 'environmental protection related ancillary output',
+	'eps-p2-eps-sp': 'intermediate consumption of environmental protection services by corporations as specialist producers',
+	'p3-eps': 'final consumption expenditure of environmental protection services',
+	'eps-p51g-np': 'gross fixed capital formation and acquisition less disposals of non-produced non-financial assets',
+	'p7-eps': 'import of environmental protection services',
+	'p6-eps': 'export of environmental protection services',
+	'eps-d21x31': 'taxes less subsidies on products',
+	'eps-sup-nu': 'supply at purchasers\' prices available for national uses',
+	'ep-d3-7-92-99-p': 'current and capital transfers for environmental protection, paid',
+    'mio-eur': 'million euros',
+	'mio-nac': 'million units of national currency',
+}
+
 DATA =  {
     'cphi': CPHI,
     'income': INCOME,
     'health': HEALTH,
+    'env': ENV,
 }
 
 SMALL_ORDINALS = {
@@ -146,7 +177,7 @@ PLACES = {
 
 COUNTRIES = {
     'EA': 'Euro area (at that point in time)', #(EA11-2000, EA12-2006, EA13-2007, EA15-2008, EA16-2010, EA17-2013, EA18-2014, EA19)
-	'EA19': 'Euro area (19 countries)',
+    'EA19': 'Euro area (19 countries)',
 	'EA18':	'Euro area (18 countries)',
 	'EU': 'European Union (at that point in time)', #(EU6-1958, EU9-1973, EU10-1981, EU12-1986, EU15-1995, EU25-2004, EU27-2007, EU28-2013)
 	'EU28':	'European Union (28 countries)',

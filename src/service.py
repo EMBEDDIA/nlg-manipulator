@@ -19,7 +19,7 @@ from core import Aggregator
 from eu_named_entity_resolver import EUEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from eu_importance_allocator import EUImportanceSelector
-from language_constants import pronouns, vocabulary, errors
+from language_constants import vocabulary, errors
 from locations import LocationHierarchy
 from locator_map_data_generator import LocatorMapDataGenerator
 
@@ -67,7 +67,7 @@ class EUNlgService(object):
                                )
 
         # Language metadata
-        self.registry.register('pronouns', pronouns)
+        #self.registry.register('pronouns', pronouns)
         self.registry.register('vocabulary', vocabulary)
 
         # Geodata
@@ -160,7 +160,7 @@ class EUNlgService(object):
             headline = where
             log.error("%s", ex)
 
-        locator_map_data = self.locator_map_data_generator.generate(where) if where_type == 'M' else ''
+        #locator_map_data = self.locator_map_data_generator.generate(where) if where_type == 'M' else ''
 
         return headline, body
 

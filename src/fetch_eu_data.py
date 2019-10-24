@@ -69,7 +69,7 @@ def rank_df(df, rank_columns):
     return df
 
 
-def add_outlierness_to_cphi_data(df, outlierness_columns, id_columns):
+def add_outlierness_to_data(df, outlierness_columns, id_columns):
 
     const_max_out = 2
 
@@ -304,19 +304,72 @@ def flatten_income(df):
     return new_df
 
 
+def flatten_env(df):
+    '''
+    Flatten a data frame so that each field contains a single value.
+    '''
+    # Replace every underscore in DataFrame
+    for column in df.columns:
+        df[column] = df[column].str.replace('_','-')
+    new_df = pd.DataFrame()
+    names = list(df.columns)
+    new_columns = names.pop(0)
+
+    initial_content = []
+    values = df.values.tolist()
+    values = [value[1:] for value in values]
+    values = list(itertools.chain.from_iterable(values))
+    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
+    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
+    values_n_flags['value'] = values_n_flags['value'].str.replace(',', '')
+    
+    for line in df[new_columns]:
+        for when in names:
+            initial_content.append((',').join([line, when]))
+    new_columns = (',').join([new_columns, 'when'])
+    new_df[new_columns] = initial_content
+
+    columns = new_columns.split(',')
+    new_df = new_df[new_columns].str.split(',', expand=True)
+    new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
+    new_df = new_df.rename(columns={'GEO':'where'})
+    new_df[['value', 'flag']] = values_n_flags
+
+    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['CEPAREMA', 'ENV_ECON' ,'UNIT\TIME'], values = 'value', aggfunc='first')
+    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df.columns = new_df.columns.to_flat_index()
+    new_df.columns = [('env_'+column[0]+'_'+column[1]+'_'+column[2]).lower() for column in new_df.columns]
+    new_df.rename(columns={'env_where__':'where', 'env_when__':'when'}, inplace=True)
+    new_df = new_df.replace(to_replace=':', value=np.nan)
+
+    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
+
+    # Add when_type and where_type TODO: for example the euro area is now labeled as a country
+    where_type = ['C'] * new_df.shape[0]
+    when_type = ['year'] * new_df.shape[0]
+
+    new_df['where_type'] = where_type
+    new_df['when_type'] = when_type
+
+    return new_df
+
+
 def run():
 
     cphi_df = pd.read_csv('../database/ei_cphi_m.tsv', sep='\t')
     health_out_of_pocket_df = pd.read_csv('../database/tepsr_sp310+ESTAT.tsv', sep='\t')
     income_df = pd.read_csv('../database/ilc_di03_1.tsv', sep='\t')
+    env_df = pd.read_csv('../database/env_ac_epneec_1.tsv', sep='\t')
 
     # Flatten DataFrames
     cphi_df = flatten_cphi(cphi_df)
     health_out_of_pocket_df = flatten_health(health_out_of_pocket_df)
     income_df = flatten_income(income_df)
+    env_df = flatten_env(env_df)
 
     # Merge DataFrames
-    dfs = [cphi_df, income_df, health_out_of_pocket_df]
+    dfs = [cphi_df, income_df, health_out_of_pocket_df, env_df]
     df = pd.concat(dfs)
 
     # Clusters for countries
@@ -340,7 +393,7 @@ def run():
 
     # Add outlierness to data
     outlierness_columns = [column for column in df.columns if column not in id_columns]
-    df = add_outlierness_to_cphi_data(df, outlierness_columns, [])
+    df = add_outlierness_to_data(df, outlierness_columns, [])
     df.to_csv(os.path.join(os.path.dirname(__file__), '../data/eu_data.csv'), index=False)
 
 
