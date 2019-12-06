@@ -50,6 +50,7 @@ class Template(DocumentPlan):
         else:
             self._components.append(slot)
         slot.parent = self
+        log.info("Hello, slot is now: {}".format(slot))
         self.slots.append(slot)
 
     def move_slot(self, from_idx, to_idx):
@@ -208,6 +209,9 @@ class Slot(TemplateComponent):
     @property
     def value(self):
         return self._to_value(self._fact)
+
+    def add_attribute(self, name, value):
+        self.attributes[name] = value
 
     @value.setter
     def value(self, f):
