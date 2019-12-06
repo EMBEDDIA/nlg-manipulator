@@ -303,6 +303,7 @@ class EURealizer():
         if place_type in ["C", "M"]:
             if slot.attributes['name_type'] == 'full':
                 self._update_slot_value(slot, self.dic.TEMPLATES.get('place').format(place))
+                self._update_slot_value(slot, self.find_case_for_slot(slot))
             elif random.rand() < 0.5:
                 try:
                     self._update_slot_value(slot, self.dic.TEMPLATES.get('place').format(place))
@@ -316,3 +317,15 @@ class EURealizer():
             template.add_slot(idx, LiteralSlot(","))
             added_slots += 1
         return added_slots
+    
+
+    def find_case_for_slot(self, slot):
+        try:
+            array = slot.value.split('case=')
+            case = array[1]
+            new_value = array[0]
+            slot.add_attribute('case', case)
+            log.info(slot.attributes)
+            return new_value
+        except:
+            return slot.value
