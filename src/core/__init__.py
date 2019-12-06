@@ -12,3 +12,4 @@ from .surface_realizer import *
 from .template_selector import *
 from .template import *
 from .util import *
+from .morphology_resolver import *

@@ -16,6 +16,7 @@ from templates.read_multiling import read_templates_file
 from core import SlotRealizer
 from core import TemplateSelector
 from core import Aggregator
+from core import MorphologyResolver
 from eu_named_entity_resolver import EUEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from eu_importance_allocator import EUImportanceSelector
@@ -67,7 +68,6 @@ class EUNlgService(object):
                                )
 
         # Language metadata
-        #self.registry.register('pronouns', pronouns)
         self.registry.register('vocabulary', vocabulary)
 
         # Geodata
@@ -93,10 +93,7 @@ class EUNlgService(object):
             yield Aggregator()
             yield SlotRealizer()
             yield EUEntityNameResolver()
-            if not nomorphi:
-                # Don't even try importing Omorphi if we're not using it
-                from omorfi_generator import OmorfiGenerator
-                yield OmorfiGenerator()
+            yield MorphologyResolver()
             yield HeadlineHTMLSurfaceRealizer() if headline else BodyHTMLSurfaceRealizer()
 
         log.info("Configuring Body NLG Pipeline")
