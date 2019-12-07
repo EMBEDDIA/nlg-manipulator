@@ -20,9 +20,13 @@ from core import MorphologyResolver
 from eu_named_entity_resolver import EUEntityNameResolver
 from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from eu_importance_allocator import EUImportanceSelector
-from language_constants import vocabulary, errors
 from locations import LocationHierarchy
 from locator_map_data_generator import LocatorMapDataGenerator
+
+import sys
+sys.path.append('./language')
+
+from language_constants import errors, vocabulary
 
 
 class EUNlgService(object):
