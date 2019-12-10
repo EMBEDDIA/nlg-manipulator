@@ -3,15 +3,17 @@ import os
 import random
 import sys
 import argparse
-from dictionary_en import COUNTRIES
 from bottle import Bottle, route, request, response, run, redirect, view, TEMPLATE_PATH, static_file, get, post
 
+import sys
+sys.path.append('./language')
+from dictionary_en import COUNTRIES
 #
 # START INIT
 #
 
 # CLI parameters
-parser = argparse.ArgumentParser(description='Run the Valtteri server.')
+parser = argparse.ArgumentParser(description='Run the EU-NLG server.')
 parser.add_argument('port', type=int, default=8080, help='port number to attach to')
 parser.add_argument('--force-cache-refresh', action='store_true', default=False, help="re-compute all local caches")
 args = parser.parse_args()
@@ -107,9 +109,7 @@ def news_html():
         "where_type": where_type,
         "language": language,
         "header": header,
-        "body": body,
-        # "locator_map": locator_map,
-        # "graph": graph
+        "body": body
     })
 
 
@@ -135,8 +135,6 @@ def news_api():
         "language": language,
         "header": header,
         "body": body,
-        #"locator_map": locator_map,
-        #"graph": graph,
     })
 
 def random_news():

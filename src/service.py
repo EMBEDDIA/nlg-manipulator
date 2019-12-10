@@ -103,7 +103,6 @@ class EUNlgService(object):
         log.info("Configuring Body NLG Pipeline")
         self.body_pipeline = NLGPipeline(self.registry, *_get_components())
         self.headline_pipeline = NLGPipeline(self.registry, *_get_components(headline=True))
-        #self.graph_pipeline = NLGPipeline(self.registry, CrimeMessageGenerator(expand=False), CrimeImportanceSelector())
 
     def _get_cached_or_compute(self, cache, compute, force_cache_refresh=False, relative_path=True):
         if relative_path:
@@ -131,7 +130,7 @@ class EUNlgService(object):
     def _load_geodata(self):
         return list(self.registry.get('cphi-data').all()['where'].unique())
 
-    def run_pipeline(self, language, where, where_type):
+    def run_pipeline(self, language, data, where, where_type):
         log.info("Running Body NLG pipeline: language={}, where={}, where_type={}".format(language, where, where_type))
         try:
             body = self.body_pipeline.run(
