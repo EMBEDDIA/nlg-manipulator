@@ -130,7 +130,7 @@ class EUNlgService(object):
     def _load_geodata(self):
         return list(self.registry.get('cphi-data').all()['where'].unique())
 
-    def run_pipeline(self, language, data, where, where_type):
+    def run_pipeline(self, language, where, where_type):
         log.info("Running Body NLG pipeline: language={}, where={}, where_type={}".format(language, where, where_type))
         try:
             body = self.body_pipeline.run(
