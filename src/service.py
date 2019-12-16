@@ -44,8 +44,13 @@ class EUNlgService(object):
         self.registry = Registry()
         self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
 
+        dataname = 'eu_data'
+        # dataname = 'cphi_test'
+        # dataname = 'income_test'
+        # dataname = 'health_test'
+
         data = [
-            ('../data/eu_data.csv', '../data/eu_data.cache', 'eu-data'),
+            ('../data/'+dataname+'.csv', '../data/'+dataname+'.cache', 'eu-data'),
         ]
 
         for csv_path, cache_path, registry_name in data:
