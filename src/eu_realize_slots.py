@@ -307,6 +307,7 @@ class EURealizer():
             elif random.rand() < 0.5:
                 try:
                     self._update_slot_value(slot, self.dic.TEMPLATES.get('place').format(place))
+                    self._update_slot_value(slot, self.find_case_for_slot(slot))
                 except:
                     raise Exception(
                         "This is impossible. If we end up here, something is wrong (or has been changed carelessly) elsewhere in the code.")
