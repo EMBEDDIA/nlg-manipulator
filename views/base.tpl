@@ -34,6 +34,9 @@
           <label for="where"><b>Country</b></label>
           <input type="text" class="blue-text" name="where" required>
 
+          <label for="data"><b>Data</b></label>
+          <input type="text" class="blue-text" name="data">
+
           <button type="submit" class="btn-large waves-effect waves-light-blue blue">Get report</button>
         </div>
       </form>
