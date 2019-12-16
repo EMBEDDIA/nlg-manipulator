@@ -1,7 +1,7 @@
 TEMPLATES = {
     # data
-    'cphi': [1, 'was for price category', 2], # cphi(0)_hicp2015(1)_cp-hi00(2)
-    'income': ['among', 2, 'in age group', 1, 'the', 3, 'was in', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
+    'cphi': ['the', 1, 'was for the price category', 2], # cphi(0)_hicp2015(1)_cp-hi00(2)
+    'income': ['among', 2, 'in the age group', 1, 'the', 3, 'was in', 4], # income(0)_total(1)_f(2)_med-e(3)_eur(4)
     'health': ['the', 1, 'was for', 2], # health(0)_pc-che(1)_hf3(2)
     'env': ['the national expenditure in the category of', 1, 'in charasteristics of', 2, 'was in', 3], # env_cepa3_eps-p1_mio-eur
 
@@ -18,10 +18,10 @@ CPHI = {
     'rt1': 'growth rate on previous month', # growth rate on previous period (t/t-1)
     'rt12': 'growth rate', # growth rate (t/t-12)
     'cp-hi00': 'all items',
-    'cp-hi01': 'food and non alcoholic beverages',
+    'cp-hi01': 'food and non-alcoholic beverages',
     'cp-hi02': 'alcoholic beverages and tobacco',
     'cp-hi03': 'clothing and footwear',
-    'cp-hi04': 'housing, water, electricity,gas and other fuels',
+    'cp-hi04': 'housing, water, electricity, gas and other fuels',
     'cp-hi05': 'furnishings, household equipment and maintenance',
     'cp-hi06': 'health',
     'cp-hi07': 'transport',
@@ -208,14 +208,14 @@ COUNTRIES = {
 	'SK': 'Slovakia',
 	'FI': 'Finland',
 	'SE': 'Sweden',
-	'UK': 'United Kingdom',
+	'UK': 'the United Kingdom',
 	'IS': 'Iceland',
 	'NO': 'Norway',
 	'CH': 'Switzerland',
 	'MK': 'North Macedonia',
 	'RS': 'Serbia',
 	'TR': 'Turkey',
-	'US': 'United States',
+	'US': 'the United States',
 }
 
 COMPARISONS = {
