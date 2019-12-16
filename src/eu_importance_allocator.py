@@ -46,7 +46,7 @@ class EUImportanceSelector(NLGPipelineComponent):
         # importance of fact
         category = fact.what_type.split('_')[0]
         what_type_score = pfg.category_scores.get(category, 1)
-        if '_comp_similar' in fact.what_type:
+        if '_comp_' in fact.what_type:
             what_type_score *= pfg.comp_weight
         elif '_rank_reverse' in fact.what_type:
             what_type_score *= pfg.rank_reverse_weight
@@ -58,8 +58,41 @@ class EUImportanceSelector(NLGPipelineComponent):
         if '_trend' in fact.what_type:
             what_type_score *= 500
 
+        # TODO ATM we do not consider national currencies
+        if '_nac' in fact.what_type:
+            return 0
+        elif '_pps' in fact.what_type:
+            what_type_score *= 10
+        elif '_eur' in fact.what_type:
+            what_type_score *= 40
+
+        # TODO young age groups are a bit odd
+        if 'y-lt6' in fact.what_type:
+            return 0
+        elif 'y6-10' in fact.what_type:
+            return 0
+        elif 'y6-11' in fact.what_type:
+            return 0
+        elif 'y11-15' in fact.what_type:
+            return 0
+        elif 'y12-17' in fact.what_type:
+            return 0
+        elif 'y-lt16' in fact.what_type:
+            return 0
+        elif 'y16-24' in fact.what_type:
+            return 0
+        elif 'y16-64' in fact.what_type:
+            return 0
+        elif 'y-ge16' in fact.what_type:
+            return 0
+        elif 'y-lt18' in fact.what_type:
+            return 0
+
+        if '_t_' in fact.what_type:
+            return 0
+
         # importance of value
-        what_score = what_type_score# * outlier_score
+        what_score = what_type_score * outlier_score
 
         when_score = 20
         # importance of time

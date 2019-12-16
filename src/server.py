@@ -1,4 +1,7 @@
 from service import EUNlgService
+from service_cphi import CPHINlgService
+from service_health import HealthNlgService
+from service_income import IncomeNlgService
 import os
 import random
 import sys
@@ -35,6 +38,18 @@ service = EUNlgService(
     random_seed = 4551546,
     force_cache_refresh = args.force_cache_refresh
 )
+service_cphi = CPHINlgService(
+    random_seed = 4551546,
+    force_cache_refresh = args.force_cache_refresh
+)
+service_health = HealthNlgService(
+    random_seed = 4551546,
+    force_cache_refresh = args.force_cache_refresh
+)
+service_income = IncomeNlgService(
+    random_seed = 4551546,
+    force_cache_refresh = args.force_cache_refresh
+)
 TEMPLATE_PATH.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../views/")
 static_root = os.path.dirname(os.path.realpath(__file__)) + "/../static/"
 
@@ -49,7 +64,13 @@ def allow_cors(func):
         return func(*args, **kwargs)
     return wrapper
 
-def get_article(language, where, where_type):
+def get_article(language, where, where_type, data):
+    if data == 'cphi':
+        return service_cphi.run_pipeline(language, where, where_type)
+    if data == 'income':
+        return service_income.run_pipeline(language, where, where_type)
+    if data == 'health':
+        return service_health.run_pipeline(language, where, where_type)
     return service.run_pipeline(language, where, where_type)
 
 @app.route('/')
@@ -98,12 +119,13 @@ def news_html():
     language = request.query.language or "fi"
     where = request.query.where or None
     where_type = request.query.where_type or None
+    data = request.query.data or 'eu'
 
     if not where:
         where_type = 'C'
         where = 'fi'
 
-    header, body = get_article(language, where, where_type)
+    header, body = get_article(language, where, where_type, data)
     return dict({
         "where": where,
         "where_type": where_type,
