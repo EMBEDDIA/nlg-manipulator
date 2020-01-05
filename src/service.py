@@ -45,9 +45,6 @@ class EUNlgService(object):
         self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
 
         dataname = 'eu_data'
-        # dataname = 'cphi_test'
-        # dataname = 'income_test'
-        # dataname = 'health_test'
 
         data = [
             ('../data/'+dataname+'.csv', '../data/'+dataname+'.cache', 'eu-data'),
@@ -135,11 +132,11 @@ class EUNlgService(object):
     def _load_geodata(self):
         return list(self.registry.get('cphi-data').all()['where'].unique())
 
-    def run_pipeline(self, language, where, where_type):
+    def run_pipeline(self, language, where, where_type, data):
         log.info("Running Body NLG pipeline: language={}, where={}, where_type={}".format(language, where, where_type))
         try:
             body = self.body_pipeline.run(
-                (where, where_type),
+                (where, where_type, data),
                 language,
                 prng_seed=self.registry.get('seed'),
             )[0]
@@ -156,7 +153,7 @@ class EUNlgService(object):
         try:
             headline_lang = "{}-head".format(language)
             headline = self.headline_pipeline.run(
-                (where, where_type),
+                (where, where_type, data),
                 headline_lang,
                 prng_seed=self.registry.get('seed'),
             )[0]

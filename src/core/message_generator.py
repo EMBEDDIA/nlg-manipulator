@@ -22,9 +22,9 @@ class MessageGenerator(NLGPipelineComponent):
     column that row, and the 'what_type' is defined by the title of that column.
     """
 
-    def run(self, registry, random, language, datastore, where_query, where_type_query, when1_query=None, when2_query=None, when_type_query="year", ignored_cols=None):
-        log.info("Generating messages with where={}, where_type={}, when1={}, when2={}, when_type={}".format(
-            where_query, where_type_query, when1_query, when2_query, when_type_query))
+    def run(self, registry, random, language, datastore, where_query, where_type_query, data_query, when1_query=None, when2_query=None, when_type_query="year", ignored_cols=None):
+        log.info("Generating messages with where={}, where_type={}, when1={}, when2={}, when_type={}, data={}".format(
+            where_query, where_type_query, when1_query, when2_query, when_type_query, data_query))
 
         if ignored_cols is None:
             ignored_cols = []
@@ -57,9 +57,15 @@ class MessageGenerator(NLGPipelineComponent):
         log.debug('Query: "{}"'.format(query))
         df = datastore.query(query)
         
+        data = data_query
         messages = []
+        if data:
+            col_names = [name for name in df if data in name]
+        else:
+            col_names = df
+        log.info(ignored_cols)
         col_names = [
-            col_name for col_name in df 
+            col_name for col_name in col_names
             if not (
                 col_name in ["where", 'when', "when1", "when2", "where_type", "when_type"]
                 or col_name in ignored_cols 

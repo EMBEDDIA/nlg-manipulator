@@ -1,7 +1,4 @@
 from service import EUNlgService
-from service_cphi import CPHINlgService
-from service_health import HealthNlgService
-from service_income import IncomeNlgService
 import os
 import random
 import sys
@@ -38,18 +35,7 @@ service = EUNlgService(
     random_seed = 4551546,
     force_cache_refresh = args.force_cache_refresh
 )
-service_cphi = CPHINlgService(
-    random_seed = 4551546,
-    force_cache_refresh = args.force_cache_refresh
-)
-service_health = HealthNlgService(
-    random_seed = 4551546,
-    force_cache_refresh = args.force_cache_refresh
-)
-service_income = IncomeNlgService(
-    random_seed = 4551546,
-    force_cache_refresh = args.force_cache_refresh
-)
+
 TEMPLATE_PATH.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../views/")
 static_root = os.path.dirname(os.path.realpath(__file__)) + "/../static/"
 
@@ -65,13 +51,7 @@ def allow_cors(func):
     return wrapper
 
 def get_article(language, where, where_type, data):
-    if data == 'cphi':
-        return service_cphi.run_pipeline(language, where, where_type)
-    if data == 'income':
-        return service_income.run_pipeline(language, where, where_type)
-    if data == 'health':
-        return service_health.run_pipeline(language, where, where_type)
-    return service.run_pipeline(language, where, where_type)
+    return service.run_pipeline(language, where, where_type, data)
 
 @app.route('/')
 @view('index')
@@ -119,7 +99,7 @@ def news_html():
     language = request.query.language or "fi"
     where = request.query.where or None
     where_type = request.query.where_type or None
-    data = request.query.data or 'eu'
+    data = request.query.data or None
 
     if not where:
         where_type = 'C'
@@ -141,6 +121,7 @@ def news_api():
     language = request.query.language or "en"
     where = request.query.where or None
     where_type = request.query.where_type or None
+    data = request.query.data or None
 
     # if not where:
     #     response.status = 400
@@ -150,7 +131,7 @@ def news_api():
         where_type = 'C'
         where = 'FI'
 
-    header, body = get_article(language, where, where_type)
+    header, body = get_article(language, where, where_type, data)
     return dict({
         "where": where,
         "where_type": where_type,
@@ -164,7 +145,7 @@ def random_news():
     options = list(COUNTRIES.keys())
     m = random.choice(options)
 
-    header, body = get_article(language, m, "C")
+    header, body = get_article(language, m, "C", None)
     return dict({
         "where": m,
         "where_type": "C",
