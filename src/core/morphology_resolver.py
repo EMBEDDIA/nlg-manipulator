@@ -1,17 +1,6 @@
 import logging
 from .pipeline import NLGPipelineComponent
 
-to_be_moved = {
-'Cipar': 'na Cipru',
-'Luksemburg': 'u Luksemburgu',
-'Malta': 'na Malti',
-'Portugal': 'u Portugalu',
-'Velika Britanija': 'u Velikoj Britaniji',
-'Island': 'na Islandu',
-'Sjeverna Makedonija': 'u sjevernoj Makedoniji',
-'Sjedinjene Države': 'u Sjedinjenim Državama',
-}
-
 from config import MORPHOLOGIES 
 
 log = logging.getLogger('root')
