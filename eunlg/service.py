@@ -2,7 +2,6 @@ import gzip
 import logging
 import os
 import pickle
-import urllib
 from random import randint
 import pandas as pd
 from collections import OrderedDict
