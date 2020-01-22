@@ -23,7 +23,6 @@ from eu_named_entity_resolver import EUEntityNameResolver
 from core.surface_realizer import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from eu_importance_allocator import EUImportanceSelector
 from locations import LocationHierarchy
-from locator_map_data_generator import LocatorMapDataGenerator
 from language.language_constants import errors, vocabulary
 
 class EUNlgService(object):
@@ -39,7 +38,6 @@ class EUNlgService(object):
 
         # New registry and result importer
         self.registry = Registry()
-        self.locator_map_data_generator = LocatorMapDataGenerator(auto_generate=False)
 
         dataname = 'eu_data'
 
