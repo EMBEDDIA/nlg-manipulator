@@ -1,8 +1,8 @@
-from .pipeline import NLGPipelineComponent
-from .template import Template, Literal, Slot
+from core.pipeline import NLGPipelineComponent
+from core.template import Template, Literal, Slot
 from templates.substitutions import FactFieldSource
-from .message import Message
-from .document_plan import Relation
+from core.message import Message
+from core.document_plan import Relation
 import re
 
 import logging

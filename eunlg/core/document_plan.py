@@ -1,6 +1,6 @@
 from enum import Enum
 
-from .message import Message
+from core.message import Message
 
 import logging
 log = logging.getLogger('root')

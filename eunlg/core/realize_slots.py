@@ -1,4 +1,4 @@
-from .pipeline import NLGPipelineComponent
+from core.pipeline import NLGPipelineComponent
 
 from eu_realize_slots import EURealizer
 

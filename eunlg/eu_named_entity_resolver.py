@@ -1,7 +1,7 @@
 import re
 import logging
 log = logging.getLogger('root')
-from core import EntityNameResolver
+from core.entity_name_resolver import EntityNameResolver
 
 from eu_realize_slots import EURealizer
 

@@ -1,8 +1,8 @@
 import logging
 from functools import lru_cache
 
-from .pipeline import NLGPipelineComponent
-from .template import DefaultTemplate
+from core.pipeline import NLGPipelineComponent
+from core.template import DefaultTemplate
 log = logging.getLogger('root')
 
 # If we're starting a new paragraph and haven't mentioned the location for more than this number of

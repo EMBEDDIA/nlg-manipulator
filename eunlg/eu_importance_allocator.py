@@ -1,6 +1,6 @@
 # FYI: needed to change the year to 2020
 
-from core import NLGPipelineComponent
+from core.pipeline import NLGPipelineComponent
 import math
 import logging
 import paramconfig as pfg

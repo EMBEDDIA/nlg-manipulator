@@ -9,25 +9,22 @@ from collections import OrderedDict
 
 log = logging.getLogger('root')
 
-from core import Registry, NLGPipeline, DataFrameStore
+from core.registry import Registry
+from core.pipeline import NLGPipeline
+from core.datastore import DataFrameStore
 from eu_message_generator import EUMessageGenerator, NoMessagesForSelectionException
-from core import BodyDocumentPlanner, HeadlineDocumentPlanner
+from core.document_planner import BodyDocumentPlanner, HeadlineDocumentPlanner
 from templates.read_multiling import read_templates_file
-from core import SlotRealizer
-from core import TemplateSelector
-from core import Aggregator
-from core import MorphologyResolver
+from core.realize_slots import SlotRealizer
+from core.template_selector import TemplateSelector
+from core.aggregator import Aggregator
+from core.morphology_resolver import MorphologyResolver
 from eu_named_entity_resolver import EUEntityNameResolver
-from core import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
+from core.surface_realizer import BodyHTMLSurfaceRealizer, HeadlineHTMLSurfaceRealizer
 from eu_importance_allocator import EUImportanceSelector
 from locations import LocationHierarchy
 from locator_map_data_generator import LocatorMapDataGenerator
-
-import sys
-sys.path.append('./language')
-
-from language_constants import errors, vocabulary
-
+from language.language_constants import errors, vocabulary
 
 class EUNlgService(object):
 

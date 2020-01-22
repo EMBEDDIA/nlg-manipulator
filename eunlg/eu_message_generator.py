@@ -1,6 +1,6 @@
 import logging
 
-from core import MessageGenerator, NoMessagesForSelectionException
+from core.message_generator import MessageGenerator, NoMessagesForSelectionException
 
 log = logging.getLogger('root')
 

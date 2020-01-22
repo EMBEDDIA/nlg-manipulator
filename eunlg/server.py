@@ -4,10 +4,7 @@ import random
 import sys
 import argparse
 from bottle import Bottle, route, request, response, run, redirect, view, TEMPLATE_PATH, static_file, get, post
-
-import sys
-sys.path.append('./language')
-from dictionary_en import COUNTRIES
+from language.dictionary_en import COUNTRIES
 #
 # START INIT
 #

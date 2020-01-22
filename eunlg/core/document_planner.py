@@ -1,9 +1,9 @@
 import logging
-from .message import Message
-from .pipeline import NLGPipelineComponent
-from .document_plan import DocumentPlan, Relation
-from .message_generator import NoMessagesForSelectionException
-from .template_selector import TemplateMessageChecker
+from core.message import Message
+from core.pipeline import NLGPipelineComponent
+from core.document_plan import DocumentPlan, Relation
+from core.message_generator import NoMessagesForSelectionException
+from core.template_selector import TemplateMessageChecker
 import re
 
 log = logging.getLogger('root')

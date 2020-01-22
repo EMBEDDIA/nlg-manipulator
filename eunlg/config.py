@@ -1,11 +1,9 @@
 # define the path that leads to language files
-import sys
-sys.path.append('./language')
 
-import dictionary_en
-import dictionary_fi
-import dictionary_de
-import dictionary_hr
+from language import dictionary_en
+from language import dictionary_fi
+from language import dictionary_de
+from language import dictionary_hr
 
 REALIZERS = {
     'en': dictionary_en,

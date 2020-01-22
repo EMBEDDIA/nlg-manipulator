@@ -1,5 +1,5 @@
 import logging
-from .pipeline import NLGPipelineComponent
+from core.pipeline import NLGPipelineComponent
 
 from config import MORPHOLOGIES 
 

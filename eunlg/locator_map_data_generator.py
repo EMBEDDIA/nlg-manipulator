@@ -3,7 +3,7 @@ import urllib.request
 import urllib.parse
 import json
 from math import radians, cos, sin, asin, sqrt
-from core import LandmarkGenerator
+from core.landmark_generator import LandmarkGenerator
 
 log = logging.getLogger('root')
 

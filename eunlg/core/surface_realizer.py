@@ -1,4 +1,4 @@
-from .pipeline import NLGPipelineComponent
+from core.pipeline import NLGPipelineComponent
 
 import re
 import logging

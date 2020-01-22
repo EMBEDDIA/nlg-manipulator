@@ -1,6 +1,6 @@
-from .pipeline import NLGPipelineComponent
+from core.pipeline import NLGPipelineComponent
 from collections import defaultdict
-from .document_plan import Relation
+from core.document_plan import Relation
 
 import logging
 log = logging.getLogger('root')

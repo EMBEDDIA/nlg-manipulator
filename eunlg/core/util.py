@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from .pipeline import NLGPipelineComponent
+from core.pipeline import NLGPipelineComponent
 
 import logging
 log = logging.getLogger('root')

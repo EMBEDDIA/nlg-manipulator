@@ -1,8 +1,8 @@
 import logging
 from math import isnan
 
-from .pipeline import NLGPipelineComponent
-from .message import Fact, Message
+from core.pipeline import NLGPipelineComponent
+from core.message import Fact, Message
 
 log = logging.getLogger('root')
 
