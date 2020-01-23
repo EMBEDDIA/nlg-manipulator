@@ -1,15 +1,17 @@
-from enum import Enum
-
-from core.message import Message
-
 import logging
-log = logging.getLogger('root')
+from enum import Enum
+from typing import List, Optional, Union
+
+from core.domain import Fact, Message
+
+log = logging.getLogger("root")
 
 
 class Relation(Enum):
     """
     Defines possible relations between the children of a DocumentPlan node.
     """
+
     ELABORATION = 1
     EXEMPLIFICATION = 2
     CONTRAST = 3
@@ -17,7 +19,10 @@ class Relation(Enum):
     LIST = 5
 
 
-class DocumentPlan(object):
+DocPlanChildType = Union["DocumentPlan", Message]
+
+
+class DocumentPlan:
     """
     Both the DocumentPlan an in general and a non-template, non-message node
     of the DocumentPlan tree.
@@ -25,31 +30,36 @@ class DocumentPlan(object):
     Contains an ordered list of children are connected by a relation.
     """
 
-    def __init__(self, children=None, relation=Relation.SEQUENCE):
+    def __init__(
+        self, children: Optional[List[DocPlanChildType]] = None, relation: Relation = Relation.SEQUENCE,
+    ) -> None:
         if children is None:
             children = []
         self._children = children
         self._relation = relation
 
     @property
-    def children(self):
+    def children(self) -> List[DocPlanChildType]:
         return self._children
 
     @property
-    def relation(self):
+    def relation(self) -> Relation:
         return self._relation
 
-    def add_message(self, msg):
-        self._children.append(msg)
+    def add_child(self, child: DocPlanChildType) -> None:
+        self._children.append(child)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.relation.name
 
     """
     Prints the DocumentPlan as a tree.
     Modified from http://stackoverflow.com/a/30893896
     """
-    def print_tree(self, this=None, indent="", last='updown'):
+
+    def print_tree(
+        self, this: Union["DocumentPlan", Message, Fact] = None, indent: str = "", last: str = "updown",
+    ) -> None:
         if not this:
             this = self
 
@@ -81,25 +91,32 @@ class DocumentPlan(object):
 
             """ Printing of "up" branch. """
             for child in up:
-                next_last = 'up' if up.index(child) is 0 else ''
-                next_indent = '{0}{1}{2}'.format(indent, ' ' if 'up' in last else '│', " " * len(str(this)))
+                next_last = "up" if up.index(child) == 0 else ""
+                next_indent = "{0}{1}{2}".format(indent, " " if "up" in last else "│", " " * len(str(this)))
                 self.print_tree(child, indent=next_indent, last=next_last)
 
         """ Printing of current node. """
-        if last == 'up': start_shape = '┌'
-        elif last == 'down': start_shape = '└'
-        elif last == 'updown': start_shape = ' '
-        else: start_shape = '├'
+        if last == "up":
+            start_shape = "┌"
+        elif last == "down":
+            start_shape = "└"
+        elif last == "updown":
+            start_shape = " "
+        else:
+            start_shape = "├"
 
-        if up: end_shape = '┤'
-        elif down: end_shape = '┐'
-        else: end_shape = ''
+        if up:
+            end_shape = "┤"
+        elif down:
+            end_shape = "┐"
+        else:
+            end_shape = ""
 
-        print('{0}{1}{2}{3}'.format(indent, start_shape, str(this), end_shape))
+        print("{0}{1}{2}{3}".format(indent, start_shape, str(this), end_shape))
 
         if isinstance(this, DocumentPlan):
             """ Printing of "down" branch. """
             for child in down:
-                next_last = 'down' if down.index(child) is len(down) - 1 else ''
-                next_indent = '{0}{1}{2}'.format(indent, ' ' if 'down' in last else '│', " " * len(str(this)))
+                next_last = "down" if down.index(child) is len(down) - 1 else ""
+                next_indent = "{0}{1}{2}".format(indent, " " if "down" in last else "│", " " * len(str(this)))
                 self.print_tree(child, indent=next_indent, last=next_last)

@@ -1,14 +1,16 @@
-import pandas as pd
-import numpy as np
-from math import sqrt
-import os.path
 import itertools
+import os.path
+from math import sqrt
+
+import numpy as np
+import pandas as pd
+
 from country_clusteriser import CountryClusteriser
 
 
 def compare_to_us(df, compare_columns):
 
-    us_df = df.loc[df['where'] == 'US']
+    us_df = df.loc[df["where"] == "US"]
     df = df.drop(us_df.index)
     df = pd.concat([us_df, df])
 
@@ -17,14 +19,14 @@ def compare_to_us(df, compare_columns):
     for col_name in compare_columns:
         compared_col_name = "{}_grouped_by_time_comp_us".format(col_name)
         grouped = grouped_cphi_time[col_name]
-        df[compared_col_name] = df[col_name] - grouped.transform('first')
+        df[compared_col_name] = df[col_name] - grouped.transform("first")
 
     return df
 
 
 def compare_to_eu(df, compare_columns):
 
-    eu_df = df.loc[df['where'] == 'EU']
+    eu_df = df.loc[df["where"] == "EU"]
     df = df.drop(eu_df.index)
     df = pd.concat([eu_df, df])
 
@@ -33,7 +35,7 @@ def compare_to_eu(df, compare_columns):
     for col_name in compare_columns:
         compared_col_name = "{}_grouped_by_time_comp_eu".format(col_name)
         grouped = grouped_cphi_time[col_name]
-        df[compared_col_name] = df[col_name] - grouped.transform('first')
+        df[compared_col_name] = df[col_name] - grouped.transform("first")
 
     return df
 
@@ -46,7 +48,7 @@ def compare_to_similar(df, cluster_df, compare_columns):
     for col_name in compare_columns:
         compared_col_name = "{}_grouped_by_time_comp_similar".format(col_name)
         grouped = grouped_b_time_and_cluster[col_name]
-        df[compared_col_name] = df[col_name] - grouped.transform('mean')
+        df[compared_col_name] = df[col_name] - grouped.transform("mean")
 
     df = df.drop("cluster", axis=1)
 
@@ -55,14 +57,14 @@ def compare_to_similar(df, cluster_df, compare_columns):
 
 def rank_df(df, rank_columns):
     grouped_time = df.groupby(["when", "when_type"])
-    #grouped_cphi_place = df.groupby(["where", "where_type", "when", "when_type"])
+    # grouped_cphi_place = df.groupby(["where", "where_type", "when", "when_type"])
 
     for col_name in rank_columns:
         ranked_col_name = "{}_grouped_by_time_rank".format(col_name)
         reverse_ranked_col_name = "{}_reverse".format(ranked_col_name)
         grouped = grouped_time[col_name]
-        df[ranked_col_name] = grouped.rank(ascending=False, method="dense", na_option='keep')
-        df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense", na_option='keep')
+        df[ranked_col_name] = grouped.rank(ascending=False, method="dense", na_option="keep")
+        df[reverse_ranked_col_name] = grouped.rank(ascending=True, method="dense", na_option="keep")
     return df
 
 
@@ -81,14 +83,17 @@ def add_outlierness_to_data(df, outlierness_columns, id_columns):
                 return 0.5 + (const_max_out - 0.5) * (q2 - val) / (q2 - min_val) * size_weight
         else:
             if (q1 < val) and (val < q3):
-                return min(
-                    outlierness(q1, count, min_val, q1, q2, q3, max_val),
-                    outlierness(q3, count, min_val, q1, q2, q3, max_val)
-                ) * size_weight
+                return (
+                    min(
+                        outlierness(q1, count, min_val, q1, q2, q3, max_val),
+                        outlierness(q3, count, min_val, q1, q2, q3, max_val),
+                    )
+                    * size_weight
+                )
             return abs(val - q2) / (q3 - q1) * size_weight
 
     def group_outlierness(grp):
-        quantiles = grp.quantile([.25, .5, .75])
+        quantiles = grp.quantile([0.25, 0.5, 0.75])
         min_val = grp.min()
         max_val = grp.max()
         q1 = quantiles[0.25]
@@ -103,14 +108,10 @@ def add_outlierness_to_data(df, outlierness_columns, id_columns):
         outlierness_ct_column_name = "{}_grouped_by_time_outlierness".format(column_name)
         df[outlierness_ct_column_name] = df.groupby(["when", "when_type"])[column_name].apply(group_outlierness)
 
-        # outlierness_ct_column_name = "{}_grouped_by_crime_place_year_outlierness".format(column_name)
-        # df[outlierness_ct_column_name] = df.groupby(["where", "where_type", "year", "when_type"])[column_name].apply(group_outlierness)
-        # df.loc[df['when_type'] == 'year', outlierness_ct_column_name] = np.nan
-
     # Last outlierness:
     #   fixed place and time (which crime was committed most, second most, ... in specific place at specific time)
-    raw_numbers_columns = [x for x in numeric_columns if 'normalized' not in x]
-    normalized_columns = [x for x in numeric_columns if 'normalized' in x]
+    raw_numbers_columns = [x for x in numeric_columns if "normalized" not in x]
+    normalized_columns = [x for x in numeric_columns if "normalized" in x]
 
     raw_outlierness = df[raw_numbers_columns]
     norm_outlierness = df[normalized_columns]
@@ -136,7 +137,7 @@ def add_outlierness_to_data(df, outlierness_columns, id_columns):
 
     non_numeric_columns = id_columns
     for column_name in non_numeric_columns:
-        #log.debug("Generating outlyingness values for column {}".format(column_name))
+        # log.debug("Generating outlyingness values for column {}".format(column_name))
         outlierness_column_name = "{}_outlierness".format(column_name)
         df[outlierness_column_name] = 0.5
 
@@ -144,12 +145,12 @@ def add_outlierness_to_data(df, outlierness_columns, id_columns):
 
 
 def flatten_cphi(df):
-    '''
+    """
     Flatten a data frame so that each field contains a single value.
-    '''
+    """
     # Replace every underscore in DataFrame
     for column in df.columns:
-        df[column] = df[column].str.replace('_','-')
+        df[column] = df[column].str.replace("_", "-")
     new_df = pd.DataFrame()
     names = list(df.columns)
 
@@ -159,53 +160,55 @@ def flatten_cphi(df):
     values = df.values.tolist()
     values = [value[1:] for value in values]
     values = list(itertools.chain.from_iterable(values))
-    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
-    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
+    values_n_flags = pd.DataFrame(values)[0].str.split(" ", expand=True)
+    values_n_flags = values_n_flags.rename(columns={0: "value", 1: "flag"})
 
     for line in df[new_columns]:
         for when in names:
-            initial_content.append((',').join([line, when]))
-    new_columns = (',').join([new_columns, 'when'])
+            initial_content.append((",").join([line, when]))
+    new_columns = (",").join([new_columns, "when"])
     new_df[new_columns] = initial_content
 
-    columns = new_columns.split(',')
-    new_df = new_df[new_columns].str.split(',', expand=True)
+    columns = new_columns.split(",")
+    new_df = new_df[new_columns].str.split(",", expand=True)
     new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
-    new_df = new_df.rename(columns={'geo\\time':'where'})
+    new_df = new_df.rename(columns={"geo\\time": "where"})
 
-    new_df[['value', 'flag']] = values_n_flags
+    new_df[["value", "flag"]] = values_n_flags
 
-    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['unit', 'indic'], values = 'value', aggfunc='first')
-    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df = pd.pivot_table(
+        new_df, index=["where", "when"], columns=["unit", "indic"], values="value", aggfunc="first",
+    )
+    new_df.reset_index(level=["where", "when"], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
-    new_df.columns = [('cphi_'+column[0]+'_'+column[1]).lower() for column in new_df.columns]
-    new_df.rename(columns={'cphi_where_':'where', 'cphi_when_':'when'}, inplace=True)
+    new_df.columns = [("cphi_" + column[0] + "_" + column[1]).lower() for column in new_df.columns]
+    new_df.rename(columns={"cphi_where_": "where", "cphi_when_": "when"}, inplace=True)
 
-    new_df = new_df.replace(to_replace=':', value=np.nan)
+    new_df = new_df.replace(to_replace=":", value=np.nan)
 
-    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    data = [pd.to_numeric(new_df[s], errors="ignore") for s in new_df.columns]
     new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
 
     # Add when_type and where_type TODO: for example the euro area is now labeled as a country
-    where_type = ['C'] * new_df.shape[0]
-    when_type = ['month'] * new_df.shape[0]
+    where_type = ["C"] * new_df.shape[0]
+    when_type = ["month"] * new_df.shape[0]
 
-    new_df['where_type'] = where_type
-    new_df['when_type'] = when_type
+    new_df["where_type"] = where_type
+    new_df["when_type"] = when_type
 
     # Remove redundant spaces
-    new_df['when'] = [when.strip(' ') for when in new_df['when']]
+    new_df["when"] = [when.strip(" ") for when in new_df["when"]]
 
     return new_df
 
 
 def flatten_health(df):
-    '''
+    """
     Flatten a data frame so that each field contains a single value.
-    '''
+    """
     # Replace every underscore in DataFrame
     for column in df.columns:
-        df[column] = df[column].str.replace('_','-')
+        df[column] = df[column].str.replace("_", "-")
     new_df = pd.DataFrame()
     names = list(df.columns)
 
@@ -215,48 +218,50 @@ def flatten_health(df):
     values = df.values.tolist()
     values = [value[1:] for value in values]
     values = list(itertools.chain.from_iterable(values))
-    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
-    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
+    values_n_flags = pd.DataFrame(values)[0].str.split(" ", expand=True)
+    values_n_flags = values_n_flags.rename(columns={0: "value", 1: "flag"})
 
     for line in df[new_columns]:
         for when in names:
-            initial_content.append((',').join([line, when]))
-    new_columns = (',').join([new_columns, 'when'])
+            initial_content.append((",").join([line, when]))
+    new_columns = (",").join([new_columns, "when"])
     new_df[new_columns] = initial_content
 
-    columns = new_columns.split(',')
-    new_df = new_df[new_columns].str.split(',', expand=True)
+    columns = new_columns.split(",")
+    new_df = new_df[new_columns].str.split(",", expand=True)
     new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
-    new_df = new_df.rename(columns={'geo\\TIME_PERIOD':'where'})
+    new_df = new_df.rename(columns={"geo\\TIME_PERIOD": "where"})
 
-    new_df[['value', 'flag']] = values_n_flags
-    new_df = pd.pivot_table(new_df, index =['where','when'], columns =['unit','icha11_hf'], values = 'value', aggfunc='first')
-    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df[["value", "flag"]] = values_n_flags
+    new_df = pd.pivot_table(
+        new_df, index=["where", "when"], columns=["unit", "icha11_hf"], values="value", aggfunc="first",
+    )
+    new_df.reset_index(level=["where", "when"], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
-    new_df.columns = [('health_'+column[0]+'_'+column[1]).lower() for column in new_df.columns]
-    new_df.rename(columns={'health_where_':'where', 'health_when_':'when'}, inplace=True)
-    new_df = new_df.replace(to_replace=':', value=np.nan)
+    new_df.columns = [("health_" + column[0] + "_" + column[1]).lower() for column in new_df.columns]
+    new_df.rename(columns={"health_where_": "where", "health_when_": "when"}, inplace=True)
+    new_df = new_df.replace(to_replace=":", value=np.nan)
 
-    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    data = [pd.to_numeric(new_df[s], errors="ignore") for s in new_df.columns]
     new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
 
     # Add when_type and where_type TODO: for example the euro area is now labeled as a country
-    where_type = ['C'] * new_df.shape[0]
-    when_type = ['year'] * new_df.shape[0]
+    where_type = ["C"] * new_df.shape[0]
+    when_type = ["year"] * new_df.shape[0]
 
-    new_df['where_type'] = where_type
-    new_df['when_type'] = when_type
+    new_df["where_type"] = where_type
+    new_df["when_type"] = when_type
 
     return new_df
 
 
 def flatten_income(df):
-    '''
+    """
     Flatten a data frame so that each field contains a single value.
-    '''
+    """
     # Replace every underscore in DataFrame
     for column in df.columns:
-        df[column] = df[column].str.replace('_','-')
+        df[column] = df[column].str.replace("_", "-")
     new_df = pd.DataFrame()
     names = list(df.columns)
     new_columns = names.pop(0)
@@ -265,49 +270,58 @@ def flatten_income(df):
     values = df.values.tolist()
     values = [value[1:] for value in values]
     values = list(itertools.chain.from_iterable(values))
-    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
-    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
-    values_n_flags['value'] = values_n_flags['value'].str.replace(',', '')
-    
+    values_n_flags = pd.DataFrame(values)[0].str.split(" ", expand=True)
+    values_n_flags = values_n_flags.rename(columns={0: "value", 1: "flag"})
+    values_n_flags["value"] = values_n_flags["value"].str.replace(",", "")
+
     for line in df[new_columns]:
         for when in names:
-            initial_content.append((',').join([line, when]))
-    new_columns = (',').join([new_columns, 'when'])
+            initial_content.append((",").join([line, when]))
+    new_columns = (",").join([new_columns, "when"])
     new_df[new_columns] = initial_content
 
-    columns = new_columns.split(',')
-    new_df = new_df[new_columns].str.split(',', expand=True)
+    columns = new_columns.split(",")
+    new_df = new_df[new_columns].str.split(",", expand=True)
     new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
-    new_df = new_df.rename(columns={'GEO':'where'})
-    new_df[['value', 'flag']] = values_n_flags
+    new_df = new_df.rename(columns={"GEO": "where"})
+    new_df[["value", "flag"]] = values_n_flags
 
-    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['AGE', 'SEX', 'INDIC_IL', 'UNIT\\TIME'], values = 'value', aggfunc='first')
-    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df = pd.pivot_table(
+        new_df,
+        index=["where", "when"],
+        columns=["AGE", "SEX", "INDIC_IL", "UNIT\\TIME"],
+        values="value",
+        aggfunc="first",
+    )
+    new_df.reset_index(level=["where", "when"], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
-    new_df.columns = [('income_'+column[0]+'_'+column[1]+'_'+column[2]+'_'+column[3]).lower() for column in new_df.columns]
-    new_df.rename(columns={'income_where___':'where', 'income_when___':'when'}, inplace=True)
-    new_df = new_df.replace(to_replace=':', value=np.nan)
+    new_df.columns = [
+        ("income_" + column[0] + "_" + column[1] + "_" + column[2] + "_" + column[3]).lower()
+        for column in new_df.columns
+    ]
+    new_df.rename(columns={"income_where___": "where", "income_when___": "when"}, inplace=True)
+    new_df = new_df.replace(to_replace=":", value=np.nan)
 
-    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    data = [pd.to_numeric(new_df[s], errors="ignore") for s in new_df.columns]
     new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
 
     # Add when_type and where_type TODO: for example the euro area is now labeled as a country
-    where_type = ['C'] * new_df.shape[0]
-    when_type = ['year'] * new_df.shape[0]
+    where_type = ["C"] * new_df.shape[0]
+    when_type = ["year"] * new_df.shape[0]
 
-    new_df['where_type'] = where_type
-    new_df['when_type'] = when_type
+    new_df["where_type"] = where_type
+    new_df["when_type"] = when_type
 
     return new_df
 
 
 def flatten_env(df):
-    '''
+    """
     Flatten a data frame so that each field contains a single value.
-    '''
+    """
     # Replace every underscore in DataFrame
     for column in df.columns:
-        df[column] = df[column].str.replace('_','-')
+        df[column] = df[column].str.replace("_", "-")
     new_df = pd.DataFrame()
     names = list(df.columns)
     new_columns = names.pop(0)
@@ -316,48 +330,54 @@ def flatten_env(df):
     values = df.values.tolist()
     values = [value[1:] for value in values]
     values = list(itertools.chain.from_iterable(values))
-    values_n_flags = pd.DataFrame(values)[0].str.split(' ', expand=True)
-    values_n_flags = values_n_flags.rename(columns={0:'value', 1:'flag'})
-    values_n_flags['value'] = values_n_flags['value'].str.replace(',', '')
-    
+    values_n_flags = pd.DataFrame(values)[0].str.split(" ", expand=True)
+    values_n_flags = values_n_flags.rename(columns={0: "value", 1: "flag"})
+    values_n_flags["value"] = values_n_flags["value"].str.replace(",", "")
+
     for line in df[new_columns]:
         for when in names:
-            initial_content.append((',').join([line, when]))
-    new_columns = (',').join([new_columns, 'when'])
+            initial_content.append((",").join([line, when]))
+    new_columns = (",").join([new_columns, "when"])
     new_df[new_columns] = initial_content
 
-    columns = new_columns.split(',')
-    new_df = new_df[new_columns].str.split(',', expand=True)
+    columns = new_columns.split(",")
+    new_df = new_df[new_columns].str.split(",", expand=True)
     new_df = new_df.rename(columns=dict(zip(list(new_df.columns), columns)))
-    new_df = new_df.rename(columns={'GEO':'where'})
-    new_df[['value', 'flag']] = values_n_flags
+    new_df = new_df.rename(columns={"GEO": "where"})
+    new_df[["value", "flag"]] = values_n_flags
 
-    new_df = pd.pivot_table(new_df, index =['where', 'when'], columns =['CEPAREMA', 'ENV_ECON' ,'UNIT\TIME'], values = 'value', aggfunc='first')
-    new_df.reset_index(level=['where', 'when'], inplace=True)
+    new_df = pd.pivot_table(
+        new_df,
+        index=["where", "when"],
+        columns=["CEPAREMA", "ENV_ECON", "UNIT\\TIME"],
+        values="value",
+        aggfunc="first",
+    )
+    new_df.reset_index(level=["where", "when"], inplace=True)
     new_df.columns = new_df.columns.to_flat_index()
-    new_df.columns = [('env_'+column[0]+'_'+column[1]+'_'+column[2]).lower() for column in new_df.columns]
-    new_df.rename(columns={'env_where__':'where', 'env_when__':'when'}, inplace=True)
-    new_df = new_df.replace(to_replace=':', value=np.nan)
+    new_df.columns = [("env_" + column[0] + "_" + column[1] + "_" + column[2]).lower() for column in new_df.columns]
+    new_df.rename(columns={"env_where__": "where", "env_when__": "when"}, inplace=True)
+    new_df = new_df.replace(to_replace=":", value=np.nan)
 
-    data = [pd.to_numeric(new_df[s], errors='ignore') for s in new_df.columns]
+    data = [pd.to_numeric(new_df[s], errors="ignore") for s in new_df.columns]
     new_df = pd.concat(data, axis=1, keys=[s.name for s in data])
 
     # Add when_type and where_type TODO: for example the euro area is now labeled as a country
-    where_type = ['C'] * new_df.shape[0]
-    when_type = ['year'] * new_df.shape[0]
+    where_type = ["C"] * new_df.shape[0]
+    when_type = ["year"] * new_df.shape[0]
 
-    new_df['where_type'] = where_type
-    new_df['when_type'] = when_type
+    new_df["where_type"] = where_type
+    new_df["when_type"] = when_type
 
     return new_df
 
 
 def run():
 
-    cphi_df = pd.read_csv('../database/ei_cphi_m.tsv', sep='\t')
-    health_out_of_pocket_df = pd.read_csv('../database/tepsr_sp310+ESTAT.tsv', sep='\t')
-    income_df = pd.read_csv('../database/ilc_di03_1.tsv', sep='\t')
-    env_df = pd.read_csv('../database/env_ac_epneec_1.tsv', sep='\t')
+    cphi_df = pd.read_csv("../database/ei_cphi_m.tsv", sep="\t")
+    health_out_of_pocket_df = pd.read_csv("../database/tepsr_sp310+ESTAT.tsv", sep="\t")
+    income_df = pd.read_csv("../database/ilc_di03_1.tsv", sep="\t")
+    env_df = pd.read_csv("../database/env_ac_epneec_1.tsv", sep="\t")
 
     # Flatten DataFrames
     cphi_df = flatten_cphi(cphi_df)
@@ -373,7 +393,7 @@ def run():
     clusteriser = CountryClusteriser()
     country_clusters_df = clusteriser.run()
 
-    id_columns = ['when', 'when_type', 'where', 'where_type']
+    id_columns = ["when", "when_type", "where", "where_type"]
     base_columns = [column for column in df.columns if column not in id_columns]
 
     # Compare columns to EU average
@@ -391,7 +411,7 @@ def run():
     # Add outlierness to data
     outlierness_columns = [column for column in df.columns if column not in id_columns]
     df = add_outlierness_to_data(df, outlierness_columns, [])
-    df.to_csv(os.path.join(os.path.dirname(__file__), '../data/eu_data.csv'), index=False)
+    df.to_csv(os.path.join(os.path.dirname(__file__), "../data/eu_data.csv"), index=False)
 
 
 if __name__ == "__main__":

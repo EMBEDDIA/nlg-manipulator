@@ -35,24 +35,64 @@ This is exactly equivalent to putting the expanded templates explicitly on conse
 the same language specifier).
 
 """
+import logging
 import re
 import warnings
-import logging
+from typing import Dict, Generator, Iterable, List, Optional, Set, Tuple, Union
 
-from core.template import Literal, Template, Slot
-from templates import FACT_FIELD_MAP, LOCATION_TYPE_MAP
-from templates.matchers import OPERATORS, Matcher, FactField, ReferentialExpr
-from templates.substitutions import FactFieldSource, LiteralSource, EntitySource, TimeSource
+from core.domain import (
+    OPERATORS,
+    EntitySource,
+    FactField,
+    FactFieldSource,
+    Literal,
+    LiteralSource,
+    Matcher,
+    ReferentialExpr,
+    Slot,
+    Template,
+    TemplateComponent,
+    TimeSource,
+)
 
-log = logging.getLogger('root')
+log = logging.getLogger("root")
 
+
+def canonical_map(map_dict: Dict[str, List[str]]) -> Dict[str, str]:
+    return dict(
+        (alt_val, canonical) for (canonical, alt_vals) in map_dict.items() for alt_val in ([canonical] + alt_vals)
+    )
+
+
+# Defines alternative, equivalent field names for use in templates
+# The alternatives get mapped to their canonical form (key) early in processing
+FACT_FIELD_ALIASES: Dict[str, List[str]] = {
+    "what_type": ["value_type", "unit"],
+    "what": ["value"],
+    "where_type": ["place_type"],
+    "where": ["place"],
+    "when_1": [],
+    "when_2": [],
+    "time": [],
+}
+FACT_FIELD_MAP = canonical_map(FACT_FIELD_ALIASES)
+FACT_FIELDS = FACT_FIELD_ALIASES.keys()
+
+# Similarly, we have multiple ways to refer to location types
+LOCATION_TYPES = {
+    "C": ["country"],
+    "D": ["district"],
+    "M": ["municipality", "mun"],
+    "P": ["polling_station", "pollingstation"],
+}
+LOCATION_TYPE_MAP = canonical_map(LOCATION_TYPES)
 
 RULE_PREFIX = "|"
 
 field_name_re = re.compile(r"[^ |=]+")
 rhs_value_re = re.compile(r"[^,]+")
 
-value_groups = {}
+value_groups: Dict[str, Set[str]] = {}
 
 """
 Referential values start with 1 or more numerals, followed by a dot.
@@ -68,18 +108,19 @@ lang_spec_re = re.compile(r"(?P<lang>\S*):\s(?P<template>.*)")
 multi_space_re = re.compile(r"\s+")
 
 
-def read_templates_file(filename, initial_language=None, return_what_types=False):
+def read_templates_file(filename: str, initial_language: Optional[str] = None) -> Dict[str, List[Template]]:
     """
     Read in template specifications from a file. The file is assumed to be utf-8 encoded.
 
+    :param initial_language: the language for the first template, if not specified in file
     :param filename: path to file
     :return: list of Template objects
     """
-    with open(filename, 'r', encoding="utf-8") as f:
-        return read_templates(f.read(), initial_language=initial_language, return_what_types=return_what_types)
+    with open(filename, "r", encoding="utf-8") as f:
+        return read_templates(f.read(), initial_language=initial_language)
 
 
-def read_templates(data, initial_language=None, return_what_types=False):
+def read_templates(data: str, initial_language: Optional[str] = None) -> Dict[str, List[Template]]:
     """
     Parse the template specifications in the given string.
 
@@ -88,15 +129,17 @@ def read_templates(data, initial_language=None, return_what_types=False):
         has been specified
     :return: dict containing a list Template objects for each language
     """
-    templates = {}
-    seen_what_types = set()
+    templates: Dict[str, List[Template]] = {}
     current_language = initial_language
 
     group_definitions = [line for line in data.splitlines() if line.startswith("$")]
     for line in group_definitions:
         group_name, _, rest = line[1:].partition(":")
         if group_name[0] != "{" or group_name[-1] != "}":
-            raise TemplateReadingError("invalid group name '{}' for use in template definitions\nGroup names need to be within curly brackets".format(group_name))
+            raise TemplateReadingError(
+                "invalid group name '{}' for use in template definitions\n"
+                "Group names need to be within curly brackets".format(group_name)
+            )
         rest = rest.strip()
         group_values = set([value.strip() for value in rest.split(",")])
         value_groups[group_name] = group_values
@@ -108,20 +151,17 @@ def read_templates(data, initial_language=None, return_what_types=False):
     for line_group in blank_line_split(lines):
         # Parse each group of lines to get a load of template and add them to the dictionary
         # Update the default language to the last one used in the group
-        new_templates, current_language, new_what_types = \
-            read_template_group(line_group, current_language=current_language)
-        seen_what_types = seen_what_types.union(new_what_types)
+        new_templates, current_language = read_template_group(line_group, current_language=current_language)
 
         for lang, lang_templates in new_templates.items():
             templates.setdefault(lang, []).extend(lang_templates)
 
-    if return_what_types:
-        return templates, seen_what_types
-    else:
         return templates
 
 
-def read_template_group(template_spec, current_language=None, warn_on_old_format=True):
+def read_template_group(
+    template_spec: Union[str, List[str]], current_language: Optional[str] = None, warn_on_old_format: bool = True,
+) -> Tuple[Dict[str, List[Template]], str]:
     """
     Parse a template group: one block that shares fact constraints and may specify multiple templates
     (for different languages, or the same).
@@ -164,24 +204,15 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
     # constraint lines
     template_lines = [line for line in lines if not line.startswith(RULE_PREFIX)]
     # The rest of the lines each define a fact associated with the templates, along with constraints
-    constraint_lines = [line[len(RULE_PREFIX):].lstrip() for line in lines if line.startswith(RULE_PREFIX)]
+    constraint_lines = [line[len(RULE_PREFIX) :].lstrip() for line in lines if line.startswith(RULE_PREFIX)]
 
     # FACT CONSTRAINTS
     # Read in the fact constraints first to get a list of rules that will be associated with the template
-    rules = []
-    seen_what_types = []
+    rules: List[List[Matcher]] = []
     for constraint_line in constraint_lines:
         # Every part of this line represents a constraint on the facts that may match
-        matchers = []
+        matchers: List[Matcher] = []
         for lhs, op, value in parse_matcher_expr(constraint_line):
-            if "what_type" in lhs.field_name:
-                # Keep track of all what_types we've seen for reference
-                # ToDo: What to do with the regexes?
-                if type(value) is set:
-                    seen_what_types.extend(value)
-                else:
-                    seen_what_types.append(value)
-
             matchers.append(Matcher(lhs, op, value))
         rules.append(matchers)
 
@@ -192,7 +223,7 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
 
     # TEMPLATES
     # Now we parse the template lines themselves
-    templates = {}
+    templates: Dict[str, List[Template]] = {}
     for template_line in template_lines:
         # Work out what language this template is for
         lang_id_match = lang_spec_re.match(template_line)
@@ -210,10 +241,10 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
 
         # Allow alternative versions of a template to be specified using the [] notation for optional parts
         for expanded_template_line in expand_alternatives(template_line):
-            components = []
+            components: List[TemplateComponent] = []
 
             # Generate list for mapping rules into template Slots
-            rule_to_slot = []
+            rule_to_slot: List[List[int]] = []
             for idx in range(len(rules)):
                 rule_to_slot.append([])
 
@@ -246,14 +277,18 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                         # or the new {time} slot, which refers to both when-fields
                         field_name = subst_parts[0]
 
-                        # It may specify which of the facts it's referring to, though this is not required (default to first)
+                        # It may specify which of the facts it's referring to, though this is not required (default to
+                        # first)
                         if "." in field_name:
                             rule_ref, __, field_name = field_name.partition(".")
-                            # Use 1-indexed fact numbering in templates: makes more sense for anyone but computer scientists
+                            # Use 1-indexed fact numbering in templates: makes more sense for anyone but
+                            # computer scientists
                             rule_ref = int(rule_ref) - 1
                             if rule_ref < 0:
-                                raise TemplateReadingError("Rule references use 1-index numbering. Found reference to rule "
-                                                           "0: did you mean 1?")
+                                raise TemplateReadingError(
+                                    "Rule references use 1-index numbering. Found reference to rule "
+                                    "0: did you mean 1?"
+                                )
                         else:
                             # Default to referring to the first rule, since there's usually only one
                             rule_ref = 0
@@ -263,21 +298,25 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                         try:
                             field_name = FACT_FIELD_MAP[field_name]
                         except KeyError:
-                            raise TemplateReadingError("unknown fact field '{}' used in substitution ({})".format(
-                                field_name, subst
-                            ))
+                            raise TemplateReadingError(
+                                "unknown fact field '{}' used in substitution ({})".format(field_name, subst)
+                            )
 
                         # Only some of the field names are allowed to be used in templates
-                        if field_name not in ['what', 'where', 'when_1', 'when_2', 'what_type', 'time', 'where_type', 'value', 'value_type', 'place']:
-                            raise TemplateReadingError("invalid field name '{}' for use in a template: {}".format(
-                                field_name, expanded_template_line
-                            ))
+                        if field_name not in FACT_FIELDS:
+                            raise TemplateReadingError(
+                                "invalid field name '{}' for use in a template: {}".format(
+                                    field_name, expanded_template_line
+                                )
+                            )
 
                         if rule_ref >= len(rules):
-                            raise TemplateReadingError("Substitution '{}' refers to rule {}, but template only has {} "
-                                                       "rules".format(subst, rule_ref+1, len(rules)))
+                            raise TemplateReadingError(
+                                "Substitution '{}' refers to rule {}, but template only has {} "
+                                "rules".format(subst, rule_ref + 1, len(rules))
+                            )
 
-                    attributes = {}
+                    attributes: Dict[str, str] = {}
                     # Read each of the attribute specifications
                     for subst_part in subst_parts[1:]:
                         if "=" in subst_part:
@@ -286,14 +325,15 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
                             attributes[att.strip()] = val.strip()
                         else:
                             raise TemplateReadingError(
-                                "Found an attribute with no value specified. Possibly a leftover old style filter? {}".format(subst_part)
+                                "Found an attribute with no value specified. "
+                                "Possibly a leftover old style filter? {}".format(subst_part)
                             )
 
                     if field_name[0] in ["'", '"']:
                         to_value = LiteralSource(field_name[1:-1])
-                    elif field_name == 'where':
+                    elif field_name == "where":
                         to_value = EntitySource(field_name)
-                    elif field_name == 'time':
+                    elif field_name == "time":
                         to_value = TimeSource(field_name)
                     else:
                         to_value = FactFieldSource(field_name)
@@ -311,10 +351,10 @@ def read_template_group(template_spec, current_language=None, warn_on_old_format
             # Add this template to the list for the relevant language
             templates.setdefault(current_language, []).append(template)
 
-    return templates, current_language, set(seen_what_types)
+    return templates, current_language
 
 
-def parse_matcher_expr(constraint_line):
+def parse_matcher_expr(constraint_line: str) -> Generator[Tuple[FactField, str, str], None, None]:
     rest = constraint_line
     while rest.strip():
         rest = rest.strip()
@@ -324,14 +364,14 @@ def parse_matcher_expr(constraint_line):
         try:
             op = next(opr for opr in OPERATORS if rest.startswith(opr))
         except StopIteration:
-            raise TemplateReadingError("unrecognised operator at start of '{}'. Should be one of {}".format(
-                rest, ", ".join(OPERATORS)
-            ))
-        rest = rest[len(op):].strip()
+            raise TemplateReadingError(
+                "unrecognised operator at start of '{}'. Should be one of {}".format(rest, ", ".join(OPERATORS))
+            )
+        rest = rest[len(op) :].strip()
 
         # The value is now everything up to the next , or the end
         value_match = rhs_value_re.match(rest)
-        value, rest = rest[:value_match.end()], rest[value_match.end()+1:].strip()
+        value, rest = rest[: value_match.end()], rest[value_match.end() + 1 :].strip()
 
         if len(value) == 0:
             raise TemplateReadingError("missing value part of constraint in: {}".format(constraint_line))
@@ -346,14 +386,16 @@ def parse_matcher_expr(constraint_line):
 
         # For certain fields, we only allow string values and limit them to a given set
         # We also map them from a set of alternatives onto a canonical form
-        if lhs.field_name == 'where_type':
+        if lhs.field_name == "where_type":
             try:
                 value = LOCATION_TYPE_MAP[value]
             except KeyError:
-                log.info("Unknown where_type '{}'. Expected one of: {}. It better be a valid regex!".format(
-                    value, ", ".join("'{}'".format(v) for v in LOCATION_TYPE_MAP.keys())
-                ))
-        elif lhs.field_name != 'what_type':
+                log.info(
+                    "Unknown where_type '{}'. Expected one of: {}. It better be a valid regex!".format(
+                        value, ", ".join("'{}'".format(v) for v in LOCATION_TYPE_MAP.keys()),
+                    )
+                )
+        elif lhs.field_name != "what_type":
             # Don't do RHS parsing for what_type
             # Special case: value references another fact???
             matches = referential_value_re.match(value)
@@ -369,13 +411,14 @@ def parse_matcher_expr(constraint_line):
                 # Allow ints and floats to be written without any special typing: just detect them
                 value = detect_types(value)
                 # You don't need to put strings in quotes, but if someone wants to, let them do so
-                if type(value) is str and \
-                        ((value[0] == "'" and value[-1] == "'") or (value[0] == '"' and value[-1] == '"')):
+                if type(value) is str and (
+                    (value[0] == "'" and value[-1] == "'") or (value[0] == '"' and value[-1] == '"')
+                ):
                     value = value[1:-1]
         yield lhs, op, value_groups.get(value, value)
 
 
-def parse_matcher_lhs(text):
+def parse_matcher_lhs(text: str) -> Tuple[FactField, str]:
     """
     Parse an expression on the LHS of a matcher. The provided text may be the whole matcher, or anything that
     starts with the LHS expression. The remainder of the text is returned.
@@ -386,7 +429,7 @@ def parse_matcher_lhs(text):
     if field_match is None:
         raise TemplateReadingError("matcher must begin with field name; could not parse: %s" % text)
     field_end = field_match.end()
-    field_name, rest = text[:field_end], text[field_end+1:].strip()
+    field_name, rest = text[:field_end], text[field_end + 1 :].strip()
 
     # Allow the alternative forms
     # If the field name is unknown, this will be assumed to be a shorthand for what_type=field_name, what=value
@@ -404,7 +447,7 @@ def parse_matcher_lhs(text):
 
 
 # Defines alternative, equivalent names for cases, so we can be flexible with the templates
-CASE_NAMES = {
+CASE_NAMES: Dict[str, List[str]] = {
     "nominative": ["nominatiivi", "nom"],
     "genitive": ["genitiivi", "gen"],
     "partitive": ["partitiivi", "par"],
@@ -420,7 +463,7 @@ CASE_NAMES = {
 }
 
 
-def process_attributes(attrs):
+def process_attributes(attrs: Dict[str, str]) -> Dict[str, str]:
     """Post-processing of attribute dictionaries for slots"""
     proc_attrs = {}
     for attr, val in attrs.items():
@@ -429,7 +472,9 @@ def process_attributes(attrs):
             try:
                 case_name = next(case for (case, alts) in CASE_NAMES.items() if case == val or val in alts)
             except StopIteration:
-                log.info("unknown case name '{}', using the given form and hoping that Omorfi recognizes it".format(val))
+                log.info(
+                    "unknown case name '{}', using the given form and hoping that Omorfi recognizes it".format(val)
+                )
                 case_name = val
             proc_attrs[attr] = case_name
         else:
@@ -437,7 +482,7 @@ def process_attributes(attrs):
     return proc_attrs
 
 
-def detect_types(value):
+def detect_types(value: str) -> Union[bool, int, float, str]:
     if value == "True":
         return True
     if value == "False":
@@ -454,7 +499,7 @@ def detect_types(value):
     return value
 
 
-def blank_line_split(seq):
+def blank_line_split(seq: Iterable[str]) -> Generator[List[str], None, None]:
     """
     Group subseqences of the given string sequence, split by blank lines.
     """
@@ -472,10 +517,10 @@ def blank_line_split(seq):
         yield group
 
 
-def group_indented_lines(seq):
+def group_indented_lines(seq: List[str]) -> Generator[str, None, None]:
     group = [seq[0].strip()]
     for line in seq[1:]:
-        if re.match("\s", line):
+        if re.match(r"\s", line):
             # Indented line, group with the previous
             group.append(line.strip())
         else:
@@ -485,7 +530,7 @@ def group_indented_lines(seq):
     yield " ".join(group)
 
 
-def expand_alternatives(line):
+def expand_alternatives(line: str) -> List[str]:
     """
     Expand out a template line containing optional parts delimited by []s into multiple template lines
     for the different versions.
@@ -493,7 +538,7 @@ def expand_alternatives(line):
     :param line: raw line
     :return: list of alternatives
     """
-    alts = [""]
+    alts: List[str] = [""]
 
     def add_to_alts(old_alts, new_alts):
         return ["{}{}".format(old_alt, new_alt) for old_alt in old_alts for new_alt in new_alts]

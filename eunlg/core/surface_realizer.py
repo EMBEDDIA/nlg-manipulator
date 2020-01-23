@@ -1,8 +1,9 @@
+import logging
+import re
+
 from core.pipeline import NLGPipelineComponent
 
-import re
-import logging
-log = logging.getLogger('root')
+log = logging.getLogger("root")
 
 
 class SurfaceRealizer(NLGPipelineComponent):
@@ -24,7 +25,7 @@ class SurfaceRealizer(NLGPipelineComponent):
         output = ""
         for p in paragraphs:
             output += self.paragraph_start + p + self.paragraph_end
-        return (output, )
+        return (output,)
 
     def realize(self, sequence, language):
         """Realizes a single paragraph."""
@@ -32,11 +33,13 @@ class SurfaceRealizer(NLGPipelineComponent):
         for message in sequence.children:
             template = message.template
             # TODO: I used a quick fix for getting rid of unwanted integers
-            sent = " ".join([str(component.value) for component in template.components if component.value != ""]).rstrip()
+            sent = " ".join(
+                [str(component.value) for component in template.components if component.value != ""]
+            ).rstrip()
             # Temp fix: remove extra spaces occurring with braces and sometimes before commas.
-            sent = re.sub(r'\(\s', r'(', sent)
-            sent = re.sub(r'\s\)', r')', sent)
-            sent = re.sub(r'\s,', r',', sent)
+            sent = re.sub(r"\(\s", r"(", sent)
+            sent = re.sub(r"\s\)", r")", sent)
+            sent = re.sub(r"\s,", r",", sent)
 
             if not sent:
                 if self.fail_on_empty:

@@ -1,17 +1,15 @@
-from omorfi.omorfi import Omorfi
-
-from finnish_municipality_morphology import INESSIVE_ADESSIVE_MAP
-
-from finnish_morphology_special_cases import special_cases as cache_fi
-from swedish_morphology_special_cases import special_cases as cache_sv
-from english_morphology_special_cases import special_cases as cache_en
-
+import logging
 import re
 
-import logging
-log = logging.getLogger('root')
+from english_morphology_special_cases import special_cases as cache_en
+from finnish_morphology_special_cases import special_cases as cache_fi
+from finnish_municipality_morphology import INESSIVE_ADESSIVE_MAP
+from omorfi.omorfi import Omorfi
+from swedish_morphology_special_cases import special_cases as cache_sv
 
-CASE_REGEX = re.compile("\[CASE=([^\]]*)\]")
+log = logging.getLogger("root")
+
+CASE_REGEX = re.compile(r"\[CASE=([^\]]*)\]")
 
 CASE_MAP = {
     "nominative": "[CASE=NOM]",
@@ -37,7 +35,7 @@ FINNISH_FALLBACKS = {
         "allative": "lle",
         "adessive": "llä",
         "ablative": "ltä",
-        "partitive": "a"
+        "partitive": "a",
     },
     "a": {
         "essive": "nä",
@@ -47,19 +45,29 @@ FINNISH_FALLBACKS = {
         "allative": "lle",
         "adessive": "lla",
         "ablative": "lta",
-        "partitive": "a"
-    }
+        "partitive": "a",
+    },
 }
 
-VOWELS = ["a", "e", "i", "o", "u", "å", "y", "ä", "ö", ]
+VOWELS = [
+    "a",
+    "e",
+    "i",
+    "o",
+    "u",
+    "å",
+    "y",
+    "ä",
+    "ö",
+]
 
-class OmorfiGenerator(object):
 
+class OmorfiGenerator:
     def __init__(self):
-        
+
         self._omorfi = Omorfi()
         self._omorfi.load_from_dir()
-        if not "omorfi-omor" in self._omorfi.generators:
+        if "omorfi-omor" not in self._omorfi.generators:
             raise Exception("Omorfi did not find omorfi-omor.generator using default heuristic, unable to proceed")
         self._generator = self._omorfi.generators["omorfi-omor"]
         self._analyse = self._omorfi.analyse
@@ -74,7 +82,7 @@ class OmorfiGenerator(object):
         elif language.startswith("en"):
             log.debug("Language is English, using custom rules")
             self._recurse_en(document_plan)
-        return (document_plan, )
+        return (document_plan,)
 
     def _recurse_en(self, this):
         try:
@@ -83,17 +91,17 @@ class OmorfiGenerator(object):
             log.debug("Visiting non-leaf '{}'".format(this))
             for child in children:
                 self._recurse_en(child)
-        except AttributeError as ex:
+        except AttributeError:
             # Had no children, must be a leaf node
             log.debug("Visiting leaf {}".format(this))
-           
+
             try:
                 attributes = this.attributes
             except AttributeError:
                 log.debug("Does not have attributes, ignoring")
                 return
 
-            if not "case" in attributes:
+            if "case" not in attributes:
                 log.debug("Does not have a case attribute, ignoring")
                 return
 
@@ -119,17 +127,17 @@ class OmorfiGenerator(object):
             log.debug("Visiting non-leaf '{}'".format(this))
             for child in children:
                 self._recurse_sv(child)
-        except AttributeError as ex:
+        except AttributeError:
             # Had no children, must be a leaf node
             log.debug("Visiting leaf {}".format(this))
-           
+
             try:
                 attributes = this.attributes
             except AttributeError:
                 log.debug("Does not have attributes, ignoring")
                 return
 
-            if not "case" in attributes:
+            if "case" not in attributes:
                 log.debug("Does not have a case attribute, ignoring")
                 return
 
@@ -155,17 +163,17 @@ class OmorfiGenerator(object):
             log.debug("Visiting non-leaf '{}'".format(this))
             for child in children:
                 self._recurse_fi(child)
-        except AttributeError as ex:
+        except AttributeError:
             # Had no children, must be a leaf node
             log.debug("Visiting leaf {}".format(this))
-           
+
             try:
                 attributes = this.attributes
             except AttributeError:
                 log.debug("Does not have attributes, ignoring")
                 return
 
-            if not "case" in attributes:
+            if "case" not in attributes:
                 log.debug("Does not have a case attribute, ignoring")
                 return
 
@@ -210,8 +218,12 @@ class OmorfiGenerator(object):
         analysis = self.analyse(analysis_part, prefer_proper_nouns)
 
         if analysis == "UNKNOWN" or "GUESS=UNKNOWN" in analysis:
-            log.error("No Omorfi analysis for case {} (originally {}) of word {} (part of {})".format(case, original_case, analysis_part, slot.value))
-            result = None 
+            log.error(
+                "No Omorfi analysis for case {} (originally {}) of word {} (part of {})".format(
+                    case, original_case, analysis_part, slot.value
+                )
+            )
+            result = None
 
         else:
             log.info("Omorfi analysis: {} -> {}".format(analysis_part, analysis))
@@ -225,8 +237,8 @@ class OmorfiGenerator(object):
             log.info("Omorfi modification: {} + {} -> {}".format(analysis, case, modified_analysis))
 
             result = self.generate(modified_analysis)[0]
-            log.info("Omorfi {} -> {}".format(modified_analysis, result))  
-        
+            log.info("Omorfi {} -> {}".format(modified_analysis, result))
+
             if result == "U":
                 log.error("No Omorfi generation for {}".format(modified_analysis))
                 result = None
@@ -237,7 +249,7 @@ class OmorfiGenerator(object):
                 suffix = FINNISH_FALLBACKS["a"].get(case, "")
             else:
                 suffix = FINNISH_FALLBACKS["ä"].get(case, "")
-            if suffix != "": 
+            if suffix != "":
                 result = analysis_part + maybe_separator + suffix
             else:
                 result = analysis_part
@@ -249,14 +261,12 @@ class OmorfiGenerator(object):
             parts[multi_word_idx] = result
             result = " ".join(parts)
 
-
         if slot.value not in cache_fi:
             cache_fi[slot.value] = {}
         cache_fi[slot.value][original_case] = result
 
         slot.value = lambda x: result
-        return 
-        
+        return
 
     def generate(self, token):
         return [res[0] for res in self._generator.lookup(token) or ["UNKNOWN"]]
@@ -278,8 +288,3 @@ class OmorfiGenerator(object):
             return next((analysis for analysis in analyses if "[UPOS=PROPN]" in analysis), analyses[0])
         else:
             return analyses[0]
-
-if __name__ == "__main__":
-    g = OmorfiGenerator()
-    print(g.analyse("Pyhärannan"))
-    print(g.generate("[WORD_ID=äänestys][UPOS=NOUN][NUM=SG][CASE=NOM][BOUNDARY=COMPOUND][WORD_ID=alue][UPOS=NOUN][NUM=SG][CASE=ADE]"))

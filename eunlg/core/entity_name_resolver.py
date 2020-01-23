@@ -1,9 +1,10 @@
-from core.pipeline import NLGPipelineComponent
-from collections import defaultdict
-from core.document_plan import Relation
-
 import logging
-log = logging.getLogger('root')
+from collections import defaultdict
+
+from core.document_plan import Relation
+from core.pipeline import NLGPipelineComponent
+
+log = logging.getLogger("root")
 
 
 class EntityNameResolver(NLGPipelineComponent):
@@ -45,13 +46,13 @@ class EntityNameResolver(NLGPipelineComponent):
             log.debug("Language had suffix '-head', removing. Result: {}".format(language))
 
         previous_entities = defaultdict(lambda: None)
-        log.info("TYPE: {}".format(type(registry) == 'core.document_plan.DocumentPlan'))
+        log.info("TYPE: {}".format(type(registry) == "core.document_plan.DocumentPlan"))
         self._recurse(registry, random, language, document_plan, previous_entities, set())
 
         if log.isEnabledFor(logging.DEBUG):
             document_plan.print_tree()
 
-        return (document_plan, )
+        return (document_plan,)
 
     def _recurse(self, registry, random, language, this, previous_entities, encountered):
         """
@@ -64,9 +65,9 @@ class EntityNameResolver(NLGPipelineComponent):
             log.debug("Visiting non-leaf '{}'".format(this))
             idx = 0
             while idx < len(this.children):
-                slots_added, encountered, previous_entities = self._recurse(registry, random, language,
-                                                                            this.children[idx], previous_entities,
-                                                                            encountered)
+                slots_added, encountered, previous_entities = self._recurse(
+                    registry, random, language, this.children[idx], previous_entities, encountered,
+                )
                 if slots_added:
                     idx += slots_added
                 idx += 1
@@ -77,12 +78,12 @@ class EntityNameResolver(NLGPipelineComponent):
             except AttributeError:
                 pass
             return 0, encountered, previous_entities
-        except AttributeError as ex:
+        except AttributeError:
             # Had no children, must be a leaf node
 
             added_slots = 0
 
-            # FYI: I added this try - except to catch the times this tries to find value for a DocumentPlan etc. 
+            # FYI: I added this try - except to catch the times this tries to find value for a DocumentPlan etc.
             try:
                 entity = this.value
             except AttributeError:
@@ -98,22 +99,22 @@ class EntityNameResolver(NLGPipelineComponent):
 
             if previous_entities[entity_type] == entity:
                 log.debug("Same as previous entity")
-                this.attributes['name_type'] = 'pronoun'
+                this.attributes["name_type"] = "pronoun"
 
             elif entity in encountered:
                 log.debug("Different entity than previous, but has been previously encountered")
-                this.attributes['name_type'] = 'short'
+                this.attributes["name_type"] = "short"
 
             else:
                 log.debug("First time encountering this entity")
-                this.attributes['name_type'] = 'full'
+                this.attributes["name_type"] = "full"
                 encountered.add(entity)
                 log.debug("Added entity to encountered, all encountered: {}".format(encountered))
 
             added_slots = self.resolve_surface_form(registry, random, language, this)
             log.debug("Resolved entity name adding {} new slot(s)".format(added_slots))
 
-            this.attributes['entity_type'] = entity_type
+            this.attributes["entity_type"] = entity_type
             previous_entities[entity_type] = entity
 
             return added_slots, encountered, previous_entities

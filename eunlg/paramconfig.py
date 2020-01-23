@@ -12,19 +12,22 @@ Configuration file containing 'importance' constants for crime facts
 
 # dictionary of parameters
 
-value_type_re = r'([0-9_a-z\-.]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)(_time_place|_time|_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)'
+value_type_re = (
+    r"([0-9_a-z\-.]+?)(_normalized)?(?:(_mk_score|_mk_trend)|(_percentage)?(_change)?(?:(?:_grouped_by)"
+    r"(_time_place|_time|_place_year))?((?:_decrease|_increase)?_rank(?:_reverse)?)?)"
+)
 
 category_scores = {
-    'life':      10,
-    'health':    10,
-    'sexual':    10,
-    'narcotics':  7,
-    'property':  7,
-    'authority': 5,
-    'alcohol':   3,
-    'traffic':   2,
-    'other':     0.001,
-    'investigations': 0.001,
+    "life": 10,
+    "health": 10,
+    "sexual": 10,
+    "narcotics": 7,
+    "property": 7,
+    "authority": 5,
+    "alcohol": 3,
+    "traffic": 2,
+    "other": 0.001,
+    "investigations": 0.001,
 }
 
 rank_reverse_weight = 1
@@ -40,6 +43,6 @@ comparison_empty = 2
 stats_rank = 2
 stats_empty = 1
 
-#regarding outlyingness value
-value_out_score = 0.01 # if what_value = Q2
-out_zero_score = 1 # if q3 and q1 are equal
+# regarding outlyingness value
+value_out_score = 0.01  # if what_value = Q2
+out_zero_score = 1  # if q3 and q1 are equal

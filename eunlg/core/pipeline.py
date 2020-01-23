@@ -1,11 +1,11 @@
+import logging
+
 from numpy.random import RandomState
 
-import logging
-log = logging.getLogger('root')
+log = logging.getLogger("root")
 
 
-class NLGPipeline(object):
-
+class NLGPipeline:
     def __init__(self, registry, *components):
         self._registry = registry
         self._components = components
@@ -38,7 +38,6 @@ class NLGPipeline(object):
         return output
 
 
-class NLGPipelineComponent(object):
-
+class NLGPipelineComponent:
     def __str__(self):
         return str(self.__class__.__name__)

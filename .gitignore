@@ -10,6 +10,6 @@ virtualenv/
 *.ipynb
 *.pyc
 /*.csv
-/venv/*
+/.venv/*
 .DS_Store
 /graveyard/

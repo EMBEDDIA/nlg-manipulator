@@ -1,8 +1,9 @@
-class LocationHierarchy(object):
+class LocationHierarchy:
     """
     Indexes geodata in a way that makes it easy to look up locations in the hierarchy and go up and down, etc.
 
     """
+
     def __init__(self, geodata):
         self.ids_by_type = {}
         self.parents = {}

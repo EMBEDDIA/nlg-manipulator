@@ -1,10 +1,12 @@
 # FYI: needed to change the year to 2020
 
-from core.pipeline import NLGPipelineComponent
-import math
 import logging
+import math
+
 import paramconfig as pfg
-log = logging.getLogger('root')
+from core.pipeline import NLGPipelineComponent
+
+log = logging.getLogger("root")
 
 
 class EUImportanceSelector(NLGPipelineComponent):
@@ -15,7 +17,7 @@ class EUImportanceSelector(NLGPipelineComponent):
         facts = messages
         scored_messages = self.score_importance(facts, registry)
         sorted_scored_messages = sorted(scored_messages, key=lambda x: float(x.score), reverse=True)
-        return (sorted_scored_messages, )
+        return (sorted_scored_messages,)
 
     def score_importance(self, messages, registry):
         for msg in messages:
@@ -44,51 +46,51 @@ class EUImportanceSelector(NLGPipelineComponent):
         #     return 0
 
         # importance of fact
-        category = fact.what_type.split('_')[0]
+        category = fact.what_type.split("_")[0]
         what_type_score = pfg.category_scores.get(category, 1)
-        if '_comp_' in fact.what_type:
+        if "_comp_" in fact.what_type:
             what_type_score *= pfg.comp_weight
-        elif '_rank_reverse' in fact.what_type:
+        elif "_rank_reverse" in fact.what_type:
             what_type_score *= pfg.rank_reverse_weight
-        elif '_rank' in fact.what_type:
+        elif "_rank" in fact.what_type:
             what_type_score *= pfg.rank_weight
-        elif not '_change' in fact.what_type and fact.what == 0:
+        elif "_change" not in fact.what_type and fact.what == 0:
             return 0
 
-        if '_trend' in fact.what_type:
+        if "_trend" in fact.what_type:
             what_type_score *= 500
 
         # TODO ATM we do not consider national currencies
-        if '_nac' in fact.what_type:
+        if "_nac" in fact.what_type:
             return 0
-        elif '_pps' in fact.what_type:
+        elif "_pps" in fact.what_type:
             what_type_score *= 10
-        elif '_eur' in fact.what_type:
+        elif "_eur" in fact.what_type:
             what_type_score *= 40
 
         # TODO young age groups are a bit odd
-        if 'y-lt6' in fact.what_type:
+        if "y-lt6" in fact.what_type:
             return 0
-        elif 'y6-10' in fact.what_type:
+        elif "y6-10" in fact.what_type:
             return 0
-        elif 'y6-11' in fact.what_type:
+        elif "y6-11" in fact.what_type:
             return 0
-        elif 'y11-15' in fact.what_type:
+        elif "y11-15" in fact.what_type:
             return 0
-        elif 'y12-17' in fact.what_type:
+        elif "y12-17" in fact.what_type:
             return 0
-        elif 'y-lt16' in fact.what_type:
+        elif "y-lt16" in fact.what_type:
             return 0
-        elif 'y16-24' in fact.what_type:
+        elif "y16-24" in fact.what_type:
             return 0
-        elif 'y16-64' in fact.what_type:
+        elif "y16-64" in fact.what_type:
             return 0
-        elif 'y-ge16' in fact.what_type:
+        elif "y-ge16" in fact.what_type:
             return 0
-        elif 'y-lt18' in fact.what_type:
+        elif "y-lt18" in fact.what_type:
             return 0
 
-        if '_t_' in fact.what_type:
+        if "_t_" in fact.what_type:
             return 0
 
         # importance of value
@@ -102,7 +104,7 @@ class EUImportanceSelector(NLGPipelineComponent):
             # and the year the fact discusses. That is, facts regarding
             # the current year get a multiplier of 1, the year before that
             # gets a multiplied of 0.5, the year before that 0.11... etc.
-            when_score *= min(1, (1 / (2020 - int(fact.when_2))**2))
+            when_score *= min(1, (1 / (2020 - int(fact.when_2)) ** 2))
             when_score *= 2
         elif fact.when_type == "month":
             # For months, the penalty is scaled linearly between the multiplers
@@ -111,10 +113,10 @@ class EUImportanceSelector(NLGPipelineComponent):
             # months, so that (for example) the year 2020 is considered to be
             # more newsworthy than the month 2020M12 by the same amount that
             # 2020M12 is more newsworthy than 2020M11.
-            year, month = fact.when_2.split('M')
-            this_year = min(1, (1 / (2020 - int(year)))**2)
-            prev_year = min(1, (1 / (2020 - (int(year)-1)))**2)
-            month_effect = (this_year - prev_year) / (int(month)+1)
+            year, month = fact.when_2.split("M")
+            this_year = min(1, (1 / (2020 - int(year))) ** 2)
+            prev_year = min(1, (1 / (2020 - (int(year) - 1))) ** 2)
+            month_effect = (this_year - prev_year) / (int(month) + 1)
             when_score *= this_year - month_effect
 
         # total importance score

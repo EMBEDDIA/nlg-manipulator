@@ -1,14 +1,13 @@
-from core.pipeline import NLGPipelineComponent
-
-from eu_realize_slots import EURealizer
-
 import logging
 import re
-log = logging.getLogger('root')
+
+from core.pipeline import NLGPipelineComponent
+from eu_realize_slots import EURealizer
+
+log = logging.getLogger("root")
 
 
 class SlotRealizer(NLGPipelineComponent):
-
     def __init__(self):
         self._realizer = None
         self._default_numeral = lambda x: "{:n}".format(x)
@@ -24,7 +23,7 @@ class SlotRealizer(NLGPipelineComponent):
         self._realizer = EURealizer(language[:2])
         self._random = random
         self._recurse(document_plan)
-        return (document_plan, )
+        return (document_plan,)
 
     def _recurse(self, this):
         try:
@@ -38,22 +37,22 @@ class SlotRealizer(NLGPipelineComponent):
                 if slots_added:
                     idx += slots_added
                 idx += 1
-        except AttributeError as ex:
+        except AttributeError:
             # Had no children, must be a leaf node
             log.debug("Visiting leaf {}".format(this))
             try:
                 slot_type = this.slot_type
             except AttributeError:
                 log.info("Got an AttributeError when checking slot_type in realize_slots. Probably not a slot.")
-                slot_type = 'n/a'
-            if slot_type == 'what':
+                slot_type = "n/a"
+            if slot_type == "what":
                 added_slots = self._realize_value(this)
                 return added_slots
             # Note that {time} slots aren't handled until at the NER, because they won't be realized every time.
-            elif slot_type[:-2] == 'when':
+            elif slot_type[:-2] == "when":
                 added_slots = self._realize_time(this)
                 return added_slots
-            elif slot_type == 'what_type':
+            elif slot_type == "what_type":
                 added_slots = self._realize_unit(this)
                 return added_slots
             else:
@@ -62,12 +61,12 @@ class SlotRealizer(NLGPipelineComponent):
     def _realize_value(self, slot):
         try:
             what_type = slot.fact.what_type
-            if 'rank' in what_type:
-                slot.attributes['num_type'] = 'ordinal'
-                num_type = 'ordinal'
+            if "rank" in what_type:
+                slot.attributes["num_type"] = "ordinal"
+                num_type = "ordinal"
             else:
-                slot.attributes['num_type'] = 'cardinal'
-                num_type = 'cardinal'
+                slot.attributes["num_type"] = "cardinal"
+                num_type = "cardinal"
             value = slot.value
             if type(value) is str:
                 return 0
@@ -79,21 +78,22 @@ class SlotRealizer(NLGPipelineComponent):
 
     def _realize_unit(self, slot):
         from paramconfig import value_type_re
+
         value_type_re = re.compile(value_type_re)
-        
+
         match = value_type_re.fullmatch(slot.value)
         unit, normalized, trend, percentage, change, grouped_by, rank = match.groups()
         try:
             if trend:
-                new_slots = self._realizer.units.get('trend', self._default_unit)(slot)
+                new_slots = self._realizer.units.get("trend", self._default_unit)(slot)
             elif change:
-                new_slots = self._realizer.units.get('change', self._default_unit)(slot)
+                new_slots = self._realizer.units.get("change", self._default_unit)(slot)
             elif rank:
-                new_slots = self._realizer.units.get('rank', self._default_unit)(slot)
+                new_slots = self._realizer.units.get("rank", self._default_unit)(slot)
             elif percentage:
-                new_slots = self._realizer.units.get('percentage', self._default_unit)(slot)
+                new_slots = self._realizer.units.get("percentage", self._default_unit)(slot)
             else:
-                new_slots = self._realizer.units.get('base', self._default_unit)(slot)
+                new_slots = self._realizer.units.get("base", self._default_unit)(slot)
             return new_slots
         except AttributeError:
             log.error("Error in unit realization of slot {}".format(slot))

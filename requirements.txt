@@ -2,3 +2,7 @@ bottle==0.12.17
 meinheld==1.0.1
 numpy==1.17.2
 pandas==0.25.1
+black==19.10b0
+isort==4.3.21
+flake8==3.7.9
+pre-commit==1.21.0

@@ -1,12 +1,13 @@
 import logging
-from core.message import Message
-from core.pipeline import NLGPipelineComponent
-from core.document_plan import DocumentPlan, Relation
-from core.message_generator import NoMessagesForSelectionException
-from core.template_selector import TemplateMessageChecker
 import re
 
-log = logging.getLogger('root')
+from core.document_plan import DocumentPlan, Relation
+from core.domain import Message
+from core.message_generator import NoMessagesForSelectionException
+from core.pipeline import NLGPipelineComponent
+from core.template_selector import TemplateMessageChecker
+
+log = logging.getLogger("root")
 
 # For now, these parameters are hard-coded
 MIN_PARAGRAPHS_PER_DOC = 3  # Try really hard to get at least this many
@@ -20,12 +21,11 @@ END_STORY_ABSOLUTE_TRESHOLD = 2.0
 
 
 class HeadlineDocumentPlanner(NLGPipelineComponent):
-
     def run(self, registry, random, language, scored_messages):
         """
         Run this pipeline component.
         """
-        
+
         log.debug("Creating headline document plan")
 
         # Root contains a sequence of children
@@ -34,9 +34,7 @@ class HeadlineDocumentPlanner(NLGPipelineComponent):
         headline_message = scored_messages[0]
         all_messages = scored_messages
 
-        dp.children.append(
-            DocumentPlan(children=[headline_message], relation=Relation.SEQUENCE)
-        )
+        dp.children.append(DocumentPlan(children=[headline_message], relation=Relation.SEQUENCE))
 
         return (dp, all_messages)
 
@@ -48,6 +46,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
 
     # The capture groups are: (unit)(normalized)(percentage)(change)(grouped_by)(rank)
     from paramconfig import value_type_re
+
     value_type_re = re.compile(value_type_re)
 
     def run(self, registry, random, language, scored_messages):
@@ -66,24 +65,31 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         # Drop messages with rank or rank_reverse values of more than 4 and messages with comparisons between
         # municipalities using the reported values instead of normalized or percentage values
         # TODO: SHould the avoided values somehow be defined in paramconfig file
-        scored_messages = [msg for msg in scored_messages
-                           if not
-                             # drop the message if it is about a rank or rank_reverse of more than 4 ...
-                             (('_rank' in msg.fact.what_type and msg.fact.what > 4)
-                              # ... or if the message is not normalized ...
-                              or (not ('_normalized' in msg.fact.what_type
-                                       # ... or percentage ...
-                                       or '_percentage' in msg.fact.what_type)
-                                  # ... and is comparing different municipalities
-                                  and '_grouped_by_time' in msg.fact.what_type
-                                  )
-                              # ... or the message is telling about one of the crimes that was done the least (aka zero times)
-                              or ('_rank_reverse' in msg.fact.what_type and msg.fact.what == 1)
-                              )]
+        scored_messages = [
+            msg
+            for msg in scored_messages
+            if not
+            # drop the message if it is about a rank or rank_reverse of more than 4 ...
+            (
+                ("_rank" in msg.fact.what_type and msg.fact.what > 4)
+                # ... or if the message is not normalized ...
+                or (
+                    not (
+                        "_normalized" in msg.fact.what_type
+                        # ... or percentage ...
+                        or "_percentage" in msg.fact.what_type
+                    )
+                    # ... and is comparing different municipalities
+                    and "_grouped_by_time" in msg.fact.what_type
+                )
+                # ... or the message is telling about one of the crimes that was done the least (aka zero times)
+                or ("_rank_reverse" in msg.fact.what_type and msg.fact.what == 1)
+            )
+        ]
 
         # In the first paragraph, don't ever use a message that's been added during expansion
         # These are recognisable by having a <1 importance coefficient
-        core_messages = [sm for sm in scored_messages if sm.importance_coefficient >= 1.]
+        core_messages = [sm for sm in scored_messages if sm.importance_coefficient >= 1.0]
         if not core_messages:
             raise NoMessagesForSelectionException
 
@@ -133,7 +139,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                     break
 
             # Check whether the added nucleus was from the expanded set
-            if message.importance_coefficient < 1.:
+            if message.importance_coefficient < 1.0:
                 expanded_nuclei += 1
 
             message.prevent_aggregation = True
@@ -171,18 +177,18 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                         break
 
                 else:
-                    log.warning('I wanted to express {}, but had no template for it'.format(satellite.fact))
+                    log.warning("I wanted to express {}, but had no template for it".format(satellite.fact))
 
-            dp.children.append(
-                DocumentPlan(children=messages, relation=Relation.SEQUENCE)
-            )
+            dp.children.append(DocumentPlan(children=messages, relation=Relation.SEQUENCE))
 
             max_score = max(message.score, max_score)
 
         return (dp, all_messages)
 
     def _is_effectively_repetition(self, candidate, messages):
-        unit, normalized, trend, percentage, change, grouped_by, rank = self.value_type_re.fullmatch(candidate.fact.what_type).groups()
+        (unit, normalized, trend, percentage, change, grouped_by, rank) = self.value_type_re.fullmatch(
+            candidate.fact.what_type
+        ).groups()
 
         flat_messages = self._flatten(messages)
         if not flat_messages:
@@ -193,23 +199,29 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 # Not repetition if we are not even talking about the same location
                 continue
             other_groups = self.value_type_re.fullmatch(other.fact.what_type).groups()
-            (existing_unit, existing_normalized, existing_trend, existing_percentage, existing_change, existing_grouped_by, existing_rank) = other_groups
+            (
+                existing_unit,
+                existing_normalized,
+                existing_trend,
+                existing_percentage,
+                existing_change,
+                existing_grouped_by,
+                existing_rank,
+            ) = other_groups
             if (
-                unit == existing_unit 
-                and percentage == existing_percentage 
-                and change == existing_change 
-                and grouped_by == existing_grouped_by 
-                and (
-                    (rank and existing_rank) 
-                    or (not rank and not existing_rank)
-                )
-                ):
+                unit == existing_unit
+                and percentage == existing_percentage
+                and change == existing_change
+                and grouped_by == existing_grouped_by
+                and ((rank and existing_rank) or (not rank and not existing_rank))
+            ):
                 # Notably, we consider ranks and reverse ranks the same and similarly consider the normalized
-                # variant of a fact to be repetitive with the un-normalized fact. 
-                log.info("Skipping {}, as it's already being effectively told by {}".format(
-                    candidate.fact.what_type, 
-                    other.fact.what_type
-                ))
+                # variant of a fact to be repetitive with the un-normalized fact.
+                log.info(
+                    "Skipping {}, as it's already being effectively told by {}".format(
+                        candidate.fact.what_type, other.fact.what_type
+                    )
+                )
                 return True
         log.debug("It does not seem to be repetition, including in DocumentPlan")
         return False
@@ -227,35 +239,43 @@ class BodyDocumentPlanner(NLGPipelineComponent):
                 todo.extend([c for c in m.children if c])
         return flat
 
-
     def _penalize_similarity(self, candidates, nuclei):
         if not nuclei:
             return candidates
         # Pick only messages about crimes that belong to DIFFERENT generic crime type but share a location
         for nucleus in nuclei:
-            candidates = [msg for msg in candidates
-                    if (nucleus.fact.where == msg.fact.where
-                        and nucleus.fact.what_type.split("_")[0] != msg.fact.what_type.split("_")[0])]
+            candidates = [
+                msg
+                for msg in candidates
+                if (
+                    nucleus.fact.where == msg.fact.where
+                    and nucleus.fact.what_type.split("_")[0] != msg.fact.what_type.split("_")[0]
+                )
+            ]
         return candidates
 
     def _encourage_similarity(self, candidates, nucleus):
         # Pick only messages about crimes that belong to the same generic crime type (in other words, that have a crime
         # type starting with the same prefix as the nucleus
-        modified = [msg for msg in candidates
-                    if (nucleus.fact.where == msg.fact.where
-                        and nucleus.fact.what_type.split("_")[0] == msg.fact.what_type.split("_")[0]
-                        and (
-                            (msg.fact.when_2 == nucleus.fact.when_2)
-                            or (msg.fact.when_1 == nucleus.fact.when_1 and msg.fact.when_2 == nucleus.fact.when_1)
-                            )
-                        )]
+        modified = [
+            msg
+            for msg in candidates
+            if (
+                nucleus.fact.where == msg.fact.where
+                and nucleus.fact.what_type.split("_")[0] == msg.fact.what_type.split("_")[0]
+                and (
+                    (msg.fact.when_2 == nucleus.fact.when_2)
+                    or (msg.fact.when_1 == nucleus.fact.when_1 and msg.fact.when_2 == nucleus.fact.when_1)
+                )
+            )
+        ]
         return modified
 
     def _add_satellite(self, satellite, messages):
         for idx, msg in enumerate(messages):
             if type(msg) is DocumentPlan:
                 if msg.relation == Relation.LIST and self._is_same_stat_type(msg.children[-1], satellite):
-                    msg.add_message(satellite)
+                    msg.add_child(satellite)
                     return
                 continue
             rel = self._check_relation(msg, satellite)
@@ -285,8 +305,7 @@ class BodyDocumentPlanner(NLGPipelineComponent):
         fact_2 = msg_2.fact
 
         # Comparison of the same what_type between different place or time
-        if (fact_1.where != fact_2.where or fact_1.when_2 != fact_2.when_2) and \
-                (fact_1.what_type == fact_2.what_type):
+        if (fact_1.where != fact_2.where or fact_1.when_2 != fact_2.when_2) and (fact_1.what_type == fact_2.what_type):
             return Relation.CONTRAST
 
         # msg_2 is an elaboration of msg_1
@@ -311,8 +330,8 @@ class BodyDocumentPlanner(NLGPipelineComponent):
             return False
         match_1 = self.value_type_re.fullmatch(fact1.what_type)
         match_2 = self.value_type_re.fullmatch(fact2.what_type)
-        unit_1, normalized_1, trend_1, percentage_1, change_1, grouped_by_1, rank_1 = match_1.groups()
-        unit_2, normalized_2, trend_2, percentage_2, change_2, grouped_by_2, rank_2 = match_2.groups()
+        (unit_1, normalized_1, trend_1, percentage_1, change_1, grouped_by_1, rank_1) = match_1.groups()
+        (unit_2, normalized_2, trend_2, percentage_2, change_2, grouped_by_2, rank_2) = match_2.groups()
         # If the facts have different base unit, they can't have an elaboration relation
         if unit_1 != unit_2:
             return False

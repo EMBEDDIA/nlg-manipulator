@@ -1,9 +1,10 @@
 import logging
 from functools import lru_cache
 
+from core.domain import DefaultTemplate
 from core.pipeline import NLGPipelineComponent
-from core.template import DefaultTemplate
-log = logging.getLogger('root')
+
+log = logging.getLogger("root")
 
 # If we're starting a new paragraph and haven't mentioned the location for more than this number of
 # messages, say it again (if possible), even if it's not changed
@@ -15,6 +16,7 @@ class TemplateSelector(NLGPipelineComponent):
     Adds a matching Template to each Message in the DocumentPlan.
 
     """
+
     def run(self, registry, random, language, document_plan, all_messages):
         """
         Run this pipeline component.
@@ -22,15 +24,17 @@ class TemplateSelector(NLGPipelineComponent):
         if log.isEnabledFor(logging.DEBUG):
             document_plan.print_tree()
 
-        templates = registry.get('templates')[language]
+        templates = registry.get("templates")[language]
 
         template_checker = TemplateMessageChecker(templates, all_messages)
         log.info("Selecting templates from {} templates".format(len(templates)))
         self._recurse(random, language, document_plan, all_messages, template_checker)
 
-        return (document_plan, )
+        return (document_plan,)
 
-    def _recurse(self, random, language, this, all_messages, template_checker, current_location=None, since_location=0):
+    def _recurse(
+        self, random, language, this, all_messages, template_checker, current_location=None, since_location=0,
+    ):
         """
         Recursively works through the tree, adding Templates to Messages.
         """
@@ -45,9 +49,9 @@ class TemplateSelector(NLGPipelineComponent):
                     # If there are no templates, something's gone horribly wrong
                     # The document planner should have made sure this didn't happen, but the only thing we can
                     #  at this point is skip the fact
-                    log.error("Found no templates to express {} (location required: {})".format(
-                        child, location_required
-                    ))
+                    log.error(
+                        "Found no templates to express {} (location required: {})".format(child, location_required)
+                    )
                 else:
                     if idx == 0 and since_location > LOC_IF_NOT_SINCE:
                         # First message of par, haven't mentioned loc for a while
@@ -76,9 +80,15 @@ class TemplateSelector(NLGPipelineComponent):
                         since_location += 1
             except AttributeError:
                 # This child is NOT a message and we should just recurse
-                current_location, since_location = \
-                    self._recurse(random, language, child, all_messages, template_checker,
-                                  current_location=current_location, since_location=since_location)
+                current_location, since_location = self._recurse(
+                    random,
+                    language,
+                    child,
+                    all_messages,
+                    template_checker,
+                    current_location=current_location,
+                    since_location=since_location,
+                )
         return current_location, since_location
 
     @staticmethod
@@ -97,14 +107,16 @@ class TemplateSelector(NLGPipelineComponent):
         if used_facts:
             log.debug("Successfully linked template to message")
         else:
-            log.error("Chosen template '{}' for fact '{}' could not be used! "
-                      "Falling back to default templates".format(template.display_template(), message.fact))
+            log.error(
+                "Chosen template '{}' for fact '{}' could not be used! "
+                "Falling back to default templates".format(template.display_template(), message.fact)
+            )
             template = DefaultTemplate("")
         message.template = template
         message.facts = used_facts
 
 
-class TemplateMessageChecker(object):
+class TemplateMessageChecker:
     """
     Doesn't actually fill in templates, but just checks, for a given message (and a list of other available messages),
     whether there is a template that can be used to realise it.
@@ -114,6 +126,7 @@ class TemplateMessageChecker(object):
     The checks are cached on message and location_required.
 
     """
+
     def __init__(self, templates, all_messages):
         self.all_messages = all_messages
         self.templates = templates
