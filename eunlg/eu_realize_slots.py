@@ -1,7 +1,7 @@
 import logging
 import re
 
-from core.domain import LiteralSlot
+from core.domain import LiteralSlot, EmptySlot
 
 log = logging.getLogger("root")
 
@@ -47,6 +47,8 @@ class EURealizer:
         for t in templ:
             if isinstance(t, int):
                 template.add_component(idx - 1, LiteralSlot(data.get(what_type[t])))
+            elif t is "EMPTY":
+                template.add_slot(idx - 1, EmptySlot())
             else:
                 template.add_component(idx - 1, LiteralSlot(t))
             added_slots += 1
@@ -100,6 +102,8 @@ class EURealizer:
         for t in templ:
             if isinstance(t, int):
                 template.add_component(idx - 1, LiteralSlot(data.get(unit[t])))
+            elif t is "EMPTY":
+                template.add_slot(idx - 1, EmptySlot())
             else:
                 template.add_component(idx - 1, LiteralSlot(t))
             added_slots += 1

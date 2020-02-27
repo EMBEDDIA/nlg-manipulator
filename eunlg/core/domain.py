@@ -171,6 +171,7 @@ FACT_FIELD_ALIASES: Dict[str, List[str]] = {
     "when_1": [],
     "when_2": [],
     "time": [],
+    "empty": [],
 }
 
 
@@ -429,6 +430,33 @@ class Literal(TemplateComponent):
         return self.value
 
 
+class EmptySlot(Slot):
+    def __init__(self, attributes=None):
+
+        self.attributes = attributes or {}
+        self._to_value = LiteralSource("empty")
+        self._fact = None
+        self._slot_type = "empty"
+
+    @property
+    def slot_type(self):
+        return self._slot_type
+
+    @property
+    def value(self):
+        return self._to_value(self._fact)
+
+    @value.setter
+    def value(self, f):
+        self._to_value = f
+
+    def copy(self):
+        return Slot(self._to_value, self.attributes.copy())
+
+    def __str__(self):
+        return "Slot({}{})".format(self.value, "".join(", {}={}".format(k, v) for (k, v) in self.attributes.items()))
+
+
 class DefaultTemplate(Template):
     def __init__(self, message):
         super().__init__(components=[Literal(message)])
@@ -499,3 +527,18 @@ class TimeSource(SlotSource):
 
     def __str__(self):
         return "fact.time"
+
+
+class EmptySource(SlotSource):
+    """
+    Special type of SlotSource for empty slots.
+    """
+
+    def __init__(self, field_name):
+        self.field_name = field_name
+
+    def __call__(self, message):
+        return self.field_name
+
+    def __str__(self):
+        return '"{}"'.format(self.field_name)

@@ -1,7 +1,7 @@
 en: {where} {time} {what} {what_type}
 fi: {where} {time} {what} {what_type}
 de: {where} {time} {what} {what_type}
-en-head: {where} {time} {what} {what_type}
+en-head: {empty} {where} {time} {what} {what_type}
 fi-head: {where} {time} {what} {what_type}
 de-head: {where} {time} {what} {what_type}
 | where_type = C

@@ -53,6 +53,7 @@ from core.domain import (
     Template,
     TemplateComponent,
     TimeSource,
+    EmptySource,
 )
 
 log = logging.getLogger("root")
@@ -74,6 +75,7 @@ FACT_FIELD_ALIASES: Dict[str, List[str]] = {
     "when_1": [],
     "when_2": [],
     "time": [],
+    "empty": [],
 }
 FACT_FIELD_MAP = canonical_map(FACT_FIELD_ALIASES)
 FACT_FIELDS = FACT_FIELD_ALIASES.keys()
@@ -335,6 +337,8 @@ def read_template_group(
                         to_value = EntitySource(field_name)
                     elif field_name == "time":
                         to_value = TimeSource(field_name)
+                    elif field_name == "empty":
+                        to_value = EmptySource(field_name)
                     else:
                         to_value = FactFieldSource(field_name)
 
