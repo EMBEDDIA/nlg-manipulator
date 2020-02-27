@@ -1,8 +1,8 @@
 TEMPLATES = {
     # data
-    "cphi": ["the", 1, "was for the price category", 2],  # cphi(0)_hicp2015(1)_cp-hi00(2)
-    "income": ["among", 2, "in the age group", 1, "the", 3, "was in", 4],  # income(0)_total(1)_f(2)_med-e(3)_eur(4)
-    "health": ["the", 1, "{empty, pos=RB}", "was for", 2],  # health(0)_pc-che(1)_hf3(2)
+    "cphi": ["the", 1, "was for the", "price category", 2],  # cphi(0)_hicp2015(1)_cp-hi00(2)
+    "income": ["among", 2, "in the age", "{group, replace=True}", 1, "the", 3, "was in", 4],  # income(0)_total(1)_f(2)_med-e(3)_eur(4)
+    "health": ["the", 1, "was for", 2],  # health(0)_pc-che(1)_hf3(2)
     "env": ["the national expenditure in the category of", 1, "in charasteristics of", 2, "was in", 3],  # env_cepa3_eps-p1_mio-eur
 
     # general

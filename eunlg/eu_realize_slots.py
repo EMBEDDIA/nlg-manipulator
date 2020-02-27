@@ -54,6 +54,15 @@ class EURealizer:
                 values = [s.split("=")[1] for s in split]
                 attributes = dict(zip(keys,values))
                 template.add_component(idx - 1, EmptySlot(attributes))
+            elif t.startswith("{"):
+                split = t.strip("{}").split(", ")
+                value = split[0]
+                split = split[1:]
+                keys = [s.split("=")[0] for s in split]
+                values = [s.split("=")[1] for s in split]
+                attributes = dict(zip(keys,values))
+                log.info(attributes)
+                template.add_component(idx - 1, LiteralSlot(value, attributes))
             else:
                 template.add_component(idx - 1, LiteralSlot(t))
             added_slots += 1
