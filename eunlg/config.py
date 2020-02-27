@@ -13,3 +13,7 @@ REALIZERS: Dict[str, str] = {
 MORPHOLOGIES = {
     "hr",
 }
+
+MANIPULATORS = {
+    "en",
+}

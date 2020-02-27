@@ -11,6 +11,7 @@ from core.aggregator import Aggregator
 from core.datastore import DataFrameStore
 from core.document_planner import BodyDocumentPlanner, HeadlineDocumentPlanner
 from core.morphology_resolver import MorphologyResolver
+from core.manipulator import Manipulator
 from core.pipeline import NLGPipeline
 from core.realize_slots import SlotRealizer
 from core.registry import Registry
@@ -95,6 +96,7 @@ class EUNlgService:
             yield SlotRealizer()
             yield EUEntityNameResolver()
             yield MorphologyResolver()
+            yield Manipulator()
             yield HeadlineHTMLSurfaceRealizer() if headline else BodyHTMLSurfaceRealizer()
 
         log.info("Configuring Body NLG Pipeline")
