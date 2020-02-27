@@ -431,30 +431,12 @@ class Literal(TemplateComponent):
 
 
 class EmptySlot(Slot):
-    def __init__(self, attributes=None):
-
-        self.attributes = attributes or {}
-        self._to_value = LiteralSource("empty")
-        self._fact = None
-        self._slot_type = "empty"
+    def __init__(self, attributes: Optional[Dict[str, Any]] = None) -> None:
+        super().__init__(EmptySource("empty"), attributes, None)
 
     @property
     def slot_type(self):
-        return self._slot_type
-
-    @property
-    def value(self):
-        return self._to_value(self._fact)
-
-    @value.setter
-    def value(self, f):
-        self._to_value = f
-
-    def copy(self):
-        return Slot(self._to_value, self.attributes.copy())
-
-    def __str__(self):
-        return "Slot({}{})".format(self.value, "".join(", {}={}".format(k, v) for (k, v) in self.attributes.items()))
+        return "empty"
 
 
 class DefaultTemplate(Template):

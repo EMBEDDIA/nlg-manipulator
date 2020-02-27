@@ -47,8 +47,13 @@ class EURealizer:
         for t in templ:
             if isinstance(t, int):
                 template.add_component(idx - 1, LiteralSlot(data.get(what_type[t])))
-            elif t is "EMPTY":
-                template.add_slot(idx - 1, EmptySlot())
+            elif t.startswith("{empty"):
+                split = t.strip("{}").split(", ")
+                split = split[1:]
+                keys = [s.split("=")[0] for s in split]
+                values = [s.split("=")[1] for s in split]
+                attributes = dict(zip(keys,values))
+                template.add_component(idx - 1, EmptySlot(attributes))
             else:
                 template.add_component(idx - 1, LiteralSlot(t))
             added_slots += 1
@@ -102,8 +107,13 @@ class EURealizer:
         for t in templ:
             if isinstance(t, int):
                 template.add_component(idx - 1, LiteralSlot(data.get(unit[t])))
-            elif t is "EMPTY":
-                template.add_slot(idx - 1, EmptySlot())
+            elif t.startswith("{empty"):
+                split = t.strip("{}").split(", ")
+                split = split[1:]
+                keys = [s.split("=")[0] for s in split]
+                values = [s.split("=")[1] for s in split]
+                attributes = dict(zip(keys,values))
+                template.add_component(idx - 1, EmptySlot(attributes))
             else:
                 template.add_component(idx - 1, LiteralSlot(t))
             added_slots += 1
@@ -138,7 +148,7 @@ class EURealizer:
         idx += 1
 
         if prev_slot.slot_type == "what":
-            # If the rank is first, the actual numeral isn't realized at all
+            # If the rank is first, the actual numeral isn"t realized at all
             if slot.fact.what == 1:
                 prev_slot.value = lambda x: ""
             # If the numeral is realized, it needs to be an ordinal
@@ -221,7 +231,7 @@ class EURealizer:
             year = slot.value
         elif slot.slot_type == "time":
             # If we are realizing a {time} slot, we can simply use either of the time values as the year
-            # Here we're choosing the latter one
+            # Here we"re choosing the latter one
             year = slot.value[1:-1].split(":")[-1]
         else:
             log.error(
@@ -239,13 +249,13 @@ class EURealizer:
                 slot.attributes["name_type"] = "short"
             slot.attributes["focus_slot"] = True
         # The latter condition makes the system realize the full year roughly once in five sentences even
-        # if the year hasn't changed.
+        # if the year hasn"t changed.
         if (slot.attributes["name_type"] in ["full", "short"]) or (
             slot.attributes["name_type"] == "pronoun" and random.rand() > 0.8
         ):
             self._update_slot_value(slot, self.dic.TEMPLATES.get("year").format(year))
             if year is None:
-                # We have no idea when the event happened. This shouldn't be possible.
+                # We have no idea when the event happened. This shouldn"t be possible.
                 self._update_slot_value(slot, "unknown")
             elif type(year) is not str:
                 self._update_slot_value(slot, self._cardinal(year))
