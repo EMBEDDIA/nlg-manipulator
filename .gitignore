@@ -13,3 +13,4 @@ virtualenv/
 /.venv/*
 .DS_Store
 /graveyard/
+.pre-commit-config.yaml
