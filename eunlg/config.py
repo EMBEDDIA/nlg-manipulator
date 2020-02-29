@@ -17,3 +17,8 @@ MORPHOLOGIES = {
 MANIPULATORS = {
     "en",
 }
+
+BERTS = {
+  "fi": "./finest-bert-pytorch",
+  "en": "bert-base-uncased",
+}
