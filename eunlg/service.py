@@ -92,7 +92,7 @@ class EUNlgService:
             yield EUImportanceSelector()
             yield HeadlineDocumentPlanner() if headline else BodyDocumentPlanner()
             yield TemplateSelector()
-            yield Aggregator()
+            #yield Aggregator()
             yield SlotRealizer()
             yield EUEntityNameResolver()
             yield MorphologyResolver()
@@ -101,7 +101,7 @@ class EUNlgService:
 
         log.info("Configuring Body NLG Pipeline")
         self.body_pipeline = NLGPipeline(self.registry, *_get_components())
-        self.headline_pipeline = NLGPipeline(self.registry, *_get_components(headline=True))
+        # self.headline_pipeline = NLGPipeline(self.registry, *_get_components(headline=True))
 
     def _get_cached_or_compute(self, cache, compute, force_cache_refresh=False, relative_path=True):
         if relative_path:

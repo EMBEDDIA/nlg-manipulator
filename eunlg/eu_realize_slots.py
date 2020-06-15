@@ -43,40 +43,33 @@ class EURealizer:
 
         templ = self.dic.TEMPLATES.get(what_type[0])
         data = self.dic.DATA.get(what_type[0])
-
-        for t in templ:
-            if isinstance(t, int):
-                template.add_component(idx - 1, LiteralSlot(data.get(what_type[t])))
-            elif t.startswith("{empty"):
-                split = t.strip("{}").split(", ")
-                split = split[1:]
-                keys = [s.split("=")[0] for s in split]
-                values = [s.split("=")[1] for s in split]
-                attributes = dict(zip(keys,values))
-                template.add_component(idx - 1, EmptySlot(attributes))
-            elif t.startswith("{"):
-                split = t.strip("{}").split(", ")
-                value = split[0]
-                split = split[1:]
-                keys = [s.split("=")[0] for s in split]
-                values = [s.split("=")[1] for s in split]
-                attributes = dict(zip(keys,values))
-                log.info(attributes)
-                template.add_component(idx - 1, LiteralSlot(value, attributes))
-            else:
-                template.add_component(idx - 1, LiteralSlot(t))
-            added_slots += 1
-            idx += 1
-
+        log.info(data)
+        if what_type[0] == "health" or what_type[0] == "income":
+            # Add stuff _before_ the what slot ...
+            idx -= 1
+            added_slots, idx = self._recurse_template(slot, idx, added_slots, what_type, templ[:-1], data)
+        if what_type[0] == "cphi":
+            # Add stuff _before_ the what slot ...
+            idx -= 1
+            added_slots, idx = self._recurse_template(slot, idx, added_slots, what_type, templ, data)
+        
+        # "Empty" the original what type slot
         self._update_slot_value(slot, "")
-        idx += 1
+        idx += 2
+
+        if what_type[0] == "health" or what_type[0] == "income":
+            # Add stuff after the what slot
+            sub_templ = data.get(what_type[templ[-1]])
+            added_slots, idx = self._recurse_template(slot, idx, added_slots, what_type, sub_templ, data)
 
         if "comp" in slot.fact.what_type:
-            template, added_slots, idx = self._comparisons(slot, template, what_type, added_slots, idx)
+            added_slots, idx = self._comparisons(slot, what_type, added_slots, idx)
 
         return added_slots
 
-    def _comparisons(self, slot, template, what_type, added_slots, idx):
+
+    def _comparisons(self, slot, what_type, added_slots, idx):
+        template = slot.parent
         if slot.fact.what < 0:
             template.add_component(idx - 1, LiteralSlot(self.dic.COMPARISONS.get("less")))
             added_slots += 1
@@ -97,7 +90,8 @@ class EURealizer:
             template.add_component(idx - 1, LiteralSlot(self.dic.COMPARISONS.get("similar")))
             added_slots += 1
             idx += 1
-        return template, added_slots, idx
+        return added_slots, idx
+
 
     def _unit_rank(self, slot):
         match = self.value_type_re.fullmatch(slot.value)
@@ -107,26 +101,13 @@ class EURealizer:
         added_slots = 0
         prev_slot = template.components[idx - 1]
         unit = unit.split("_")
-        # Add stuff _before_ the what slot ...
-        idx -= 1
 
         templ = self.dic.TEMPLATES.get(unit[0])
         data = self.dic.DATA.get(unit[0])
 
-        for t in templ:
-            if isinstance(t, int):
-                template.add_component(idx - 1, LiteralSlot(data.get(unit[t])))
-            elif t.startswith("{empty"):
-                split = t.strip("{}").split(", ")
-                split = split[1:]
-                keys = [s.split("=")[0] for s in split]
-                values = [s.split("=")[1] for s in split]
-                attributes = dict(zip(keys,values))
-                template.add_component(idx - 1, EmptySlot(attributes))
-            else:
-                template.add_component(idx - 1, LiteralSlot(t))
-            added_slots += 1
-            idx += 1
+        # Add stuff _before_ the what slot ...
+        idx -= 1
+        template, added_slots, idx = self._recurse_template(template, idx, added_slots, what_type, templ, unit)
 
         idx, added_slots, template = self._rank(idx, added_slots, template, slot, prev_slot, rank)
 
@@ -145,6 +126,40 @@ class EURealizer:
             idx += 1
 
         return added_slots
+
+
+    def _recurse_template(self, slot, idx, added_slots, what_type, templ, data):
+        template = slot.parent
+        for t in templ:
+            if isinstance(t, int):
+                sub_templ = data.get(what_type[t])
+                added_slots, idx = self._recurse_template(slot, idx, added_slots, what_type, sub_templ, data)
+            elif t.startswith("{empty"):
+                split = t.strip("{}").split(", ")
+                split = split[1:]
+                keys = [s.split("=")[0] for s in split]
+                values = [s.split("=")[1] for s in split]
+                attributes = dict(zip(keys,values))
+                template.add_component(idx, EmptySlot(attributes))
+                added_slots += 1
+                idx += 1
+            elif t.startswith("{"):
+                split = t.strip("{}").split(", ")
+                value = split[0]
+                split = split[1:]
+                keys = [s.split("=")[0] for s in split]
+                values = [s.split("=")[1] for s in split]
+                attributes = dict(zip(keys,values))
+                log.info(attributes)
+                template.add_component(idx, LiteralSlot(value, attributes))
+                added_slots += 1
+                idx += 1
+            else:
+                template.add_component(idx, LiteralSlot(t))
+                added_slots += 1
+                idx += 1
+        return added_slots, idx
+
 
     def _rank(self, idx, added_slots, template, slot, prev_slot, rank):
         # TODO took of the definite article to combine English and Finnish realization

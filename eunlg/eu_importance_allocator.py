@@ -62,11 +62,13 @@ class EUImportanceSelector(NLGPipelineComponent):
 
         # TODO ATM we do not consider national currencies
         if "_nac" in fact.what_type:
-            return 0
-        elif "_pps" in fact.what_type:
+            what_type_score *= 10
+        if "_pps" in fact.what_type:
             what_type_score *= 10
         elif "_eur" in fact.what_type:
-            what_type_score *= 40
+            what_type_score *= 100
+        elif "_cp-hiigxe" in fact.what_type:
+            what_type_score *= 1000
 
         # TODO young age groups are a bit odd
         if "y-lt6" in fact.what_type:

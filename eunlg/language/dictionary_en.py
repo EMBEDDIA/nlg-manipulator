@@ -1,88 +1,88 @@
 TEMPLATES = {
     # data
-    "cphi": ["the", 1, "was for the", "{price, replace=True}", "category", 2],  # cphi(0)_hicp2015(1)_cp-hi00(2)
-    "income": ["among", 2, "in the age", "{group, replace=True}", 1, "the", 3, "was in", 4],  # income(0)_total(1)_f(2)_med-e(3)_eur(4)
-    "health": ["the", "{average, replace=True}", 1, "was for", 2],  # health(0)_pc-che(1)_hf3(2)
+    "cphi": ["the", 1, "for", "price", "category", 2],  # cphi(0)_hicp2015(1)_cp-hi00(2)
+    "income": [2, 1, 3, 4],  # income(0)_total(1)_f(2)_med-e(3)_eur(4)
+    "health": [2, 1],  # health(0)_pc-che(1)_hf3(2)
     "env": ["the national expenditure in the category of", 1, "in charasteristics of", 2, "was in", 3],  # env_cepa3_eps-p1_mio-eur
 
     # general
     "month": "in {} {}",  # month, year
-    "year": "in the year {}",  # year
+    "year": "in {}",  # year
     "year_change": "from {} to {}",  # from year to year
     "month_change": "from {} {} to {} {}",  # from month year to month year
     "place": "in {}",  # area_name
 }
 
 CPHI = {
-    "hicp2015": "harmonized consumer price index",  # harmonized consumer price index (2015=100)
-    "rt1": "growth rate on previous month",  # growth rate on previous period (t/t-1)
-    "rt12": "growth rate",  # growth rate (t/t-12)
-    "cp-hi00": "all items",
-    "cp-hi01": "food and non-alcoholic beverages",
-    "cp-hi02": "alcoholic beverages and tobacco",
-    "cp-hi03": "clothing and footwear",
-    "cp-hi04": "housing, water, electricity, gas and other fuels",
-    "cp-hi05": "furnishings, household equipment and maintenance",
-    "cp-hi06": "health",
-    "cp-hi07": "transport",
-    "cp-hi08": "communication",
-    "cp-hi09": "recreation and culture",
-    "cp-hi10": "education",
-    "cp-hi11": "hotels, cafes and restaurants",
-    "cp-hi12": "miscellaneous goods and services",
-    "cp-hi00xef": "all items excluding energy, food, alcohol and tobacco",
-    "cp-hi00xtb": "all items excluding tobacco",
-    "cp-hie": "energy",
-    "cp-hif": "food",
-    "cp-hifu": "unprocessed food",
-    "cp-hig": "total goods",
-    "cp-hiig": "industrial goods",
-    "cp-his": "total services",
-    "cp-hiigxe": "non-energy industrial goods",
-    "cp-hi00xe": "all items excluding energy",
-    "cp-hi00xefu": "all items excluding energy and unprocessed food",
-    "cp-hi00xes": "all items excluding energy and seasonal food",
+    "hicp2015": ["harmonized", "consumer", "price", "index", "was"],  # harmonized consumer price index (2015=100)
+    "rt1": ["value of HICP did", "grow", "from", "previous", "month"],  # growth rate on previous period (t/t-1)
+    "rt12": ["growth", "rate", "was"],  # growth rate (t/t-12)
+    "cp-hi00": ["all", "items"],
+    "cp-hi01": ["food", "and non-alcoholic beverages"],
+    "cp-hi02": ["alcoholic", "beverages", "and tobacco"],
+    "cp-hi03": ["clothing", "and", "footwear"],
+    "cp-hi04": ["housing, water,", "electric", "power, and gas and", "other", "fuels"],
+    "cp-hi05": ["furnishings, household", "equipment", "and", "maintenance"],
+    "cp-hi06": ["health"],
+    "cp-hi07": ["transport"],
+    "cp-hi08": ["communication"],
+    "cp-hi09": ["recreation", "and", "culture"],
+    "cp-hi10": ["education"],
+    "cp-hi11": ["hotels, cafes and", "restaurants"],
+    "cp-hi12": ["miscellaneous", "goods and services"],
+    "cp-hi00xef": ["all items", "except", "energy, food,", "alcohol", "and", "tobacco"],
+    "cp-hi00xtb": ["all items", "except", "tobacco"],
+    "cp-hie": ["energy"],
+    "cp-hif": ["food"],
+    "cp-hifu": ["unprocessed", "food"],
+    "cp-hig": ["all", "goods"],
+    "cp-hiig": ["industrial", "goods"],
+    "cp-his": ["all", "services"],
+    "cp-hiigxe": ["other than energy", "{related, replace=True}", "industrial", "goods"],
+    "cp-hi00xe": ["all items", "except", "energy"],
+    "cp-hi00xefu": ["all items", "except", "energy and", "unprocessed", "food"],
+    "cp-hi00xes": ["all items", "except", "energy and", "seasonal", "food"],
 }
 
 INCOME = {
-    "f": "females",
-    "m": "males",
-    "t": "all sexes",
-    "eur": "euros",
-    "nac": "national currency",
-    "pps": "purchasing power standard",
-    "med-e": "median equivalised net income",
-    "mei-e": "mean equivalised net income",
-    "total": "all ages",
-    "y-lt6": "less than 6 years",
-    "y6-10": "from 6 to 10 years",
-    "y6-11": "from 6 to 11 years",
-    "y11-15": "from 11 to 15 years",
-    "y12-17": "from 12 to 17 years",
-    "y-lt16": "less than 16 years",
-    "y16-24": "from 16 to 24 years",
-    "y16-64": "from 16 to 64 years",
-    "y-ge16": "16 years or over",
-    "y-lt18": "less than 18 years",
-    "y18-24": "from 18 to 24 years",
-    "y18-64": "from 18 to 64 years",
-    "y-ge18": "18 years or over",
-    "y25-49": "from 25 to 49 years",
-    "y25-54": "from 25 to 54 years",
-    "y50-64": "from 50 to 64 years",
-    "y55-64": "from 55 to 64 years",
-    "y-lt60": "less than 60 years",
-    "y-ge60": "60 years or over",
-    "y-lt65": "less than 65 years",
-    "y65-74": "from 65 to 74 years",
-    "y-ge65": "65 years or over",
-    "y-lt75": "less than 75 years",
-    "y-ge75": "75 years or over",
+    "f": ["women"],
+    "m": ["males"],
+    "t": ["people"],
+    "eur": ["€"],
+    "nac": ["in", "local", "currency of the", "country"],
+    "pps": ["when expressed in purchasing power standard"],
+    "med-e": ["got", "median", "net", "{salary, replace=True}", "of"],
+    "mei-e": ["got", "mean", "net income of"],
+    "total": ["all ages"],
+    "y-lt6": ["less", "than 6 years of age"],
+    "y6-10": ["from 6 to 10 years of age"],
+    "y6-11": ["from 6 to 11 years of age"],
+    "y11-15": ["from 11 to 15 years of age"],
+    "y12-17": ["from 12 to 17 years of age"],
+    "y-lt16": ["less", "than 16 years of age"],
+    "y16-24": ["from 16 to 24 years of age"],
+    "y16-64": ["from 16 to 64 years of age"],
+    "y-ge16": ["16 years of age or", "older"],
+    "y-lt18": ["18 years of age or", "{younger, replace=True}"],
+    "y18-24": ["from 18 to 24 years of age"],
+    "y18-64": ["from 18 to 64 years of age"],
+    "y-ge18": ["18 years of age or", "older"],
+    "y25-49": ["from 25 to 49 years of age"],
+    "y25-54": ["from 25 to 54 years of age"],
+    "y50-64": ["from 50 to 64 years of age"],
+    "y55-64": ["from 55 to 64 years of age"],
+    "y-lt60": ["60 years of age or", "{younger, replace=True}"],
+    "y-ge60": ["60 years of age or", "older"],
+    "y-lt65": ["65 years of age or", "{younger, replace=True}"],
+    "y65-74": ["from 65 to 74 years of age"],
+    "y-ge65": ["65 years of age or", "older"],
+    "y-lt75": ["75 years of age or", "{younger, replace=True}"],
+    "y-ge75": ["75 years of age or", "older"],
 }
 
 HEALTH = {
-    "hf3": "household out-of-pocket payment",
-    "pc-che": "percentual share of total current health expenditure",
+    "hf3": ["households did", "{make, replace=True}", "a monetary", "contribution", "of"],
+    "pc-che": ["%", "towards", "their", "own", "healthcare"],
 }
 
 ENV = {
@@ -183,7 +183,7 @@ COUNTRIES = {
     "EU28": "European Union (28 countries)",
     "BE": "Belgium",
     "BG": "Bulgaria",
-    "CZ": "Czechia",
+    "CZ": "Czech Republic",
     "DK": "Denmark",
     "DE": "Germany",  # (until 1990 former territory of the FRG)
     "EE": "Estonia",

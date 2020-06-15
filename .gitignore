@@ -15,3 +15,6 @@ virtualenv/
 /graveyard/
 .pre-commit-config.yaml
 bert/
+finest-bert-pytorch/
+eunlg/core/mapped_emb/
+results/

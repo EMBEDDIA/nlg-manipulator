@@ -16,9 +16,12 @@ MORPHOLOGIES = {
 
 MANIPULATORS = {
     "en",
+    "fi",
 }
 
 BERTS = {
-  "fi": "./finest-bert-pytorch",
-  "en": "bert-base-uncased",
+    #"en": "bert-base-uncased",
+    "en": "../finest-bert-pytorch",
+    "fi": "../finest-bert-pytorch",
+    #"fi": "../bert-base-finnish-cased-v1",
 }
